@@ -6,7 +6,7 @@ do
 	nginx -t
 	if [ $? -eq 0 ]
 	then
-		echo "reloading nginx configuration"
+		echo "Reloading nginx configuration"
 		nginx -s reload
 	fi
 done
