@@ -1,0 +1,32 @@
+user nginx;
+worker_processes auto;
+
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+	worker_connections 2048;
+	use epoll;
+	multi_accept on;
+}
+
+http {
+	proxy_cache_path /tmp/nginx levels=1:2 keys_zone=cache:10m inactive=60m max_size=8g;
+	proxy_cache cache;
+	proxy_cache_revalidate on;
+	proxy_cache_use_stale error timeout updating;
+
+	add_header X-Proxy-Cache $upstream_cache_status;
+
+	ssl_session_cache shared:SSL:10m;
+	ssl_session_timeout 30m;
+
+	access_log off;
+
+	server {
+		listen 80;
+		listen [::]:80;
+
+		return 301 https://$host$request_uri;
+	}
+
