@@ -7,11 +7,10 @@ services:
       - "0.0.0.0:80:80"
     volumes:
       - config:/etc/nginx/conf.d
-      - ssl:/etc/ssl
+      - /etc/letsencrypt:/etc/letcencrypt
     restart: on-failure
 volumes:
   config:
-  ssl:
 networks:
   default:
     external:

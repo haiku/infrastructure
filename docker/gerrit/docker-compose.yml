@@ -1,24 +1,16 @@
 version: "2"
 services:
   app:
-    image: gerritforge/gerrit-centos7
+    image: openfrontier/gerrit
     volumes:
-      - db:/var/gerrit/db
-      - etc:/var/gerrit/etc
-      - git:/var/gerrit/git
-      - index:/var/gerrit/index
-      - cache:/var/gerrit/cache
-      - logs:/var/gerrit/logs
-      - static:/var/gerrit/static:ro
+      - site:/var/gerrit/review_site
     restart: on-failure
+    environment:
+      - AUTH_TYPE=OAUTH
+#      - OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
+#      - OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
 volumes:
-  db:
-  etc:
-  git:
-  index:
-  cache:
-  logs:
-  static:
+  site:
 networks:
   default:
     external:
