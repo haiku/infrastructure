@@ -6,5 +6,4 @@ Treating Haiku's infrastructure as cattle instead of kittens since 2017.
 
 ## Directories
 
-  * docker - Docker manifests to build custom containers
-  * systemd - Systemd services to run infrastructure services
+  * docker - Docker manifests to build and deploy containers

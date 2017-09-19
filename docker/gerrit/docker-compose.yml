@@ -1,0 +1,27 @@
+version: "3"
+services:
+  gerrit:
+    image: gerritforge/gerrit-centos7
+    ports:
+      - "0.0.0.0:8080:8080"
+      - "0.0.0.0:29418:29418"
+    volumes:
+      - db:/var/gerrit/db
+      - etc:/var/gerrit/etc
+      - git:/var/gerrit/git
+      - index:/var/gerrit/index
+      - cache:/var/gerrit/cache
+      - static:/var/gerrit/static:ro
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+volumes:
+  db:
+  etc:
+  git:
+  index:
+  cache:
+  static:
