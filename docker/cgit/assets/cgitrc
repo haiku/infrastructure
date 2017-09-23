@@ -4,8 +4,8 @@ cache-size=1000
 # Specify some default clone prefixes
 clone-prefix=git://git.haiku-os.org https://git.haiku-os.org ssh://git.haiku-os.org
 
-css=/cgit/cgit.css
-logo=/cgit/haiku-logo.png
+css=/haiku-cgit.css
+logo=/haiku-logo.png
 
 # Show ascii-art commit graph
 enable-commit-graph=1
@@ -34,10 +34,7 @@ favicon=/favicon.ico
 max-stats=year
 virtual-root=/
 
-##
-## List of common mimetypes
-##
-
+# Common Mimetypes
 mimetype.css=text/css
 mimetype.git=image/git
 mimetype.html=text/html
@@ -47,15 +44,6 @@ mimetype.pdf=application/pdf
 mimetype.png=image/png
 mimetype.svg=image/svg+xml
 
-
-##
-## List of repositories.
-## PS: Any repositories listed when section is unset will not be
-##     displayed under a section heading
-## PPS: This list could be kept in a different file (e.g. '/etc/cgitrepos')
-##      and included like this:
-##        include=/etc/cgitrepos
-##
 
 enable-filter-overrides=0
 
