@@ -1,0 +1,63 @@
+# Enable caching of up to 1000 output entriess
+cache-size=1000
+
+# Specify some default clone prefixes
+clone-prefix=git://git.haiku-os.org https://git.haiku-os.org ssh://git.haiku-os.org
+
+css=/cgit/cgit.css
+logo=/cgit/haiku-logo.png
+
+# Show ascii-art commit graph
+enable-commit-graph=1
+
+# Show extra links for each repository on the index page
+enable-index-links=1
+
+# Show number of affected files per commit on the log pages
+enable-log-filecount=1
+
+# Show number of added/removed lines per commit on the log pages
+enable-log-linecount=1
+
+# Set the title and heading of the repository index page
+root-title=Haiku's repositories
+
+# Allow download of tar.gz, tar.bz2 and zip-files
+#snapshots=tar.gz tar.bz2 zip
+
+# Specify the number of items to display in atom feeds view
+max-atom-items=25
+
+commit-filter=/srv/git/repos/haiku/cgit-filter-commit-links.sh
+
+favicon=/favicon.ico
+max-stats=year
+virtual-root=/
+
+##
+## List of common mimetypes
+##
+
+mimetype.css=text/css
+mimetype.git=image/git
+mimetype.html=text/html
+mimetype.jpg=image/jpeg
+mimetype.jpeg=image/jpeg
+mimetype.pdf=application/pdf
+mimetype.png=image/png
+mimetype.svg=image/svg+xml
+
+
+##
+## List of repositories.
+## PS: Any repositories listed when section is unset will not be
+##     displayed under a section heading
+## PPS: This list could be kept in a different file (e.g. '/etc/cgitrepos')
+##      and included like this:
+##        include=/etc/cgitrepos
+##
+
+enable-filter-overrides=0
+
+include=/var/git/repos
+
