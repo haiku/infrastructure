@@ -1,13 +1,13 @@
 version: "2"
 services:
   app:
-    image: nginx
+    image: haiku/nginx-router
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:80:80"
     volumes:
       - config:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letcencrypt
+      - /etc/letsencrypt:/etc/letsencrypt
     restart: on-failure
 volumes:
   config:
