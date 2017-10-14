@@ -5,6 +5,7 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:80:80"
+      - "0.0.0.0:2222:2222"
     volumes:
       - config:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt

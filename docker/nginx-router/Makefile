@@ -1,4 +1,4 @@
 default:
-	docker build --no-cache --tag haiku/nginx-router:latest .
+	docker build --no-cache --tag docker.io/haiku/nginx-router:latest .
 push:
-	docker push haiku/nginx-router:latest
+	docker push docker.io/haiku/nginx-router:latest
