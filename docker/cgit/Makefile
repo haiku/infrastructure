@@ -1,4 +1,4 @@
 default:
-	docker build --no-cache --tag haiku/cgit:latest .
+	docker build --no-cache --tag docker.io/haiku/cgit:latest .
 push:
-	docker push haiku/cgit:latest
+	docker push docker.io/haiku/cgit:latest
