@@ -5,7 +5,7 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:80:80"
-      - "0.0.0.0:2222:2222"
+      - "94.130.158.38:22:2222" # Disable me on non-prod!
     volumes:
       - config:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
