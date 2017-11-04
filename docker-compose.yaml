@@ -7,7 +7,7 @@ services:
       - "0.0.0.0:80:80"
 #      - "94.130.158.38:22:2222" # PROD-ONLY
     volumes:
-      - router_config:/etc/nginx/conf.d
+      - ./data/router:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
     restart: on-failure
   gerrit:
@@ -29,9 +29,4 @@ services:
     image: haiku/irker
     restart: on-failure
 volumes:
-  router_config:
   gerrit_data:
-networks:
-  default:
-    external:
-      name: backend
