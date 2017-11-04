@@ -1,0 +1,37 @@
+version: "2"
+services:
+  router:
+    image: haiku/nginx-router
+    ports:
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:80:80"
+#      - "94.130.158.38:22:2222" # PROD-ONLY
+    volumes:
+      - router_config:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
+    restart: on-failure
+  gerrit:
+    image: openfrontier/gerrit
+    volumes:
+      - gerrit_data:/var/gerrit/review_site
+    restart: on-failure
+    environment:
+      - AUTH_TYPE=OAUTH
+      - GITWEB_TYPE=cgit
+#      - OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
+#      - OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
+  cgit:
+    image: haiku/cgit
+    volumes:
+      - gerrit_data:/var/git
+    restart: on-failure
+  irker:
+    image: haiku/irker
+    restart: on-failure
+volumes:
+  router_config:
+  gerrit_data:
+networks:
+  default:
+    external:
+      name: backend
