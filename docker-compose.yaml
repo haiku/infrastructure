@@ -7,8 +7,8 @@ services:
       - "0.0.0.0:80:80"
       #- "94.130.158.38:22:2222" # PROD-ONLY
     volumes:
-      - ./data/router:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ./data/router:/etc/nginx/conf.d:z
+      - /etc/letsencrypt:/etc/letsencrypt:z
     restart: on-failure
     depends_on:
       - gerrit
