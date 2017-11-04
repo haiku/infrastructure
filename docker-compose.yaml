@@ -5,11 +5,14 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:80:80"
-#      - "94.130.158.38:22:2222" # PROD-ONLY
+      #- "94.130.158.38:22:2222" # PROD-ONLY
     volumes:
       - ./data/router:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
     restart: on-failure
+    depends_on:
+      - gerrit
+      - cgit
   gerrit:
     image: openfrontier/gerrit
     volumes:
@@ -18,8 +21,8 @@ services:
     environment:
       - AUTH_TYPE=OAUTH
       - GITWEB_TYPE=cgit
-#      - OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
-#      - OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
+      #- OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
+      #- OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
   cgit:
     image: haiku/cgit
     volumes:
