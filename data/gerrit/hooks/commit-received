@@ -37,24 +37,24 @@ with_lock_unlock_if_held() {
 
 # grab lockfile to protect against concurrent post-receive
 # hooks getting confused with the order of hrevs
-with_lock_has_lock=0                          
-trap with_lock_unlock_if_held INT TERM EXIT   
-lockfile -1 -r 30 "$lockfile"                             
-if [ $? -ne 0 ] ; then                          
-        exit $?            
-fi                                         
-with_lock_has_lock=1         
-                                                          
-export GIT_DIR                                  
-                           
+with_lock_has_lock=0
+trap with_lock_unlock_if_held INT TERM EXIT
+lockfile -1 -r 30 "$lockfile"
+if [ $? -ne 0 ] ; then
+        exit $?
+fi
+with_lock_has_lock=1
+
+export GIT_DIR
+
 # create hrev-tags and send e-mail & cia notifications
-echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/receive-notify.pl
-                                                          
-# tell buildbot about new changes               
+echo "$OLDREV $NEWREV $REFNAME" | $GERRIT_SITE/hooks/receive-notify.pl
+
+# tell buildbot about new changes
 #echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot.py
-                                                                
-echo "Release lock..."       
-                                                          
-# cleanup lockfile                                               
-rm -f "$lockfile"                                     
+
+echo "Release lock..."
+
+# cleanup lockfile
+rm -f "$lockfile"
 with_lock_has_lock=0

@@ -17,6 +17,7 @@ services:
     image: openfrontier/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site
+      - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
     restart: on-failure
     environment:
       - AUTH_TYPE=OAUTH
