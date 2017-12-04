@@ -31,5 +31,10 @@ services:
   irker:
     image: haiku/irker
     restart: on-failure
+  smtp:
+    image: mwader/postfix-relay
+    restart: on-failure
+    environment:
+      - POSTFIX_myhostname=maui.haiku-os.org
 volumes:
   gerrit_data:
