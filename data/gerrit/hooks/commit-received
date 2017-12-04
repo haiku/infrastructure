@@ -27,7 +27,7 @@ done
 
 echo "Obtaining lock..."
 
-lockfile=$GIT_DIR/hrev.lock
+lockfile=$GIT_DIR/receive.lock
 
 with_lock_unlock_if_held() {
         if [[ "$with_lock_has_lock" -eq 1 ]] ; then
@@ -48,7 +48,7 @@ with_lock_has_lock=1
 export GIT_DIR                                  
                            
 # create hrev-tags and send e-mail & cia notifications
-echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/post-receive.pl
+echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/receive-notify.pl
                                                           
 # tell buildbot about new changes               
 #echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot.py
