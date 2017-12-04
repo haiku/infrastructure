@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# This wrapper takes Gerrit hook calls from the Gerrit
+# plugin and makes them act like standard git hooks.
+
+PROJECT=""
+REFNAME=""
+UPLOADER=""
+OLDREV=""
+NEWREV=""
+CMDREF=""
+
+O=`getopt -l project: -l refname: -l uploader: -l oldrev: -l newrev: -l cmdref: -- p:r:u:o:n:c: "$@"` || exit 1
+eval set -- "$O"
+while true; do
+        case "$1" in
+        --project)      PROJECT="$2"; shift 2;;
+        --refname)      REFNAME="$2"; shift 2;;
+        --uploader)     UPLOADER="$2"; shift 2;;
+        --oldrev)       OLDREV="$2"; shift 2;;
+        --newrev)       NEWREV="$2"; shift 2;;
+        --cmdref)       CMDREF="$2"; shift 2;;
+        --)     shift; break;;
+        *)      echo Error: $1; exit 1;;
+        esac
+done
+
+echo "Obtaining lock..."
+
+lockfile=$GIT_DIR/hrev.lock
+
+with_lock_unlock_if_held() {
+        if [[ "$with_lock_has_lock" -eq 1 ]] ; then
+                rm -f "$lockfile"
+        fi
+}
+
+# grab lockfile to protect against concurrent post-receive
+# hooks getting confused with the order of hrevs
+with_lock_has_lock=0                          
+trap with_lock_unlock_if_held INT TERM EXIT   
+lockfile -1 -r 30 "$lockfile"                             
+if [ $? -ne 0 ] ; then                          
+        exit $?            
+fi                                         
+with_lock_has_lock=1         
+                                                          
+export GIT_DIR                                  
+                           
+# create hrev-tags and send e-mail & cia notifications
+echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/post-receive.pl
+                                                          
+# tell buildbot about new changes               
+#echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot.py
+                                                                
+echo "Release lock..."       
+                                                          
+# cleanup lockfile                                               
+rm -f "$lockfile"                                     
+with_lock_has_lock=0
