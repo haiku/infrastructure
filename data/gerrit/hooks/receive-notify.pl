@@ -236,9 +236,8 @@ sub mail_notification($$$@)
     }
     else
     {
-        # TODO: Use smtp relay
         # Open a pipe to sendmail.
-        my $command = "/usr/sbin/sendmail -oi '$target'";
+        my $command = "/usr/sbin/sendmail -S smtp:25 -oi '$target'";
         if (open(SENDMAIL, "| $command")) 
         {
             print SENDMAIL @head, map { "$_\n" } @body;
