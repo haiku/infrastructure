@@ -26,9 +26,15 @@ services:
       #- OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
   cgit:
     image: haiku/cgit
+    restart: on-failure
     volumes:
       - gerrit_data:/var/git
-    restart: on-failure
+    environment:
+      CGIT_TITLE: "Haiku's repositories"
+      CGIT_DESC: 'Presented by cgit on Docker'
+      # check section-from-path in cgit docs
+      CGIT_VROOT: '/'
+      CGIT_SECTION_FROM_STARTPATH: 1
   irker:
     image: haiku/irker
     restart: on-failure

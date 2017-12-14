@@ -1,6 +1,6 @@
 # cgit for Haiku
 
-This cgit container runs a minimal lighttp and allows users
+This cgit container runs nginx and allows users
 to navigate git repositories attached via a volume at /var/git.
 
 ## Requirements

@@ -1,0 +1,62 @@
+root-title=$CGIT_TITLE
+root-desc=$CGIT_DESC
+
+source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
+about-filter=/usr/lib/cgit/filters/about-formatting.sh
+commit-filter=/usr/lib/cgit/filters/commit-link-filter.sh
+
+##
+## Search for these files in the root of the default branch of repositories
+## for coming up with the about page:
+##
+readme=:README.md
+readme=:readme.md
+readme=:README.mkd
+readme=:readme.mkd
+readme=:README.rst
+readme=:readme.rst
+readme=:README.html
+readme=:readme.html
+readme=:README.htm
+readme=:readme.htm
+readme=:README.txt
+readme=:readme.txt
+readme=:README
+readme=:readme
+readme=:INSTALL.md
+readme=:install.md
+readme=:INSTALL.mkd
+readme=:install.mkd
+readme=:INSTALL.rst
+readme=:install.rst
+readme=:INSTALL.html
+readme=:install.html
+readme=:INSTALL.htm
+readme=:install.htm
+readme=:INSTALL.txt
+readme=:install.txt
+readme=:INSTALL
+readme=:install
+
+css=/cgit-css/haiku-cgit.css
+logo=/cgit-css/haiku-logo.png
+
+# Cache
+cache-root=/var/cache/cgit
+cache-size=1000
+
+enable-index-links=1
+enable-index-owner=0
+enable-remote-branches=1
+enable-log-filecount=1
+enable-log-linecount=1
+enable-git-config=1
+snapshots=tar.gz tar.bz2 zip
+
+robots=noindex, nofollow
+
+virtual-root=$CGIT_VROOT
+
+section-from-path=$CGIT_SECTION_FROM_STARTPATH
+
+include=/var/git/repos
