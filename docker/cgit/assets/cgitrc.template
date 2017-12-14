@@ -11,6 +11,7 @@ commit-filter=/usr/lib/cgit/filters/commit-link-filter.sh
 ##
 readme=:README.md
 readme=:readme.md
+readme=:ReadMe.md
 readme=:README.mkd
 readme=:readme.mkd
 readme=:README.rst
@@ -38,6 +39,8 @@ readme=:install.txt
 readme=:INSTALL
 readme=:install
 
+clone-prefix=git://git.haiku-os.org https://git.haiku-os.org ssh://git.haiku-os.org
+
 css=/cgit-css/haiku-cgit.css
 logo=/cgit-css/haiku-logo.png
 
@@ -45,15 +48,16 @@ logo=/cgit-css/haiku-logo.png
 cache-root=/var/cache/cgit
 cache-size=1000
 
+enable-git-config=0
 enable-index-links=1
 enable-index-owner=0
 enable-remote-branches=1
 enable-log-filecount=1
 enable-log-linecount=1
-enable-git-config=1
-snapshots=tar.gz tar.bz2 zip
+enable-commit-graph=1
+snapshots=0
 
-robots=noindex, nofollow
+robots=noindex,nofollow
 
 virtual-root=$CGIT_VROOT
 
