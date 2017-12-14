@@ -39,8 +39,6 @@ readme=:install.txt
 readme=:INSTALL
 readme=:install
 
-clone-prefix=git://git.haiku-os.org https://git.haiku-os.org ssh://git.haiku-os.org
-
 css=/cgit-css/haiku-cgit.css
 logo=/cgit-css/haiku-logo.png
 
