@@ -1,0 +1,28 @@
+#!/bin/bash
+
+DOMAINS="review.haiku-os.org cgit-next.haiku-os.org"
+LOG="/var/log/letsencrypt.log"
+CONTEXT="/root/infrastructure"
+
+date >> $LOG
+echo "Bringing down services..." >> $LOG
+
+# Bring down the docker nginx http/https router (which consumes 443)
+docker-compose -f $CONTEXT/docker-compose.yaml stop router >> $LOG 2>&1
+sleep 5
+# Open 443 for certbot
+echo "Opening 443 for certbot..." >> $LOG
+iptables -A INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+for i in $DOMAINS; do
+	COMMAND="certbot certonly --standalone -n -d $i"
+	echo "Running '$COMMAND'" >> $LOG
+	$COMMAND >> $LOG 2>&1
+done
+sleep 5
+# Close 443 to return to docker
+echo "Securing 443..." >> $LOG
+iptables -D INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+
+# Bring docker nginx http/https router back online
+echo "Restoring services..." >> $LOG
+docker-compose -f $CONTEXT/docker-compose.yaml start router >> $LOG 2>&1
