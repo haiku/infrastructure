@@ -10,4 +10,4 @@ RUN apk add --update git python $BUILD_PACKAGES  &&\
 	apk del $BUILD_PACKAGES
 
 EXPOSE 6659
-ENTRYPOINT ["/usr/bin/irkerd", "-dinfo", "-l/dev/stdout", "-H0.0.0.0"]
+ENTRYPOINT ["/usr/bin/irkerd", "-dinfo", "-nHAIKU-irker%03d", "-l/dev/stdout", "-H0.0.0.0"]
