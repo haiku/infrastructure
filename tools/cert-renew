@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOMAINS="review.haiku-os.org cgit-next.haiku-os.org"
+DOMAINS="review.haiku-os.org cgit-next.haiku-os.org cgit.haiku-os.org git.haiku-os.org git-next.haiku-os.org"
 LOG="/var/log/letsencrypt.log"
 CONTEXT="/root/infrastructure"
 
@@ -13,6 +13,7 @@ sleep 5
 # Open 443 for certbot
 echo "Opening 443 for certbot..." >> $LOG
 iptables -A INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+ip6tables -A INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
 for i in $DOMAINS; do
 	COMMAND="certbot certonly --standalone -n -d $i"
 	echo "Running '$COMMAND'" >> $LOG
@@ -22,6 +23,7 @@ sleep 5
 # Close 443 to return to docker
 echo "Securing 443..." >> $LOG
 iptables -D INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+ip6tables -D INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
 
 # Bring docker nginx http/https router back online
 echo "Restoring services..." >> $LOG
