@@ -208,12 +208,12 @@ sub mail_notification($$$@)
     # Check if the author has specified his real mail
     # address in his ~/.forward file. If so, we use
     # that, otherwise we fake an address from this host:
-    #if (open(my $forwardFH, '<', "/home/$committer/.forward")) 
+    #if (open(my $forwardFH, '<', "/home/$committer/.forward"))
     #{
     #    chomp($mail_from = <$forwardFH>);
     #    close $forwardFH;
     #}
-    #else 
+    #else
     #{
         # TODO: Fix me to authors email!
         $mail_from = "$committer\@git.haiku-os.org";
@@ -238,13 +238,13 @@ sub mail_notification($$$@)
     {
         # Open a pipe to sendmail.
         my $command = "/usr/sbin/sendmail -S smtp:25 -oi '$target'";
-        if (open(SENDMAIL, "| $command")) 
+        if (open(SENDMAIL, "| $command"))
         {
             print SENDMAIL @head, map { "$_\n" } @body;
             close SENDMAIL
               or warn "$0: error in closing `$command' for writing: $!\n";
         }
-        else 
+        else
         {
             warn "$0: cannot open `| $command' for writing: $!\n";
         }
@@ -341,7 +341,7 @@ sub add_revision_tag_to_commit($$)
     return $revision;
 }
 
-# 
+#
 sub summarize_changed_dirs($)
 {
     my ($objRange) = @_;
@@ -405,7 +405,7 @@ sub do_stats($$)
 {
     my ($objRange, $flags) = @_;
 
-    my @stats = map { 
+    my @stats = map {
         s{^\s*(.*?)\s*$}{$1}; $_
     } qx{git diff-tree --stat=76 -M --no-commit-id $objRange};
 
@@ -442,7 +442,7 @@ sub prepare_commit_notice($$$$)
     my $logStr = join "\n", @{$info{log}};
 
     my @committerInfo = ();
-    if ($info{committer} ne $info{author}) 
+    if ($info{committer} ne $info{author})
     {
         push @committerInfo, qq{Committer:   $info{committer}};
         push @committerInfo, 'Commit-Date: ' . format_date($info{"committer_date"},$info{"committer_tz"});
@@ -450,11 +450,11 @@ sub prepare_commit_notice($$$$)
 
     my @ticketInfo = ();
     my %seenTicket;
-    while($logStr =~ m[#(\d+)]g) 
+    while($logStr =~ m[#(\d+)]g)
     {
         $seenTicket{$1} = 1;
     }
-    foreach my $ticketNr (sort { $a <=> $b } keys %seenTicket) 
+    foreach my $ticketNr (sort { $a <=> $b } keys %seenTicket)
     {
         push @ticketInfo, "Ticket:      https://dev.haiku-os.org/ticket/$ticketNr";
     }
@@ -497,7 +497,7 @@ sub prepare_commit_notice($$$$)
             }
         }
 
-        if ($flags->{doDiff} && ($max_diff_lines <= 0 || $refInfo->{diff_lines} < $max_diff_lines)) 
+        if ($flags->{doDiff} && ($max_diff_lines <= 0 || $refInfo->{diff_lines} < $max_diff_lines))
         {
             open DIFF, "-|" or exec "git", "diff-tree", "-p", "-M", "--no-commit-id", $obj or die "cannot exec git-diff-tree";
             my @diff;
@@ -571,7 +571,7 @@ sub send_commit_notice($$$)
 sub prepare_irker_notice($$)
 {
     my ($refInfo, $commits) = @_;
-    
+
     return if !$irker_json;
 
     my $revision = $refInfo->{revision};
@@ -608,8 +608,8 @@ sub send_global_notice($$)
     foreach my $commit (@$commits)
     {
         my ($notice, $subject) = prepare_commit_notice(
-            $refInfo, $commit, 
-            $commit eq $refInfo->{newSha1} ? $refInfo->{revision} : '', 
+            $refInfo, $commit,
+            $commit eq $refInfo->{newSha1} ? $refInfo->{revision} : '',
             { doDiff => 1, doOverview => 1, doStats => @$commits == 1 ? 1 : 0, suppressLog => @$commits == 1 ? 1 : 0 }
         );
 
@@ -635,7 +635,7 @@ sub send_global_notice($$)
         push @overview, map {
             my $author = "[ $_->{author} ]";
             (
-                "$_->{shortObj}: " . join("\n  ", @{$_->{log}}), 
+                "$_->{shortObj}: " . join("\n  ", @{$_->{log}}),
                 '',
                 ' ' x (76 - length($author)) . $author,
                 ''
@@ -645,18 +645,18 @@ sub send_global_notice($$)
     else {
         push @overview, map {
             (
-                "$_->{shortObj}: " . join("\n  ", @{$_->{log}}), 
-                '' 
+                "$_->{shortObj}: " . join("\n  ", @{$_->{log}}),
+                ''
             )
         } @{$refInfo->{overview}};
         my ($author) = map { "[ $_ ]" } keys %authors;
-        push @overview, ' ' x (76 - length($author)) . $author, ''; 
+        push @overview, ' ' x (76 - length($author)) . $author, '';
     }
     push @overview, '-' x 76, '';
 
     if (@$commits > 1) {
         push @overview, (
-            do_stats($objRange, { max_lines => $max_stats_lines }), 
+            do_stats($objRange, { max_lines => $max_stats_lines }),
             '',
             '#' x 76,
             '',
@@ -690,7 +690,7 @@ sub gather_commits_for_ref($$$)
     push @revlist_args, "$new_sha1", @oldCommits, @exclude_list;
 
     open LIST, "-|" or exec "git", "rev-list", @revlist_args or die "cannot exec git-rev-list";
-    my @commits = map 
+    my @commits = map
     {
         chomp;
         die "invalid commit $_" unless /^[0-9a-f]{40}$/;
@@ -727,11 +727,11 @@ my @refInfos;
 
 if (@ARGV)
 {
-    push @refInfos, 
+    push @refInfos,
     {
-        'oldSha1' => $ARGV[0], 
-        'newSha1' => $ARGV[1], 
-        'ref'     => $ARGV[2] 
+        'oldSha1' => $ARGV[0],
+        'newSha1' => $ARGV[1],
+        'ref'     => $ARGV[2]
     };
 }
 else  # read them from stdin
@@ -743,8 +743,8 @@ else  # read them from stdin
 
         push @refInfos,
         {
-            'oldSha1' => $1, 
-            'newSha1' => $2, 
+            'oldSha1' => $1,
+            'newSha1' => $2,
             'ref'     => $3
         };
     }
