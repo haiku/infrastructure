@@ -6,17 +6,19 @@
 PROJECT=""
 REFNAME=""
 UPLOADER=""
+UPLOADER_USERNAME=""
 OLDREV=""
 NEWREV=""
 CMDREF=""
 
-O=`getopt -l project: -l refname: -l uploader: -l oldrev: -l newrev: -l cmdref: -- p:r:u:o:n:c: "$@"` || exit 1
+O=`getopt -l project: -l refname: -l uploader: -l uploader-username: -l oldrev: -l newrev: -l cmdref: -- p:r:u:e:o:n:c: "$@"` || exit 1
 eval set -- "$O"
 while true; do
         case "$1" in
         --project)      PROJECT="$2"; shift 2;;
         --refname)      REFNAME="$2"; shift 2;;
         --uploader)     UPLOADER="$2"; shift 2;;
+        --uploader-username) UPLOADER_USERNAME="$2"; shift 2;;
         --oldrev)       OLDREV="$2"; shift 2;;
         --newrev)       NEWREV="$2"; shift 2;;
         --cmdref)       CMDREF="$2"; shift 2;;
@@ -24,6 +26,15 @@ while true; do
         *)      echo Error: $1; exit 1;;
         esac
 done
+UPLOADER_EMAIL=`echo $UPLOADER | cut -d "(" -f2 | cut -d ")" -f1`
+if [ -z "$UPLOADER_USERNAME" ]; then
+	# no username? default to first part of email
+	UPLOADER_USERNAME=${UPLOADER_EMAIL%@*}
+fi
+if [ -z "$UPLOADER_USERNAME" ]; then
+	# STILL no username? default to "nobody"
+	UPLOADER_USERNAME=nobody
+fi
 
 echo "Obtaining lock..."
 
@@ -48,7 +59,7 @@ with_lock_has_lock=1
 export GIT_DIR
 
 # create hrev-tags and send e-mail & cia notifications
-echo "$OLDREV $NEWREV $REFNAME" | $GERRIT_SITE/hooks/receive-notify.pl
+echo "$OLDREV $NEWREV $REFNAME" | USER="$UPLOADER_USERNAME" USER_EMAIL="$UPLOADER_EMAIL" $GERRIT_SITE/hooks/receive-notify.pl
 
 # tell buildbot about new changes
 #echo "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot.py

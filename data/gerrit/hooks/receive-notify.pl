@@ -204,20 +204,11 @@ sub mail_notification($$$@)
     my ($target, $subject, $content_type, @body) = @_;
 
     my $committer = $ENV{USER};
-    my $mail_from;
-    # Check if the author has specified his real mail
-    # address in his ~/.forward file. If so, we use
-    # that, otherwise we fake an address from this host:
-    #if (open(my $forwardFH, '<', "/home/$committer/.forward"))
-    #{
-    #    chomp($mail_from = <$forwardFH>);
-    #    close $forwardFH;
-    #}
-    #else
-    #{
-        # TODO: Fix me to authors email!
+    my $mail_from = $ENV{USER_EMAIL};
+    if (!length($mail_from))
+    {
         $mail_from = "$committer\@git.haiku-os.org";
-    #}
+    }
 
     my @head;
     push(@head, "To: $target\n");
