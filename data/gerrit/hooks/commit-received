@@ -26,7 +26,7 @@ while true; do
         *)      echo Error: $1; exit 1;;
         esac
 done
-UPLOADER_EMAIL=`echo $UPLOADER | cut -d "(" -f2 | cut -d ")" -f1`
+UPLOADER_EMAIL=`echo $UPLOADER | cut -d "<" -f2 | cut -d ">" -f1`
 if [ -z "$UPLOADER_USERNAME" ]; then
 	# no username? default to first part of email
 	UPLOADER_USERNAME=${UPLOADER_EMAIL%@*}
