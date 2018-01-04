@@ -42,6 +42,8 @@ readme=:install
 css=/cgit-css/haiku-cgit.css
 logo=/cgit-css/haiku-logo.png
 
+clone-url=https://git.haiku-os.org/$CGIT_REPO_URL ssh://git.haiku-os.org/$CGIT_REPO_URL
+
 # Cache
 cache-root=/var/cache/cgit
 cache-size=1000
@@ -53,6 +55,7 @@ enable-remote-branches=1
 enable-log-filecount=1
 enable-log-linecount=1
 enable-commit-graph=1
+enable-http-clone=1
 snapshots=0
 
 robots=noindex,nofollow
