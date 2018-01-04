@@ -12,8 +12,8 @@ docker-compose -f $CONTEXT/docker-compose.yaml stop router >> $LOG 2>&1
 sleep 5
 # Open 443 for certbot
 echo "Opening 443 for certbot..." >> $LOG
-iptables -A INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
-ip6tables -A INPUT -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+iptables -I INPUT 1 -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
+ip6tables -I INPUT 1 -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
 for i in $DOMAINS; do
 	COMMAND="certbot certonly --standalone -n -d $i"
 	echo "Running '$COMMAND'" >> $LOG
