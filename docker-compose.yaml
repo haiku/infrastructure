@@ -5,7 +5,6 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:80:80"
-      #- "94.130.158.38:22:2222" # PROD-ONLY
     volumes:
       - ./data/router:/etc/nginx/conf.d:z
       - /etc/letsencrypt:/etc/letsencrypt:z
@@ -14,6 +13,8 @@ services:
       - gerrit
       - cgit
   gerrit:
+    ports:
+      #- "94.130.158.38:22:29418" # PROD-ONLY
     image: openfrontier/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site
