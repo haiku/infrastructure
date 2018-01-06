@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOMAINS="review.haiku-os.org cgit-next.haiku-os.org cgit.haiku-os.org git.haiku-os.org git-next.haiku-os.org"
+DOMAINS="review.haiku-os.org cgit-next.haiku-os.org cgit.haiku-os.org git.haiku-os.org git-next.haiku-os.org haiku-os.org"
 LOG="/var/log/letsencrypt.log"
 CONTEXT="/root/infrastructure"
 
