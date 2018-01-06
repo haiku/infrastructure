@@ -1,6 +1,14 @@
 #!/bin/bash
 
-DOMAINS="review.haiku-os.org cgit-next.haiku-os.org cgit.haiku-os.org git.haiku-os.org git-next.haiku-os.org haiku-os.org"
+# Automation: Runs once a week
+#
+# Renews certificates by bringing consumers of 443 down,
+# opening firewall ports, and using certbot standalone.
+#
+# TODO: Test each certificate for validity? If no certs
+# expire soon, don't bring down router container?
+
+DOMAINS="review.haiku-os.org cgit.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org"
 LOG="/var/log/letsencrypt.log"
 CONTEXT="/root/infrastructure"
 
