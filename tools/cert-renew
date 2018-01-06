@@ -23,7 +23,11 @@ echo "Opening 443 for certbot..." >> $LOG
 iptables -I INPUT 1 -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
 ip6tables -I INPUT 1 -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >> $LOG 2>&1
 for i in $DOMAINS; do
-	COMMAND="certbot certonly --standalone -n -d $i"
+	ACTION="certonly"
+	if [ -d "/etc/letsencrypt/live/$i" ]; then
+		ACTION="renew"
+	fi
+	COMMAND="certbot $ACTION --standalone -n -d $i"
 	echo "Running '$COMMAND'" >> $LOG
 	$COMMAND >> $LOG 2>&1
 done
