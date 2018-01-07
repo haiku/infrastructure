@@ -1,0 +1,133 @@
+#!/usr/bin/python
+
+from datetime import datetime
+import glob
+import os
+import re
+import time
+from subprocess import call, check_call, check_output;
+
+# constants
+gitRepos = [
+    ['/ports-mirror/haikuports.git', 'https://github.com/haikuports/haikuports'],
+    ['/ports-mirror/haikuports.cross.git', 'https://github.com/haikuports/haikuports.cross'],
+]
+
+portsMirrorDir = '/ports-mirror/srv-www'
+downloadDir = '/ports-mirror/ports-mirror.in'
+
+if not os.path.exists(portsMirrorDir):
+    os.mkdir(portsMirrorDir)
+if not os.path.exists(downloadDir):
+    os.mkdir(downloadDir)
+
+shellVars = dict()
+recipe = ''
+
+class Replacer(object):
+    def __init__(self, recipe):
+        self.recipe = recipe
+
+    def __call__(self, match):
+        shellVar = match.group(1)
+        if shellVar not in shellVars:
+            shellVarSpecMatch = re.search('^' + shellVar + '="(.+?)"', self.recipe, flags=re.DOTALL | re.MULTILINE)
+            if not shellVarSpecMatch:
+                return match.group(0)
+            shellVars[shellVar] = shellVarSpecMatch.group(1)
+        return shellVars[shellVar]
+
+def expandVariables(string, recipe):
+    replacer = Replacer(recipe)
+    string = re.sub('\$(\w+)', replacer, string)
+    return re.sub('\$\{(\w+)\}', replacer, string)
+
+def updateFromCheckout(gitRepoDir):
+    for recipeFile in glob.glob(gitRepoDir + '/*/*/*.recipe'):
+        with open(recipeFile, 'r') as f:
+            recipe = f.read()
+
+        if 'ARCHITECTURES="' not in recipe:
+            continue
+
+        recipeFileName = os.path.basename(recipeFile)
+        recipeName = recipeFileName.partition('-')[0]
+
+        shellVars.clear()
+        shellVars['portName'] = os.path.basename(recipeFile).partition('-')[0]
+        shellVars['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
+        shellVars['portVersionedName'] = shellVars['portName'] + '-' + shellVars['portVersion']
+
+        for srcUriMatch in re.finditer('^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
+            srcUriKey = srcUriMatch.group(1)
+            srcFilenameKey = srcUriKey.replace('SOURCE_URI', 'SOURCE_FILENAME')
+            checksumSha256Key = srcUriKey.replace('SOURCE_URI', 'CHECKSUM_SHA256')
+            for  srcUriSpec in srcUriMatch.group(2).split():
+                if not (srcUriSpec.startswith('http') or srcUriSpec.startswith('ftp')):
+                    continue
+                srcUri = srcUriSpec.partition('#')[0]
+                srcUri = expandVariables(srcUri, recipe)
+                srcFilenameMatch = re.search('^' + srcFilenameKey + '="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE)
+                if srcFilenameMatch:
+                    filename = srcFilenameMatch.group(1)
+                elif 'sourceforge.net' in srcUri and srcUri.endswith('download'):
+                    filename = os.path.basename(os.path.dirname(srcUri))
+                else:
+                    filename = os.path.basename(srcUri)
+                filename = expandVariables(filename, recipe)
+                borkedMarkerPath = downloadDir + '/' + filename + '.is_borked'
+                if os.path.exists(borkedMarkerPath):
+                    continue
+                targetpath = portsMirrorDir + '/' + recipeName + '/' + filename
+                downloadpath = downloadDir + '/' + filename
+                if os.path.exists(targetpath):
+                    continue
+                targetdir = os.path.dirname(targetpath)
+                if not os.path.exists(targetdir):
+                    os.mkdir(targetdir)
+                print datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+                print '\t' + os.path.basename(recipeFile) + ' => ' + filename
+                checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE)
+                if not checksumMatch:
+                    print '*** recipe ' + recipeFile + ' does not contain a usable checksum!'
+                    continue
+                if os.path.exists(downloadpath):
+                    os.remove(downloadpath)
+                args = [ 'curl', '-fkL', '--limit-rate', '2M', '--silent', '--output', downloadpath, srcUri ]
+                #args = [ 'curl', '-fkL', '--limit-rate', '2M', '--output', downloadpath, srcUri ]
+                curlResult = call(args, cwd=portsMirrorDir)
+                if curlResult != 0:
+                    print '* unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult)
+                    continue
+
+                checksum = check_output(['sha256sum', '-b', downloadpath]).split()[0]
+                if checksum != checksumMatch.group(1):
+                    print '*** SHA256-checksum mismatch for ' + filename
+                    print '***    expected :' + checksumMatch.group(1)
+                    print '***    got      :' + checksum
+                    continue
+
+                os.rename(downloadpath, targetpath)
+
+while True:
+	for gitRepo in gitRepos:
+		gitRepoDir = gitRepo[0]
+		gitRepoUrl = gitRepo[1]
+		repoName = gitRepoDir.split('/')[-1]
+
+		if not os.path.exists(gitRepoDir):
+			print 'cloning %s from %s' % (repoName, gitRepoUrl)
+			check_call([ 'git', 'clone', '--all', gitRepoUrl, gitRepoDir ])
+
+		branchesString = check_output([ 'git', 'branch' ], cwd=gitRepoDir)
+		branches = branchesString.splitlines()
+
+		for branch in branches:
+			branch = branch[2:]
+			print 'updating %s/%s' % (repoName, branch)
+			check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
+			check_call([ 'git', 'pull', '-q', '--rebase' ], cwd=gitRepoDir)
+
+			updateFromCheckout(gitRepoDir)
+
+	time.sleep(60 * 60 * 6) # 6 hours

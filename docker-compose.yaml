@@ -8,6 +8,7 @@ services:
     volumes:
       - ./data/router:/etc/nginx/conf.d:z
       - /etc/letsencrypt:/etc/letsencrypt:z
+      - ports_mirror:/ports-mirror
     restart: on-failure
     depends_on:
       - gerrit
@@ -39,6 +40,11 @@ services:
   irker:
     image: haiku/irker
     restart: on-failure
+  portsmirror:
+    image: haiku/ports-mirror
+    restart: on-failure
+    volumes:
+      - ports_mirror:/ports-mirror
   smtp:
     image: mwader/postfix-relay
     restart: on-failure
@@ -46,3 +52,4 @@ services:
       - POSTFIX_myhostname=maui.haiku-os.org
 volumes:
   gerrit_data:
+  ports_mirror:
