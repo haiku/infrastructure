@@ -4,7 +4,22 @@ from datetime import datetime
 import glob
 import os
 import re
+import time
 from subprocess import call, check_call, check_output;
+
+# constants
+gitRepos = [
+    ['/ports-mirror/haikuports.git', 'https://github.com/haikuports/haikuports'],
+    ['/ports-mirror/haikuports.cross.git', 'https://github.com/haikuports/haikuports.cross'],
+]
+
+portsMirrorDir = '/ports-mirror/srv-www'
+downloadDir = '/ports-mirror/ports-mirror.in'
+
+if not os.path.exists(portsMirrorDir):
+    os.mkdir(portsMirrorDir)
+if not os.path.exists(downloadDir):
+    os.mkdir(downloadDir)
 
 shellVars = dict()
 recipe = ''
@@ -27,12 +42,6 @@ def expandVariables(string, recipe):
     string = re.sub('\$(\w+)', replacer, string)
     return re.sub('\$\{(\w+)\}', replacer, string)
 
-portsMirrorDir = '/srv/www/ports-mirror'
-downloadDir = '/srv/www/ports-mirror.in'
-
-if not os.path.exists(downloadDir):
-    os.mkdir(downloadDir)
-
 def updateFromCheckout(gitRepoDir):
     for recipeFile in glob.glob(gitRepoDir + '/*/*/*.recipe'):
         with open(recipeFile, 'r') as f:
@@ -49,10 +58,10 @@ def updateFromCheckout(gitRepoDir):
         shellVars['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
         shellVars['portVersionedName'] = shellVars['portName'] + '-' + shellVars['portVersion']
 
-        for srcUriMatch in re.finditer('^(SRC_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
+        for srcUriMatch in re.finditer('^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
             srcUriKey = srcUriMatch.group(1)
-            srcFilenameKey = srcUriKey.replace('SRC_URI', 'SRC_FILENAME')
-            checksumSha256Key = srcUriKey.replace('SRC_URI', 'CHECKSUM_SHA256')
+            srcFilenameKey = srcUriKey.replace('SOURCE_URI', 'SOURCE_FILENAME')
+            checksumSha256Key = srcUriKey.replace('SOURCE_URI', 'CHECKSUM_SHA256')
             for  srcUriSpec in srcUriMatch.group(2).split():
                 if not (srcUriSpec.startswith('http') or srcUriSpec.startswith('ftp')):
                     continue
@@ -100,20 +109,25 @@ def updateFromCheckout(gitRepoDir):
 
                 os.rename(downloadpath, targetpath)
 
-gitRepoDirs = [
-    '/home/portsmirror/haikuports.git',
-    '/home/portsmirror/haikuports.cross.git'
-]
+while True:
+	for gitRepo in gitRepos:
+		gitRepoDir = gitRepo[0]
+		gitRepoUrl = gitRepo[1]
+		repoName = gitRepoDir.split('/')[-1]
 
-for gitRepoDir in gitRepoDirs:
-    repoName = gitRepoDir.split('/')[-1]
-    branchesString = check_output([ 'git', 'branch' ], cwd=gitRepoDir)
-    branches = branchesString.splitlines()
+		if not os.path.exists(gitRepoDir):
+			print 'cloning %s from %s' % (repoName, gitRepoUrl)
+			check_call([ 'git', 'clone', '--all', gitRepoUrl, gitRepoDir ])
 
-    for branch in branches:
-        branch = branch[2:]
-        print 'updating %s/%s' % (repoName, branch)
-        check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
-        check_call([ 'git', 'pull', '-q', '--rebase' ], cwd=gitRepoDir)
+		branchesString = check_output([ 'git', 'branch' ], cwd=gitRepoDir)
+		branches = branchesString.splitlines()
 
-        updateFromCheckout(gitRepoDir)
+		for branch in branches:
+			branch = branch[2:]
+			print 'updating %s/%s' % (repoName, branch)
+			check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
+			check_call([ 'git', 'pull', '-q', '--rebase' ], cwd=gitRepoDir)
+
+			updateFromCheckout(gitRepoDir)
+
+	time.sleep(60 * 60 * 6) # 6 hours
