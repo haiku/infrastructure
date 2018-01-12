@@ -1,0 +1,14 @@
+#!/bin/sh
+
+ORG=haiku
+PREFIX=/var/lib/docker/volumes/infrastructure_gerrit_data/_data/git/
+REPOS="haiku.git buildtools.git"
+
+# push repositories haiku & buildtools to github
+
+for i in $REPOS; do
+	cd $PREFIX/$i
+	if [ ! -e OFFLINE ]; then
+	    git push --all git@github.com:$ORG/$i 2>&1 | grep -v 'up-to-date'
+	fi
+done;
