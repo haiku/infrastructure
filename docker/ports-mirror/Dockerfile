@@ -4,7 +4,6 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 RUN apk add --update git python curl
 
 ADD update-ports-mirror /usr/local/bin/update-ports-mirror
-RUN chmod +x /usr/local/bin/update-ports-mirror
 
 VOLUME ["/ports-mirror"]
 

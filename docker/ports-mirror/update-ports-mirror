@@ -119,8 +119,8 @@ while True:
 			print 'cloning %s from %s' % (repoName, gitRepoUrl)
 			check_call([ 'git', 'clone', gitRepoUrl, gitRepoDir ])
 
-		check_call([ 'git', 'fetch', '--all' ])
-		check_call([ 'git', 'pull', '--all' ])
+		check_call([ 'git', 'fetch', '--all' ], cwd=gitRepoDir)
+		check_call([ 'git', 'pull', '--all' ], cwd=gitRepoDir)
 
 		branchesString = check_output([ 'git', 'branch', '-a' ], cwd=gitRepoDir)
 		branches = branchesString.splitlines()
