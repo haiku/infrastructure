@@ -86,15 +86,15 @@ def updateFromCheckout(gitRepoDir):
                 if not os.path.exists(targetdir):
                     os.mkdir(targetdir)
                 print datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-                print '\t' + os.path.basename(recipeFile) + ' => ' + filename
+                print '\t' + os.path.basename(recipeFile) + ' => ' + filename + " (" + srcUri + ")"
                 checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE)
                 if not checksumMatch:
                     print '*** recipe ' + recipeFile + ' does not contain a usable checksum!'
                     continue
                 if os.path.exists(downloadpath):
                     os.remove(downloadpath)
-                args = [ 'curl', '-fkL', '--limit-rate', '2M', '--silent', '--output', downloadpath, srcUri ]
-                #args = [ 'curl', '-fkL', '--limit-rate', '2M', '--output', downloadpath, srcUri ]
+                args = [ 'curl', '-fkL', '--limit-rate', '5M', '--silent', '--output', downloadpath, srcUri ]
+                #args = [ 'curl', '-fkL', '--limit-rate', '5M', '--output', downloadpath, srcUri ]
                 curlResult = call(args, cwd=portsMirrorDir)
                 if curlResult != 0:
                     print '* unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult)
@@ -117,16 +117,22 @@ while True:
 
 		if not os.path.exists(gitRepoDir):
 			print 'cloning %s from %s' % (repoName, gitRepoUrl)
-			check_call([ 'git', 'clone', '--all', gitRepoUrl, gitRepoDir ])
+			check_call([ 'git', 'clone', gitRepoUrl, gitRepoDir ])
 
-		branchesString = check_output([ 'git', 'branch' ], cwd=gitRepoDir)
+		check_call([ 'git', 'fetch', '--all' ])
+		check_call([ 'git', 'pull', '--all' ])
+
+		branchesString = check_output([ 'git', 'branch', '-a' ], cwd=gitRepoDir)
 		branches = branchesString.splitlines()
 
 		for branch in branches:
 			branch = branch[2:]
+			if branch.startswith("(HEAD"):
+				continue
+			if ' ' in branch:
+				branch = branch[0:branch.find(' ')]
 			print 'updating %s/%s' % (repoName, branch)
 			check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
-			check_call([ 'git', 'pull', '-q', '--rebase' ], cwd=gitRepoDir)
 
 			updateFromCheckout(gitRepoDir)
 
