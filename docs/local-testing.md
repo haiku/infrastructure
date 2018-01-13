@@ -12,7 +12,9 @@ Requirements
 3. a persistant volume with the unique maui data
 4. run ```sudo ./tools/fake-cert```
 5. the following added to your /etc/hosts:
-  ```127.0.0.1 git.haiku-os.org review.haiku-os.org cgit.haiku-os.org```
+```
+127.0.0.1 review.haiku-os.org cgit.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org ports-mirror.haiku-os.org
+```
 
 Your test environment
 ----------------------------------

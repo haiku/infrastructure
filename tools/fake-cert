@@ -9,7 +9,7 @@
 # To regenerate fakecerts, rm -rf /etc/letsencrypt/live/*
 
 CERT_ROOT="/etc/letsencrypt/live"
-DOMAINS="git.haiku-os.org cgit.haiku-os.org review.haiku-os.org haiku-os.org"
+DOMAINS="review.haiku-os.org cgit.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org ports-mirror.haiku-os.org"
 mkdir -p $CERT_ROOT
 for i in $DOMAINS; do
 	if [ -d $CERT_ROOT/$i ]; then
