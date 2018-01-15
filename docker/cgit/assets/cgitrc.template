@@ -1,8 +1,11 @@
+### cgitrc.template for Haiku
+### this file is used to generate the real cgitrc just before cgit startup
+
 root-title=$CGIT_TITLE
 root-desc=$CGIT_DESC
 
 source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
-about-filter=/usr/lib/cgit/filters/about-formatting.sh
+#about-filter=/usr/lib/cgit/filters/about-formatting.sh
 commit-filter=/usr/lib/cgit/filters/commit-link-filter.sh
 
 ##
@@ -49,13 +52,32 @@ cache-root=/var/cache/cgit
 cache-size=1000
 
 enable-git-config=0
+
+# Show extra links for each repository on the index page
 enable-index-links=1
+
+# Show owner on index page
 enable-index-owner=0
+
+# Display remote branches in summary and refs views
 enable-remote-branches=1
-enable-log-filecount=1
+
+# Show number of affected files per commit on the log pages
 enable-log-linecount=1
+
+# Enable ASCII art commit history graph on the log pages
 enable-commit-graph=1
+
+# Allow http transport git clone
 enable-http-clone=1
+
+# Enable blame page and create links to it from tree page
+enable-blame=1
+
+# Sort branches by date
+branch-sort=age
+
+# Disable all adhoc downloads
 snapshots=0
 
 robots=noindex,nofollow
