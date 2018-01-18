@@ -4,7 +4,7 @@ Babel==0.9.6
 docutils==0.13.1
 Genshi==0.7
 packaging==16.8
-# psycopg2==2.6.2 ### installed in the Dockerfile
+psycopg2==2.6.2
 Pygments==2.2.0
 pyparsing==2.1.10
 pytz==2016.10

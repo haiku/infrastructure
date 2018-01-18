@@ -9,7 +9,10 @@ WORKDIR /app
 ADD requirements.txt /app
 
 # Install the requirements
-RUN apk update && apk add git py-psycopg2
+RUN apk update && \
+    apk add --virtual build-deps gcc python-dev musl-dev && \
+    apk add git postgresql-dev
+
 RUN pip install -r requirements.txt
 
 CMD /usr/local/bin/tracd -b 0.0.0.0 -p 80 -s /var/trac/dev.haiku-os.org
