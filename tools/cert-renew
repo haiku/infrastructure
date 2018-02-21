@@ -8,7 +8,7 @@
 # TODO: Test each certificate for validity? If no certs
 # expire soon, don't bring down router container?
 
-DOMAINS="review.haiku-os.org cgit.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org ports-mirror.haiku-os.org"
+DOMAINS="review.haiku-os.org cgit.haiku-os.org dev.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org ports-mirror.haiku-os.org dev.haiku-os.org"
 LOG="/var/log/letsencrypt.log"
 CONTEXT="/root/infrastructure"
 

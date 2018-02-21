@@ -59,7 +59,14 @@ services:
     restart: on-failure
     environment:
       - POSTFIX_myhostname=maui.haiku-os.org
+  trac:
+    image: nielx/trac
+    volumes:
+      - trac_data:/var/trac
+    depends_on:
+      - postgres
 volumes:
   gerrit_data:
   ports_mirror:
   postgres_data:
+  trac_data:
