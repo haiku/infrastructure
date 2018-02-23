@@ -14,7 +14,13 @@ ENV GERRIT_INIT_ARGS ""
 RUN adduser -D -h "${GERRIT_HOME}" -g "Gerrit User" -s /sbin/nologin "${GERRIT_USER}"
 
 RUN set -x \
-    && apk add --update --no-cache git openssh openssl bash perl perl-cgi git-gitweb curl su-exec procmail python
+    && apk add --update --no-cache git openssh openssl bash perl perl-cgi git-gitweb curl su-exec procmail python py2-pip
+
+# Build python twisted
+RUN set -x \
+    && apk add --no-cache --virtual=build-dependencies gcc g++ make python-dev
+RUN pip install twisted
+RUN apk del --purge build-dependencies
 
 RUN mkdir /docker-entrypoint-init.d
 
