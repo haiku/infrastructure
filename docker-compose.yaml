@@ -16,7 +16,7 @@ services:
   gerrit:
     ports:
       #- "94.130.158.38:22:29418" # PROD-ONLY
-    image: openfrontier/gerrit
+    image: haiku/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site
       - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
