@@ -64,7 +64,7 @@ services:
     image: nielx/trac
     restart: on-failure
     volumes:
-      - trac_data:/var/trac
+      - trac_data:/var/trac:z
     depends_on:
       - postgres
   buildbot:
