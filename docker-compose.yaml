@@ -14,8 +14,8 @@ services:
       - gerrit
       - cgit
   gerrit:
-    ports:
-      #- "94.130.158.38:22:29418" # PROD-ONLY
+#    ports:
+#      - "94.130.158.38:22:29418" # PROD-ONLY
     image: haiku/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site
@@ -65,7 +65,16 @@ services:
       - trac_data:/var/trac
     depends_on:
       - postgres
+  buildbot:
+    image: buildbot/buildbot-master:v1.0.0
+    volumes:
+      - buildbot_config:/var/lib/buildbot
+    links:
+      - postgres
+    depends_on:
+      - postgres
 volumes:
+  buildbot_config:
   gerrit_data:
   ports_mirror:
   postgres_data:
