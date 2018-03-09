@@ -9,6 +9,7 @@ services:
       - ./data/router:/etc/nginx/conf.d:z
       - /etc/letsencrypt:/etc/letsencrypt:z
       - ports_mirror:/ports-mirror:z
+      - ./data/static-html:/static-html:z
     restart: on-failure
     depends_on:
       - gerrit

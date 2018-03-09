@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Haiku build infrastructure @ maui</title>
+  <meta name="description" content="Haiku's build infrastructure">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="eleven columns" style="margin-top: 25%; margin-bottom: 100px;">
+        <center><img src="images/logo_black_transparent.png"></center>
+      </div>
+    </div>
+    <div class="row">
+      <div class="six columns">
+		<img src="images/installer_64.png">
+        <h4>Buildbot</h4>
+        <p>Continiously compiles <a href="http://cgit.haiku-os.org">Haiku's source code</a> on changes and generates <a href="http://download.haiku-os.org">nightly images.</a></p>
+		<a class="button" href="/buildbot">Buildbot ></a>
+      </div>
+      <div class="six columns">
+		<img src="images/hpkg_64.png">
+        <h4>Buildmaster</h4>
+		<p>
+        <p>Continiously build <a href="http://github.com/haikuports/haikuports">HaikuPorts</a> packages and update Haiku's software repositories.</p>
+		<a class="button" href="/buildmaster/x86_gcc2h">Buildmaster x86 (gcc2) ></a><br/>
+		<a class="button" href="/buildmaster/x86_64">Buildmaster x86_64 ></a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
