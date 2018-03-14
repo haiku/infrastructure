@@ -62,18 +62,18 @@ services:
       - POSTFIX_myhostname=maui.haiku-os.org
   trac:
     image: nielx/trac
+    restart: on-failure
     volumes:
       - trac_data:/var/trac
     depends_on:
       - postgres
   buildbot:
     image: buildbot/buildbot-master:v1.0.0
+    restart: on-failure
     volumes:
       - buildbot_config:/var/lib/buildbot
-    links:
-      - postgres
-    depends_on:
-      - postgres
+    ports:
+      - '0.0.0.0:9989:9989'
 volumes:
   buildbot_config:
   gerrit_data:
