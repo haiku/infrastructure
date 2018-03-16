@@ -68,7 +68,8 @@ services:
     depends_on:
       - postgres
   buildbot:
-    image: buildbot/buildbot-master:v1.0.0
+    image: buildbot/buildbot-master:v1.1.0
+    hostname: buildbot
     restart: on-failure
     volumes:
       - buildbot_config:/var/lib/buildbot
