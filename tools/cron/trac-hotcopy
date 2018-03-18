@@ -1,0 +1,16 @@
+#!/bin/sh
+TRAC_CONTAINER_ID=$(docker ps --filter "name=infrastructure_trac_1" -q)
+POSTGRES_CONTAINER_ID=$(docker ps --filter "name=infrastructure_postgres_1" -q)
+
+# Clean up possible left-overs from a previous backup
+docker exec $TRAC_CONTAINER_ID rm -r /var/trac/db-backup.sql /var/trac/trac-backup/
+
+# Dump the backup of the database
+docker exec $POSTGRES_CONTAINER_ID pg_dump -U baron trac | docker exec -i $TRAC_CONTAINER_ID dd of=/var/trac/db-backup.sql
+# Perform the hot-copy
+docker exec $TRAC_CONTAINER_ID trac-admin /var/trac/dev.haiku-os.org/ hotcopy /var/trac/trac-backup --no-database
+docker exec $TRAC_CONTAINER_ID mv /var/trac/db-backup.sql /var/trac/trac-backup/db
+
+# Remove the old backup and save the new one
+docker exec $TRAC_CONTAINER_ID rm /var/trac/trac-backup.tar.bz2
+docker exec $TRAC_CONTAINER_ID tar -cjf /var/trac/trac-backup.tar.bz2 /var/trac/trac-backup/
