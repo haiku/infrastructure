@@ -60,6 +60,7 @@ fi
 with_lock_has_lock=1
 
 export GIT_DIR
+cd "$GIT_DIR"
 
 # create hrev-tags and send e-mail & cia notifications
 echo "$OLDREV $NEWREV $REFNAME" | USER="$UPLOADER_USERNAME" USER_EMAIL="$UPLOADER_EMAIL" $GERRIT_SITE/hooks/receive-notify.pl
