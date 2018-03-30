@@ -25,7 +25,7 @@ ip6tables -I INPUT 1 -p tcp -m state --dport 443 --state NEW -m tcp -j ACCEPT >>
 for i in $DOMAINS; do
 	ACTION="certonly"
 	if [ -d "/etc/letsencrypt/live/$i" ]; then
-		ACTION="renew"
+		ACTION="certonly --keep-until-expiring"
 	fi
 	COMMAND="certbot $ACTION --standalone -n -d $i"
 	echo "Running '$COMMAND'" >> $LOG
