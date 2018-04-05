@@ -41,6 +41,15 @@ services:
   irker:
     image: haiku/irker
     restart: on-failure
+  pootle:
+    image: nielx/pootle:2.7
+    restart: on-failure
+    volumes:
+      - pootle_data:/var/pootle:z
+    depends_on:
+      - postgres
+      - redis
+      - smtp
   portsmirror:
     image: haiku/ports-mirror
     restart: on-failure
@@ -55,6 +64,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+  redis:
+    image: redis:4.0
+    restart: on-failure
   smtp:
     image: mwader/postfix-relay
     restart: on-failure
@@ -67,6 +79,7 @@ services:
       - trac_data:/var/trac:z
     depends_on:
       - postgres
+      - smtp
   buildbot:
     image: buildbot/buildbot-master:v1.1.0
     hostname: buildbot
@@ -79,6 +92,7 @@ services:
 volumes:
   buildbot_config:
   gerrit_data:
+  pootle_data:
   ports_mirror:
   postgres_data:
   trac_data:

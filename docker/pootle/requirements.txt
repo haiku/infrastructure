@@ -1,0 +1,12 @@
+# Base package
+Pootle==2.7.6
+
+# Patched translate toolkit
+git+https://github.com/nielx/translate.git@stable/1.14.0
+
+# Other required packages
+psycopg2
+pytz
+
+# Optional package to speed up merging (will be standard from Pootle 2.8.*)
+python-levenshtein==0.12.0
