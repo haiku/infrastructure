@@ -80,6 +80,14 @@ services:
     depends_on:
       - postgres
       - smtp
+  userguide:
+    image: nielx/userguide
+    restart: on-failure
+    volumes:
+      - userguide_data:/var/userguide:z
+    depends_on:
+      - postgres
+      - smtp
   buildbot:
     image: buildbot/buildbot-master:v1.1.0
     hostname: buildbot
@@ -95,4 +103,5 @@ volumes:
   pootle_data:
   ports_mirror:
   postgres_data:
+  userguide_data:
   trac_data:
