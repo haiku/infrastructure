@@ -15,8 +15,9 @@ services:
       - gerrit
       - cgit
   gerrit:
-#    ports:
-#      - "94.130.158.38:22:29418" # PROD-ONLY
+    # Uncomment in test environments
+    ports:
+      - "94.130.158.38:22:29418" # PROD-ONLY
     image: haiku/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site
