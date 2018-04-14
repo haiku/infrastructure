@@ -93,8 +93,8 @@ services:
     hostname: buildbot
     restart: on-failure
     volumes:
-      - buildbot_config:/var/lib/buildbot
-      - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg
+      - buildbot_config:/var/lib/buildbot:z
+      - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
     ports:
       - '0.0.0.0:9989:9989'
 volumes:
