@@ -43,7 +43,7 @@ services:
     image: haiku/irker
     restart: on-failure
   pootle:
-    image: nielx/pootle:2.7
+    image: haiku/pootle
     restart: on-failure
     volumes:
       - pootle_data:/var/pootle:z
@@ -74,7 +74,7 @@ services:
     environment:
       - POSTFIX_myhostname=maui.haiku-os.org
   trac:
-    image: nielx/trac
+    image: haiku/trac
     restart: on-failure
     volumes:
       - trac_data:/var/trac:z
@@ -82,7 +82,7 @@ services:
       - postgres
       - smtp
   userguide:
-    image: nielx/userguide
+    image: haiku/userguide
     restart: on-failure
     volumes:
       - userguide_data:/var/userguide:z
