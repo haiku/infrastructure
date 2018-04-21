@@ -17,8 +17,7 @@ if [ "$1" = 'pootle' ]; then
         pootle init --config $POOTLE_SETTINGS
     fi
 
-    pootle rqworker &
-    exec pootle runserver --insecure 0.0.0.0:80
+    exec supervisord
 elif [ "$1" = 'synchronize' ]; then
     # Save all the data to disk
     pootle sync_stores --force --overwrite

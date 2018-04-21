@@ -18,10 +18,10 @@ The volume should contain the following:
  - A `repository` directory that contains the haiku repository
 
 The pootle-entrypoint.sh contains two run commands:
- - `pootle` which starts a server
+ - `pootle` which starts an nginx frontend, a pootle server and a pootle rqworker
  - `synchronize` which collects the updated English catalogs, merges the
    existing translations, writes the merged files to disk and then commits
    them to the Haiku repository
 
 The synchronization step requires that there is a haiku repository that is
-configured for building. In the test setup the x86_gcc2 architecture is used.
+configured for building. In the test setup the x86_gcc2 +x86 architectures are used.
