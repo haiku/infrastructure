@@ -37,7 +37,7 @@ elif [ "$1" = 'synchronize' ]; then
     check_errors $? "Error importing the catalogs into pootle"
 
     # Output the translated catalogs to the repository
-    python /app/finish_output_catalogs /var/pootle/catalogs/haiku /var/pootle/repository/data/catalogs/
+    python /app/finish_output_catalogs.py /var/pootle/catalogs/haiku /var/pootle/repository/data/catalogs/
     check_errors $? "Error copying the updated translations to the git tree"
     git add -A
     git commit -m "Update translations from Pootle"
