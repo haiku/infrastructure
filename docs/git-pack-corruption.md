@@ -93,3 +93,9 @@ git fsck --lost-found
 One final ```git fsck``` ensuring all "_missing XXX and broken link_" messages are gone.
 
 ```git gc``` to cleanup the final danglging objects.
+
+Once you feel confident the repository is healthy, ```mv haiku.git-corrupt haiku.git```
+
+## Testing
+
+Do some new clones, and some pulls to existing repos to make sure things are working as expected.
