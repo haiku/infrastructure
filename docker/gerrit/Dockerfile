@@ -29,26 +29,25 @@ RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VE
 #Only for local test
 #COPY gerrit-${GERRIT_VERSION}.war $GERRIT_WAR
 
-#Download Plugins
-ENV PLUGIN_VERSION=bazel-stable-2.15
 ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 
-#delete-project
-RUN curl -fSsL \
-    ${GERRITFORGE_URL}/job/plugin-delete-project-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/delete-project/delete-project.jar \
-    -o ${GERRIT_HOME}/delete-project.jar
+# Download Plugins
+ENV PLUGINS="delete-project events-log gitiles importer admin-console webhooks"
+ENV PLUGIN_VERSION=bazel-stable-2.15
+RUN for i in ${PLUGINS}; do \
+	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
+		-o ${GERRIT_HOME}/$i.jar; \
+	done;
 
-#events-log
-#This plugin is required by gerrit-trigger plugin of Jenkins.
-RUN curl -fSsL \
-    ${GERRITFORGE_URL}/job/plugin-events-log-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/events-log/events-log.jar \
-    -o ${GERRIT_HOME}/events-log.jar
+# Download master-stable plugins
+ENV MASTER_PLUGINS="avatars-gravatar"
+ENV MASTER_PLUGIN_VERSION=bazel-master-stable-2.15
 
-#gitiles
-RUN curl -fSsL \
-    ${GERRITFORGE_URL}/job/plugin-gitiles-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/gitiles/gitiles.jar \
-    -o ${GERRIT_HOME}/gitiles.jar
+RUN for i in ${MASTER_PLUGINS}; do \
+	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${MASTER_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
+		-o ${GERRIT_HOME}/$i.jar; \
+	done;
 
 #oauth2 plugin
 ENV GERRIT_OAUTH_VERSION 2.14.6.2
@@ -56,11 +55,6 @@ ENV GERRIT_OAUTH_VERSION 2.14.6.2
 RUN curl -fSsL \
     https://github.com/davido/gerrit-oauth-provider/releases/download/v${GERRIT_OAUTH_VERSION}/gerrit-oauth-provider.jar \
     -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
-
-#importer
-RUN curl -fSsL \
-    ${GERRITFORGE_URL}/job/plugin-importer-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/importer/importer.jar \
-    -o ${GERRIT_HOME}/importer.jar
 
 # Ensure the entrypoint scripts are in a fixed location
 COPY gerrit-entrypoint.sh /
