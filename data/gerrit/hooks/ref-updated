@@ -6,16 +6,18 @@
 PROJECT=""
 REFNAME=""
 SUBMITTER=""
+USERNAME=""
 OLDREV=""
 NEWREV=""
 
-O=`getopt -l project: -l refname: -l submitter: -l oldrev: -l newrev: -- p:r:s:o:n: "$@"` || exit 1
+O=`getopt -l project: -l refname: -l submitter: -l submitter-username -l oldrev: -l newrev: -- p:r:s:u:o:n: "$@"` || exit 1
 eval set -- "$O"
 while true; do
 	case "$1" in
 		--project)      PROJECT="$2"; shift 2;;
 		--refname)      REFNAME="$2"; shift 2;;
 		--submitter)    SUBMITTER="$2"; shift 2;;
+		--submitter-username) USERNAME="$2"; shift 2;;
 		--oldrev)       OLDREV="$2"; shift 2;;
 		--newrev)       NEWREV="$2"; shift 2;;
 		--)     shift; break;;
@@ -26,13 +28,14 @@ done
 echo "DEBUG: THE REFNAME IS: $REFNAME"
 echo "DEBUG: THE PROJECT IS: $PROJECT"
 echo "DEBUG: THE SUBMITTER IS $SUBMITTER"
+echo "DEBUG: THE USERNAME IS $USERNAME"
 echo "DEBUG: THE OLDREV is $OLDREV"
 echo "DEBUG: THE NEWREV is $NEWREV"
 
-UPLOADER_EMAIL=`echo $SUBMITTER | cut -d "<" -f2 | cut -d ">" -f1`
+UPLOADER_EMAIL=$SUBMITTER
 if [ -z "$UPLOADER_USERNAME" ]; then
 	# no username? default to first part of email
-	UPLOADER_USERNAME=${UPLOADER_EMAIL%@*}
+	UPLOADER_USERNAME=${USERNAME}
 fi
 if [ -z "$UPLOADER_USERNAME" ]; then
 	# STILL no username? default to "nobody"
