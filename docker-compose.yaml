@@ -8,8 +8,10 @@ services:
     volumes:
       - ./data/router:/etc/nginx/conf.d:z
       - /etc/letsencrypt:/etc/letsencrypt:z
-      - ports_mirror:/ports-mirror:z
       - ./data/static-html:/static-html:z
+      - ports_mirror:/ports-mirror:z
+      - download_data:/download-data:z
+      - repo_data:/repo-data:z
     restart: on-failure
     depends_on:
       - gerrit
@@ -107,3 +109,5 @@ volumes:
   postgres_data:
   userguide_data:
   trac_data:
+  download_data:
+  repo_data:
