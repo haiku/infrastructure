@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo "log file = /dev/stdout" > /etc/rsyncd.conf
+echo "port = 12000" >> /etc/rsyncd.conf
+echo "use chroot = yes" >> /etc/rsyncd.conf
+echo "max connections = 10" >> /etc/rsyncd.conf
+
+for D in /repo-data/*; do
+	if [ -d "${D}" ]; then
+		SHARENAME=$(basename "${D}")
+		echo "Injecting ${D} as ${SHARENAME}..."
+
+		echo "[$SHARENAME]" >> /etc/rsyncd.conf
+		echo "path = ${D}" >> /etc/rsyncd.conf
+		echo "comment = ${SHARENAME}" >> /etc/rsyncd.conf
+		echo "read only = true" >> /etc/rsyncd.conf
+		echo "timeout = 300" >> /etc/rsyncd.conf
+
+		echo "hosts deny = *" >> /etc/rsyncd.conf
+		ALLOW=""
+		if [ -f /etc/rsync-whitelist ]; then
+			for i in $(cat /etc/rsync-whitelist); do
+				ALLOW="${ALLOW} $i"
+			done
+		fi
+		echo "hosts allow = ${ALLOW}" >> /etc/rsyncd.conf
+	fi
+done
+
+exec /usr/bin/rsync --no-detach --daemon --config /etc/rsyncd.conf "$@"

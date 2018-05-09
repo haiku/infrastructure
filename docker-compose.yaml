@@ -101,6 +101,14 @@ services:
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
     ports:
       - '0.0.0.0:9989:9989'
+  cdn:
+    image: haiku/cdn
+    restart: on-failure
+    volumes:
+      - repo_data:/repo-data:z
+      - ./data/cdn/rsync-whitelist:/etc/rsync-whitelist:ro
+    ports:
+      - '0.0.0.0:12000:12000'
 volumes:
   buildbot_config:
   gerrit_data:
