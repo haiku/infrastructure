@@ -31,6 +31,7 @@ use strict;
 use warnings;
 use open ':utf8';
 use Cwd 'realpath';
+use Encode qw(decode);
 
 use IO::Socket::INET;
 
@@ -203,8 +204,8 @@ sub mail_notification($$$@)
 {
     my ($target, $subject, $content_type, @body) = @_;
 
-    my $committer = $ENV{USER};
-    my $mail_from = $ENV{USER_EMAIL};
+    my $committer = decode('UTF-8', $ENV{USER}, Encode::FB_CROAK);
+    my $mail_from = decode('UTF-8', $ENV{USER_EMAIL}, Encode::FB_CROAK);
     if (!length($mail_from))
     {
         $mail_from = "$committer\@git.haiku-os.org";
