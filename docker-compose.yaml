@@ -22,12 +22,13 @@ services:
       - "94.130.158.38:22:29418" # PROD-ONLY
     image: haiku/gerrit
     volumes:
-      - gerrit_data:/var/gerrit/review_site
+      - gerrit_data:/var/gerrit/review_site:z
       - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
     restart: on-failure
     environment:
       - AUTH_TYPE=OAUTH
       - GITWEB_TYPE=cgit
+      - JAVA_HEAPLIMIT=1024m
       #- OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
       #- OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
   cgit:
