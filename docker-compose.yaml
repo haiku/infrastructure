@@ -70,7 +70,10 @@ services:
       - '5432:5432'
   redis:
     image: redis:4.0
+    command: redis-server --appendonly yes
     restart: on-failure
+    volumes:
+      - redis_data:/data:z
   smtp:
     image: mwader/postfix-relay
     restart: on-failure
@@ -120,3 +123,4 @@ volumes:
   trac_data:
   download_data:
   repo_data:
+  redis_data:
