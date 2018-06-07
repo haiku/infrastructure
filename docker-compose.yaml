@@ -96,8 +96,7 @@ services:
       - postgres
       - smtp
   buildbot:
-    #image: buildbot/buildbot-master:v1.1.0
-    image: rodrigc6/buildbot
+    image: buildbot/buildbot-master:v1.1.2
     hostname: buildbot
     restart: on-failure
     volumes:
