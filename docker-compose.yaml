@@ -1,23 +1,36 @@
-version: "2"
+version: "2.1"
 services:
-  router:
-    image: haiku/nginx-router
+  traefik:
+    # Traefik connects to docker and reads labels to form routes
+    # Traefik also handles letsencrypt renewals
+    image: traefik:1.5.4
+    restart: always
     ports:
-      - "0.0.0.0:443:443"
-      - "0.0.0.0:80:80"
+      - 80:80
+      - 443:443
+      - 8080:8080
     volumes:
-      - ./data/router:/etc/nginx/conf.d:z
-      - /etc/letsencrypt:/etc/letsencrypt:z
-      - ./data/static-html:/static-html:z
-      - ports_mirror:/ports-mirror:z
-      - download_data:/download-data:z
-      - repo_data:/repo-data:z
-    restart: on-failure
-    depends_on:
-      - gerrit
-      - cgit
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/traefik/traefik.toml:/traefik.toml
+      - traefik_acme:/acme
+  #router:
+  #  image: haiku/nginx-router
+  #  ports:
+  #    - "0.0.0.0:443:443"
+  #    - "0.0.0.0:80:80"
+  #  volumes:
+  #    - ./data/router:/etc/nginx/conf.d:z
+  #    - /etc/letsencrypt:/etc/letsencrypt:z
+  #    - ./data/static-html:/static-html:z
+  #    - ports_mirror:/ports-mirror:z
+  #    - download_data:/download-data:z
+  #    - repo_data:/repo-data:z
+  #  restart: on-failure
+  #  depends_on:
+  #    - gerrit
+  #    - cgit
   gerrit:
-    # Uncomment in test environments
+    # Disable in test environments
     ports:
       - "94.130.158.38:22:29418" # PROD-ONLY
     image: haiku/gerrit
@@ -31,6 +44,10 @@ services:
       - JAVA_HEAPLIMIT=1024m
       #- OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
       #- OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:review${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=8080"
   cgit:
     image: haiku/cgit
     restart: on-failure
@@ -42,6 +59,10 @@ services:
       # check section-from-path in cgit docs
       CGIT_VROOT: '/'
       CGIT_SECTION_FROM_STARTPATH: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:cgit${DOMAIN_POST}.haiku-os.org,git${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   irker:
     image: haiku/irker
     restart: on-failure
@@ -54,11 +75,19 @@ services:
       - postgres
       - redis
       - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=PathPrefix:/pootle;Host:i18n${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   portsmirror:
     image: haiku/ports-mirror
     restart: on-failure
     volumes:
       - ports_mirror:/ports-mirror
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:ports-mirror${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   postgres:
     image: postgres:9.6
     restart: on-failure
@@ -87,6 +116,10 @@ services:
     depends_on:
       - postgres
       - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:dev${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   userguide:
     image: haiku/userguide
     restart: on-failure
@@ -95,6 +128,10 @@ services:
     depends_on:
       - postgres
       - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=PathPrefix:/userguide;Host:i18n${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   buildbot:
     image: buildbot/buildbot-master:v1.1.2
     hostname: buildbot
@@ -103,16 +140,21 @@ services:
       - buildbot_config:/var/lib/buildbot:z
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
     ports:
-      - '0.0.0.0:9989:9989'
-  cdn:
-    image: haiku/cdn
-    restart: on-failure
-    volumes:
-      - repo_data:/repo-data:z
-      - ./data/cdn/rsync-whitelist:/etc/rsync-whitelist:ro
-    ports:
-      - '0.0.0.0:12000:12000'
+      - 9989:9989
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=PathPrefix:/buildbot;Host:build${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
+#  cdn:
+#    image: haiku/cdn
+#    restart: on-failure
+#    volumes:
+#      - repo_data:/repo-data:z
+#      - ./data/cdn/rsync-whitelist:/etc/rsync-whitelist:ro
+#    ports:
+#      - '0.0.0.0:12000:12000'
 volumes:
+  traefik_acme:
   buildbot_config:
   gerrit_data:
   pootle_data:
