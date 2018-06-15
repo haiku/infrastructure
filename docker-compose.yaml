@@ -10,25 +10,9 @@ services:
       - "0.0.0.0:443:443"
       - "0.0.0.0:8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/traefik/traefik.toml:/traefik.toml
-      - traefik_acme:/acme
-  #router:
-  #  image: haiku/nginx-router
-  #  ports:
-  #    - "0.0.0.0:443:443"
-  #    - "0.0.0.0:80:80"
-  #  volumes:
-  #    - ./data/router:/etc/nginx/conf.d:z
-  #    - /etc/letsencrypt:/etc/letsencrypt:z
-  #    - ./data/static-html:/static-html:z
-  #    - ports_mirror:/ports-mirror:z
-  #    - download_data:/download-data:z
-  #    - repo_data:/repo-data:z
-  #  restart: on-failure
-  #  depends_on:
-  #    - gerrit
-  #    - cgit
+      - /var/run/docker.sock:/var/run/docker.sock:z
+      - ./data/traefik/traefik.toml:/traefik.toml:z
+      - traefik_acme:/acme:z
   gerrit:
     # Disable in test environments
     ports:
