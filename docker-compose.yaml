@@ -116,6 +116,24 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/userguide/"
       - "traefik.basic.port=80"
+  www-i18n:
+    image: dragas/thttpd
+    restart: on-failure
+    volumes:
+      ./data/static-html/i18n:/var/www/http:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
+  www-build:
+    image: dragas/thttpd
+    restart: on-failure
+    volumes:
+      ./data/static-html/build:/var/www/http:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:build${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   buildbot:
     image: buildbot/buildbot-master:v1.1.2
     hostname: buildbot
