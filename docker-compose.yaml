@@ -6,9 +6,9 @@ services:
     image: traefik:latest
     restart: always
     ports:
-      - 80:80
-      - 443:443
-      - 8080:8080
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/traefik/traefik.toml:/traefik.toml
