@@ -10,10 +10,9 @@ Requirements
 1. docker and docker-compose installed
 2. this repository
 3. a persistant volume with the unique maui data
-4. run ```sudo ./tools/fake-cert```
-5. the following added to your /etc/hosts:
+4. Add the following to your /etc/hosts:
 ```
-127.0.0.1 review.haiku-os.org cgit.haiku-os.org git.haiku-os.org haiku-os.org api.haiku-os.org userguide.haiku-os.org ports-mirror.haiku-os.org
+127.0.0.1 review-local.haiku-os.org cgit-local.haiku-os.org git-local.haiku-os.org haiku-os.org api-local.haiku-os.org userguide-local.haiku-os.org ports-mirror-local.haiku-os.org
 ```
 
 Your test environment
@@ -21,8 +20,9 @@ Your test environment
 
 From the root infrastructure directory...
 
-1. docker-compose pull
-2. docker-compose up -d
+1. Disable ACME in data/traefik/traefik.toml
+2. docker-compose pull
+3. DOMAIN_POST="-local" docker-compose up -d
 
 
 Helpful hints
