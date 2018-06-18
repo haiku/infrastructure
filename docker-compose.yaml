@@ -140,6 +140,8 @@ services:
     volumes:
       - buildbot_config:/var/lib/buildbot:z
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
+      - nightly_data:/nightly-data:z
+      - repo_data:/repo-data:z
     ports:
       - 9989:9989
     labels:
@@ -151,6 +153,7 @@ services:
 #    restart: on-failure
 #    volumes:
 #      - repo_data:/repo-data:z
+#      - nightly_data:/nightly-data:z
 #      - ./data/cdn/rsync-whitelist:/etc/rsync-whitelist:ro
 #    ports:
 #      - '0.0.0.0:12000:12000'
