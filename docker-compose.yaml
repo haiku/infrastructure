@@ -166,6 +166,6 @@ volumes:
   postgres_data:
   userguide_data:
   trac_data:
-  download_data:
   repo_data:
+  nightly_data:
   redis_data:
