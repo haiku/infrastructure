@@ -134,7 +134,7 @@ services:
       - "traefik.basic.frontend.rule=Host:build${DOMAIN_POST}.haiku-os.org"
       - "traefik.basic.port=80"
   buildbot:
-    image: buildbot/buildbot-master:v1.1.2
+    image: buildbot/buildbot-master:v1.2.0
     hostname: buildbot
     restart: on-failure
     volumes:
