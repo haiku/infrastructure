@@ -45,6 +45,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:cgit${DOMAIN_POST}.haiku-os.org,git${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.frontend.redirect.regex=cgit${DOMAIN_POST}.haiku-os.org/(.*)"
+      - "traefik.basic.frontend.redirect.replacement=git${DOMAIN_POST}.haiku-os.org/$$1"
       - "traefik.basic.port=80"
   irker:
     image: haiku/irker
