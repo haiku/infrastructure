@@ -125,6 +125,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org"
+      # redirect /pootle & /userguide to forward to proper containers
+      - "traefik.basic.frontend.redirect.regex=i18n${DOMAIN_POST}.haiku-os.org/(pootle|userguide)$$"
+      - "traefik.basic.frontend.redirect.replacement=i18n${DOMAIN_POST}.haiku-os.org/$$1/"
       - "traefik.basic.port=80"
   www-build:
     image: dragas/thttpd
