@@ -115,7 +115,7 @@ services:
       - smtp
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/userguide"
+      - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/userguide/"
       - "traefik.basic.port=80"
   www-i18n:
     image: dragas/thttpd
