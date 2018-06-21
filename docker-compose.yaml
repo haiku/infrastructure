@@ -62,7 +62,7 @@ services:
       - smtp
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/pootle"
+      - "traefik.basic.frontend.rule=Host:i18n${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/pootle/"
       - "traefik.basic.port=80"
   portsmirror:
     image: haiku/ports-mirror
