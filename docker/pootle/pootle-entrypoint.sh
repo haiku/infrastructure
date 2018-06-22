@@ -26,7 +26,7 @@ elif [ "$1" = 'synchronize' ]; then
     # Go to the repository directory and generate catalogs
     cd /var/pootle/repository
     git pull
-    jam catkeys
+    jam -q catkeys
 
     # Merge the templates
     python /app/import_templates_from_repository.py /var/pootle/repository/generated/objects/catalogs/ /var/pootle/catalogs/haiku/
@@ -40,7 +40,7 @@ elif [ "$1" = 'synchronize' ]; then
     python /app/finish_output_catalogs.py /var/pootle/catalogs/haiku /var/pootle/repository/data/catalogs/
     check_errors $? "Error copying the updated translations to the git tree"
     git add -A
-    git commit -m "Update translations from Pootle"
+    git commit -m "Update translations from Pootle" --author "Autocomitter <noreply@haiku-os.org>"
     check_errors $? "Git Error: Error committing the changes to the repository"
     git pull --rebase
     check_errors $? "Git Error: Error pulling the latest revisions into the repository"

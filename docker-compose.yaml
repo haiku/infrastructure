@@ -52,7 +52,7 @@ services:
     image: haiku/irker
     restart: on-failure
   pootle:
-    image: haiku/pootle
+    image: nielx/pootle:latest
     restart: on-failure
     volumes:
       - pootle_data:/var/pootle:z

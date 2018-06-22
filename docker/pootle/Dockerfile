@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM debian:stretch-slim
 
 # Set the working directory to /app
 WORKDIR /app
@@ -12,26 +12,31 @@ ADD scripts/import_templates_from_repository.py /app
 RUN chmod +x /app/pootle-entrypoint.sh
 
 # Add software (to be used to extract new catalogs)
-RUN apk update &&          \
-    apk add build-base     \
-        git                \
-        bison              \
-        bsd-compat-headers \
-        curl-dev           \
-        flex               \
-        gawk               \
-        nasm               \
-        tar                \
-        texinfo            \
-        wget               \
-        libxml2-dev        \
-        libxslt-dev        \
-        python2            \
-        python2-dev        \
-        py2-pip            \
-        postgresql-dev     \
-        nginx              \
-        supervisor
+RUN apt-get update && \
+    apt-get -y install  git \
+                        nasm \
+                        autoconf \
+                        automake \
+                        texinfo \
+                        flex \
+                        bison \
+                        gawk \
+                        build-essential \
+                        unzip \
+                        wget \
+                        zip \
+                        less \
+                        zlib1g-dev \
+                        libcurl4-openssl-dev \
+                        genisoimage \
+                        libtool \
+                        mtools \
+                        postgresql-server-dev-9.6 \
+                        python-pip \
+                        libxml2-dev \
+                        libxslt1-dev \
+                        nginx \
+                        supervisor
 
 # Create a working jam
 RUN git clone https://git.haiku-os.org/buildtools
@@ -46,13 +51,11 @@ RUN pip install -r requirements.txt
 ENV POOTLE_SETTINGS /var/pootle/settings.conf
 
 # Set up Supervisor.
-RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisord.conf && \
-    mkdir /etc/supervisor.d
-ADD supervisor/pootle.ini supervisor/nginx.ini /etc/supervisor.d/
+RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf
+ADD supervisor/pootle.conf supervisor/nginx.conf /etc/supervisor/conf.d/
 
 # Set up nginx
-RUN mkdir /run/nginx
-ADD nginx/default.conf /etc/nginx/conf.d/
+ADD nginx/default /etc/nginx/sites-available/
 
 ENTRYPOINT ["/app/pootle-entrypoint.sh"]
 
