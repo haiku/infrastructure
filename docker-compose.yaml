@@ -145,23 +145,24 @@ services:
     volumes:
       - buildbot_config:/var/lib/buildbot:z
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
-      - nightly_data:/nightly-data:z
-      - repo_data:/repo-data:z
+      - s3_data:/data:z
     ports:
       - 9989:9989
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build${DOMAIN_POST}.haiku-os.org;PathPrefixStrip:/buildbot/"
       - "traefik.basic.port=80"
-#  cdn:
-#    image: haiku/cdn
-#    restart: on-failure
-#    volumes:
-#      - repo_data:/repo-data:z
-#      - nightly_data:/nightly-data:z
-#      - ./data/cdn/rsync-whitelist:/etc/rsync-whitelist:ro
-#    ports:
-#      - '0.0.0.0:12000:12000'
+  cdn:
+    image: minio/minio
+    restart: on-failure
+    command: server /data
+    volumes:
+      - s3_data:/data:z
+      - minio_config:/root/.minio/:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:cdn${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=9000"
 volumes:
   traefik_acme:
   buildbot_config:
@@ -171,6 +172,6 @@ volumes:
   postgres_data:
   userguide_data:
   trac_data:
-  repo_data:
-  nightly_data:
   redis_data:
+  s3_data:
+  minio_config:
