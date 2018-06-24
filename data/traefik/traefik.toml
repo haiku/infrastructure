@@ -26,6 +26,7 @@ dashboard = true
 
 [backends]
   [backends.haiku-www]
+  [backends.api-www]
 [frontends]
   [frontends.haiku-www]
    backend = "haiku-www"
@@ -34,6 +35,13 @@ dashboard = true
     replacement = "https://www.haiku-os.org/$1"
     [frontends.haiku-www.routes.1]
       rule = "Host: haiku-os.org"
+  [frontends.api-www]
+    backend = "api-www"
+    [frontends.api-www.redirect]
+      regex = "//api.haiku-os.org/(.*)"
+      replacement = "//www.haiku-os.org/docs/api/$1"
+      [frontends.api-www.routes.1]
+        rule = "Host: api.haiku-os.org"
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
