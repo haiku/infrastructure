@@ -1,7 +1,7 @@
 debug = true
 
 logLevel = "ERROR"
-defaultEntryPoints = ["https","http"]
+defaultEntryPoints = ["https"]
 
 #[accessLog]
 
@@ -25,9 +25,13 @@ dashboard = true
 [file]
 
 [backends]
+  [backends.http-only]
   [backends.haiku-www]
   [backends.api-www]
 [frontends]
+  [frontends.http-only]
+    entrypoints = ["http"]
+    backend = "http-only"
   [frontends.haiku-www]
    backend = "haiku-www"
    [frontends.haiku-www.redirect]
