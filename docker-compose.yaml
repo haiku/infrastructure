@@ -139,12 +139,13 @@ services:
       - "traefik.basic.frontend.rule=Host:build${DOMAIN_POST}.haiku-os.org"
       - "traefik.basic.port=80"
   buildbot:
-    image: buildbot/buildbot-master:v1.2.0
+    image: haiku/buildbot-master
     hostname: buildbot
     restart: on-failure
     volumes:
       - buildbot_config:/var/lib/buildbot:z
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
+      - /var/run/docker.sock:/var/run/docker.sock:z
       - s3_data:/data:z
     ports:
       - 9989:9989
