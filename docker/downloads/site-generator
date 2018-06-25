@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ ! -f /secrets/s3 ]; then
+	echo "Missing s3 secrets at /secrets/s3!"
+	exit 1
+fi
+
+cd /generate-download-pages
+source /secrets/s3
+
+while true; do
+	echo "generate-download-pages.py running..."
+	/usr/bin/python /generate-download-pages/generate-download-pages.py --s3_endpoint "$S3_ENDPOINT" --s3_key "$S3_KEY" --s3_secret "$S3_SECRET"
+	sleep 1800
+done

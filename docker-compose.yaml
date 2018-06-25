@@ -138,6 +138,15 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build${DOMAIN_POST}.haiku-os.org"
       - "traefik.basic.port=80"
+  downloads:
+    image: haiku/downloads
+    restart: on-failure
+    volumes:
+      - s3_secrets:/secrets:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:download${DOMAIN_POST}.haiku-os.org"
+      - "traefik.basic.port=80"
   buildbot:
     image: haiku/buildbot-master
     hostname: buildbot
@@ -175,4 +184,5 @@ volumes:
   trac_data:
   redis_data:
   s3_data:
+  s3_secrets:
   minio_config:
