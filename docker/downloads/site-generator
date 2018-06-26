@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ ! -f /secrets/s3 ]; then
 	echo "Missing s3 secrets at /secrets/s3!"
