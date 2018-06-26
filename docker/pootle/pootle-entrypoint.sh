@@ -26,7 +26,10 @@ elif [ "$1" = 'synchronize' ]; then
     # Go to the repository directory and generate catalogs
     cd /var/pootle/repository
     git pull
+    jam -q
+    check_errors $? "Error building Haiku"
     jam -q catkeys
+    check_errors $? "Error building catkeys"
 
     # Merge the templates
     python /app/import_templates_from_repository.py /var/pootle/repository/generated/objects/catalogs/ /var/pootle/catalogs/haiku/
