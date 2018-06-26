@@ -1,3 +1,9 @@
+#
+# Haiku's infrastructure
+#
+# WARNING: Defining "ports" means these ports will be open to the public internet!
+#          Docker controls the firewall. Docker is life.
+#
 version: "2.1"
 services:
   traefik:
@@ -80,8 +86,6 @@ services:
       POSTGRES_USER: "baron"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
   redis:
     image: redis:4.0
     command: redis-server --appendonly yes
