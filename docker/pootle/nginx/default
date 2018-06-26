@@ -11,7 +11,7 @@ server {
    charset utf-8;
 
    location /assets {
-       alias /usr/lib/python2.7/site-packages/pootle/assets/;
+       alias /usr/local/lib/python2.7/dist-packages/pootle/assets/;
        expires 14d;
        access_log off;
    }
