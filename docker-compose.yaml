@@ -152,7 +152,7 @@ services:
       - "traefik.basic.frontend.rule=Host:download.${DOMAIN}"
       - "traefik.basic.port=80"
   buildbot:
-    image: haiku/buildbot-master
+    image: haiku/buildbot-master:v1.2.0
     hostname: buildbot
     restart: on-failure
     volumes:

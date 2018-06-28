@@ -1,18 +1,13 @@
 debug = true
 
-logLevel = "ERROR"
-defaultEntryPoints = ["https"]
+logLevel = "DEBUG"
+defaultEntryPoints = ["http"]
 
-#[accessLog]
+[accessLog]
 
 [entryPoints]
   [entryPoints.http]
   address = ":80"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
-  [entryPoints.https]
-  address = ":443"
-  [entryPoints.https.tls]
   [entryPoints.api]
   address = ":8080"
 
@@ -25,13 +20,9 @@ dashboard = true
 [file]
 
 [backends]
-  [backends.http-only]
   [backends.haiku-www]
   [backends.api-www]
 [frontends]
-  [frontends.http-only]
-    entrypoints = ["http"]
-    backend = "http-only"
   [frontends.haiku-www]
    backend = "haiku-www"
    [frontends.haiku-www.redirect]
@@ -49,15 +40,7 @@ dashboard = true
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "haiku-os.org"
+domain = "haiku.nz"
 watch = true
 exposedByDefault = false
 
-[acme]
-email = "haiku-inc@gmail.com"
-storage = "/acme/acme.json"
-entryPoint = "https"
-onHostRule = true
-
-[acme.httpChallenge]
-entryPoint = "http"
