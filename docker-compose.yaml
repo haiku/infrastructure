@@ -142,8 +142,8 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
-  downloads:
-    image: haiku/downloads
+  download:
+    image: haiku/download
     restart: on-failure
     volumes:
       - s3_secrets:/secrets:z
