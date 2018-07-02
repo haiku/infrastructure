@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Haiku Repositories @ maui</title>
+  <meta name="description" content="Haiku's package repositories">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="eleven columns" style="margin-top: 20%; margin-bottom: 100px;">
+        <center><img src="images/logo_black_transparent.png">
+      </div>
+    </div>
+    <div class="row">
+      <div class="six columns">
+		<img src="images/installer_64.png">
+        <h5>Haiku Repository</h5>
+        <p>A hpkg repository continiously providing updates to Haiku's core operating system files.</p>
+		<div style="padding: 10px; background-color: #111; color: #fff; text-font: monospace; border-radius: 4px; border: 1px solid black; font-size: 0.9em;">pkgman add-repo \<br/>https://eu.hpkg.haiku-os.org/haiku-repo/$(getarch)/current</div>
+		<br/>
+      </div>
+      <div class="six columns">
+		<img src="images/hpkg_64.png">
+        <h5>Haikuports Repository</h5>
+        <p>A hpkg repository continiously providing fresh <a href="http://github.com/haikuports/haikuports">HaikuPorts</a> packages.</p>
+		<div style="padding: 10px; background-color: #111; color: #fff; text-font: monospace; border-radius: 4px; border: 1px solid black; font-size: 0.9em;">pkgman add-repo \<br/>https://eu.hpkg.haiku-os.org/haikuports-repo/$(getarch)/current</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns" style="margin-top: 20px;">
+        <h5>Repository rsync Mirroring</h5>
+        <p>Please contact Haiku's systems administration team if you are interested in mirroring Haiku's package repositories</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
