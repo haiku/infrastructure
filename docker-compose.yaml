@@ -142,15 +142,16 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
-#  www-repo:
-#    image: nginx/nginx:alpine
-#    restart: on-failure
-#    volumes:
-#      - ./data/static-html/repo:/usr/share/nginx/html:z
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.basic.frontend.rule=Host:eu.hpkg.${DOMAIN}"
-#      - "traefik.basic.port=80"
+  www-repo:
+    image: haiku/nginx
+    restart: on-failure
+    volumes:
+      - ./data/www-repo:/etc/nginx/conf.d:z
+      - ./data/static-html/repo:/usr/share/nginx/html:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:eu.hpkg.${DOMAIN}"
+      - "traefik.basic.port=80"
   download:
     image: haiku/download
     restart: on-failure
