@@ -157,6 +157,7 @@ services:
     restart: on-failure
     volumes:
       - s3_secrets:/secrets:z
+      - s3_data:/data:z
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:download.${DOMAIN}"
