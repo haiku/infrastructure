@@ -161,8 +161,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:download.${DOMAIN}"
-      - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)$$"
-      - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/"
+      - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
+      - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
   buildbot:
     image: haiku/buildbot-master
