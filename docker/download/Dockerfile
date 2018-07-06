@@ -14,5 +14,5 @@ RUN chmod 755 /usr/local/bin/symlinkbot
 
 ADD supervisord.conf /etc/supervisord.conf
 
-VOLUME ["/secrets", "/haiku-repo"]
+VOLUME ["/secrets", "/data"]
 CMD ["/usr/bin/supervisord"]
