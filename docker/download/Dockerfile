@@ -2,7 +2,7 @@ FROM alpine
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 RUN apk add --update python python-dev py-pip git libgcc
-RUN pip install mako boto supervisor
+RUN pip install mako boto supervisor toml
 RUN git clone https://github.com/haiku/generate-download-pages.git /generate-download-pages
 RUN mkdir /generate-download-pages/output
 
