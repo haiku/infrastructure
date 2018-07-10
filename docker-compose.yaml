@@ -195,6 +195,7 @@ services:
     restart: on-failure
     volumes:
       - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml
+      - metrics_data:/prometheus:z
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
@@ -211,4 +212,5 @@ volumes:
   redis_data:
   s3_data:
   s3_secrets:
+  metrics_data:
   minio_config:
