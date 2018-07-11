@@ -236,7 +236,5 @@ volumes:
   metrics_data:
   minio_config:
   discourse_shared:
-    name: discourse_shared
   discourse_logs:
-    name: discourse_logs
   smtp_keys:
