@@ -1,0 +1,73 @@
+templates:
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+
+expose:
+
+params:
+  db_default_text_search_config: "pg_catalog.english"
+
+  ## Set db_shared_buffers to a max of 25% of the total memory.
+  ## will be set automatically by bootstrap based on detected RAM, or you can override
+  db_shared_buffers: "1024MB"
+
+  ## can improve sorting performance, but adds memory usage per-connection
+  #db_work_mem: "40MB"
+
+  ## Which Git revision should this container use? (default: tests-passed)
+  #version: tests-passed
+
+env:
+  LANG: en_US.UTF-8
+  # DISCOURSE_DEFAULT_LOCALE: en
+
+  ## How many concurrent web requests are supported? Depends on memory and CPU cores.
+  ## will be set automatically by bootstrap based on detected CPUs, or you can override
+  UNICORN_WORKERS: 6
+
+  ## The domain name this Discourse instance will respond to
+  ## Required. Discourse will not work with a bare IP number.
+  DISCOURSE_HOSTNAME: discuss.haiku-os.org
+
+  ## Uncomment if you want the container to be started with the same
+  ## hostname (-h option) as specified above (default "$hostname-$config")
+  DOCKER_USE_HOSTNAME: true
+
+  ## List of comma delimited emails that will be made admin and developer
+  ## on initial signup example 'user1@example.com,user2@example.com'
+  DISCOURSE_DEVELOPER_EMAILS: 'jessica.l.hamilton@gmail.com'
+
+  ## The SMTP mail server used to validate new accounts and send notifications
+  DISCOURSE_SMTP_ADDRESS: infrastructure_smtp_1
+  DISCOURSE_SMTP_PORT: 25
+  DISCOURSE_SMTP_AUTHENTICATION: none
+  DISCOURSE_SMTP_ENABLE_START_TLS: false
+
+  DISCOURSE_DB_USERNAME: discourse
+  DISCOURSE_DB_HOST: infrastructure_postgres_1
+  DISCOURSE_REDIS_HOST: infrastructure_redis_1
+
+## The Docker container is stateless; all data is stored in /shared
+volumes:
+  - volume:
+      host: discourse_shared
+      guest: /shared
+  - volume:
+      host: discourse_logs
+      guest: /var/log
+
+## Plugins go here
+## see https://meta.discourse.org/t/19157 for details
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          - git clone https://github.com/discourse/docker_manager.git
+
+## Any custom commands to run after building
+run:
+  - exec: echo "Beginning of custom commands"
+  - exec: cp /images/bikeshed.png /var/www/discourse/public/images/
+  - exec: cp /images/haiku_logo_white.svg /var/www/discourse/public/images/
+  - exec: echo "End of custom commands"
