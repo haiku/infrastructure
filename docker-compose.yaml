@@ -211,6 +211,16 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:cdn.${DOMAIN}"
       - "traefik.basic.port=9000"
+  metrics:
+    image: prom/prometheus
+    restart: on-failure
+    volumes:
+      - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml
+      - metrics_data:/prometheus:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
+      - "traefik.basic.port=9090"
 volumes:
   traefik_acme:
   buildbot_config:
@@ -223,6 +233,7 @@ volumes:
   redis_data:
   s3_data:
   s3_secrets:
+  metrics_data:
   minio_config:
   discourse_shared:
     name: discourse_shared
