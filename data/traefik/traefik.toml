@@ -14,7 +14,7 @@ defaultEntryPoints = ["https"]
   address = ":443"
   [entryPoints.https.tls]
   [entryPoints.api]
-  address = ":8080"
+  address = ":9191"
 
 [api]
 entryPoint = "api"
