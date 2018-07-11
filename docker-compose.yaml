@@ -215,7 +215,7 @@ services:
     image: prom/prometheus
     restart: on-failure
     volumes:
-      - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:z
       - metrics_data:/prometheus:z
     labels:
       - "traefik.enable=true"
