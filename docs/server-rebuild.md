@@ -36,11 +36,29 @@ Configure ~200GiB for root, leave the rest of the space empty. Make sure
 some RAID is in place. (I used btrfs RAID1 for the "current" maui since
 I now consider mdadm the devil on root filesystems)
 
-Set hostname to maui.haiku-os.org
-Install, create yourself a non-root user.
-Configure the static ip of 94.130.128.252.
+* Set hostname to maui.haiku-os.org
+* Install, create yourself a non-root user.
+* Configure the static ip of 94.130.128.252.
 
 Reboot into your new maui.
+
+Configure network (/etc/sysconfig/network-scripts/ifcfg-enp0s31f6):
+```
+NAME="enp0s31f6"
+DEVICE="enp0s31f6"
+ONBOOT=yes
+NETBOOT=yes
+IPV6INIT=yes
+BOOTPROTO=static
+IPADDR=94.130.128.252
+NETMASK=255.255.255.192
+GATEWAY=94.130.128.193
+IPADDR1=94.130.158.38
+NETMASK1=255.255.255.248
+TYPE=Ethernet
+DNS1="213.133.99.99"
+```
+
 Apply any available OS updates, reboot again.
 
 ## Configure
@@ -101,12 +119,14 @@ Restore "hot" persistant data (replace XXX with login from keepass info)
 rsync --progress -e 'ssh -p23' --recursive uXXXXXX@uXXXXX.your-backup.de:./maui/ /var/lib/docker/volumes/
 ```
 
+Restore the build artifacts however you can to ```/var/lib/docker/volumes/infrastructure_s3_data```
+
+
 Start "everything"
 ```
 cd ~/infrastructure
 docker-compose up -d
 ```
-
 
 ## Congratulations!
 
