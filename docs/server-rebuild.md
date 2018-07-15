@@ -22,13 +22,13 @@ contains all of our build artifacts.
 Hetzner gives us a 100GB limit)
 
 If you're in a bad way, (but have access to the filesystem), be sure
-to run a final sync ov /var/lib/docker/volumes to Hetzner to have the
+to run a final sync of ```/var/lib/docker/volumes``` to Hetzner to have the
 "most live" backup possible.
 
 ## Reinstall!
 
 Do *NOT* use the "Linux" install option at Hetzner. It creates a horrid
-2TiB root mdadm/ext4 partition which is extremely difficult to recover.
+2TiB root mdadm/ext4 partition which is extremely difficult to resize.
 Use the VNC option and do the install there.  The VNC options are limited,
 but they do have Fedora which I like (you're the new boss, do what you like).
 
@@ -127,6 +127,10 @@ Start "everything"
 cd ~/infrastructure
 docker-compose up -d
 ```
+
+## Reconfigure user accounts
+
+Make sure you re-add the local user accounts for the sysadmin team members.
 
 ## Congratulations!
 
