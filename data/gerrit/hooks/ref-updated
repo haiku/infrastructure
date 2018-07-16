@@ -33,11 +33,11 @@ echo "DEBUG: THE OLDREV is $OLDREV"
 echo "DEBUG: THE NEWREV is $NEWREV"
 
 UPLOADER_EMAIL=$SUBMITTER
-if [ -z "$UPLOADER_USERNAME" ]; then
+if [ -z "${UPLOADER_USERNAME// }" ]; then
 	# no username? default to first part of email
 	UPLOADER_USERNAME="${USERNAME}"
 fi
-if [ -z "$UPLOADER_USERNAME" ]; then
+if [ -z "${UPLOADER_USERNAME// }" ]; then
 	# STILL no username? default to "nobody"
 	UPLOADER_USERNAME=nobody
 fi
