@@ -18,8 +18,8 @@ for D in /repo-data/*; do
 
 		echo "hosts deny = *" >> /etc/rsyncd.conf
 		ALLOW=""
-		if [ -f /etc/rsync-whitelist ]; then
-			for i in $(cat /etc/rsync-whitelist); do
+		if [ -f /repo-whitelist/${SHARENAME}/rsync-whitelist ]; then
+			for i in $(sed -e '/^#/d' /repo-whitelist/${SHARENAME}/rsync-whitelist); do
 				ALLOW="${ALLOW} $i"
 			done
 		fi

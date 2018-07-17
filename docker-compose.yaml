@@ -211,6 +211,14 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:cdn.${DOMAIN}"
       - "traefik.basic.port=9000"
+  repo-mirror:
+    image: haiku/repo-mirror
+    restart: on-failure
+    volumes:
+      - s3_data:/repo-data:ro,z
+      - ./data/repo-mirror:/repo-whitelist:ro,z
+    ports:
+      - 12000:12000
   metrics:
     image: prom/prometheus
     restart: on-failure
