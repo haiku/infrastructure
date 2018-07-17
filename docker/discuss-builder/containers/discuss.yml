@@ -50,10 +50,10 @@ env:
 ## The Docker container is stateless; all data is stored in /shared
 volumes:
   - volume:
-      host: discourse_shared
+      host: infrastructure_discourse_shared
       guest: /shared
   - volume:
-      host: discourse_logs
+      host: infrastructure_discourse_logs
       guest: /var/log
 
 ## Plugins go here

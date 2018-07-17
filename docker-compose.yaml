@@ -18,24 +18,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:z
       - ${TRAEFIK_TOML}:/traefik.toml:z
       - traefik_acme:/acme:z
-#  discourse:
-#    image: haiku/discuss
-#    entrypoint: /sbin/boot
-#    environment:
-#      LANG: en_US.UTF-8
-#      RAILS_ENV: production
-#      UNICORN_WORKERS: 6
-#      UNICORN_SIDEKIQS: 1
-#      DOCKER_USE_HOSTNAME: "true"
-#    expose:
-#      - "80"
-#    volumes:
-#      - discourse_shared:/shared:z
-#      - discourse_logs:/var/log:z
-#    restart: on-failure
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
+  discourse:
+    image: haiku/discuss
+    entrypoint: /sbin/boot
+    environment:
+      LANG: en_US.UTF-8
+      RAILS_ENV: production
+      UNICORN_WORKERS: 6
+      UNICORN_SIDEKIQS: 1
+      DOCKER_USE_HOSTNAME: "true"
+    expose:
+      - "80"
+    volumes:
+      - discourse_shared:/shared:z
+      - discourse_logs:/var/log:z
+    restart: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
   gerrit:
     # Disable in test environments
     ports:
