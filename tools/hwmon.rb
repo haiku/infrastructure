@@ -18,7 +18,7 @@ end
 def check_btrfs()
 	@volumes.each do |volume|
 		stdout_str, error_str, status = Open3.capture3('btrfs', 'device', 'stats', '-c', volume)
-		if status.success?
+		if !status.success?
 			subject = "[WARN] #{volume} @ maui is not consistent!"
 			raise_alert(subject, stdout_str)
 		end
