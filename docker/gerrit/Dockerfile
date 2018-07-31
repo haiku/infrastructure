@@ -33,7 +33,7 @@ ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 
 # Download Plugins
-ENV PLUGINS="delete-project events-log gitiles importer admin-console webhooks download-commands"
+ENV PLUGINS="delete-project events-log gitiles importer admin-console webhooks"
 ENV PLUGIN_VERSION=bazel-stable-2.15
 RUN for i in ${PLUGINS}; do \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
