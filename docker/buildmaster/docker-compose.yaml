@@ -36,6 +36,17 @@ services:
       - teleport:/var/teleport
     restart: on-failure
 
+  frontend:
+    image: haikuports/buildmaster-frontend
+    volumes:
+      - sources:/var/sources:ro
+      - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
+      - data_master_x86_64:/var/instances/master/x86_64:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:buildmaster.${DOMAIN}"
+      - "traefik.basic.port=80"
+
 volumes:
   sources:
   data_master_x86_64:
