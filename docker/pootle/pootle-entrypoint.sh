@@ -26,9 +26,7 @@ elif [ "$1" = 'synchronize' ]; then
     # Go to the repository directory and generate catalogs
     cd /var/pootle/repository
     git pull
-    jam -q
-    check_errors $? "Error building Haiku"
-    jam -q catkeys
+    jam -q @nightly-anyboot catkeys
     check_errors $? "Error building catkeys"
 
     # Merge the templates
@@ -42,7 +40,7 @@ elif [ "$1" = 'synchronize' ]; then
     # Output the translated catalogs to the repository
     python /app/finish_output_catalogs.py /var/pootle/catalogs/haiku /var/pootle/repository/data/catalogs/
     check_errors $? "Error copying the updated translations to the git tree"
-    git add -A
+    git add data/catalogs/ -A
     git commit -m "Update translations from Pootle" --author "Autocomitter <noreply@haiku-os.org>"
     check_errors $? "Git Error: Error committing the changes to the repository"
     git pull --rebase
@@ -50,5 +48,3 @@ elif [ "$1" = 'synchronize' ]; then
     git push
     check_errors $? "Git Error: Error pushing the translations to the Haiku repository"
 fi
-
-exec "$@"
