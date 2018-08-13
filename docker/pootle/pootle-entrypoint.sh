@@ -26,7 +26,7 @@ elif [ "$1" = 'synchronize' ]; then
     # Go to the repository directory and generate catalogs
     cd /var/pootle/repository
     git pull
-    jam -q catkeys || true
+    jam -q catkeys
     check_errors $? "Error building catkeys"
 
     # Merge the templates
