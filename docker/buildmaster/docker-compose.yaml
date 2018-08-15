@@ -44,7 +44,7 @@ services:
       - data_master_x86_64:/var/instances/master/x86_64:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:buildmaster.${DOMAIN}"
+      - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
       - "traefik.basic.port=80"
 
 volumes:
