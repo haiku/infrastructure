@@ -1,0 +1,57 @@
+version: "2"
+services: &buildmaster_common
+  image: haikuports/buildmaster
+  command: loop
+  networks:
+    - buildmaster_net
+  restart: on-failure
+  depends_on:
+    - teleport
+
+services:
+  buildmaster_master_x86_64:
+    volumes:
+      - sources:/var/sources:z
+      - data_master_x86_64:/var/buildmaster:z
+    environment:
+      REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
+    <<: *buildmaster_common
+
+  buildmaster_master_x86_gcc2:
+    volumes:
+      - sources:/var/sources:z
+      - data_master_x86_gcc2:/var/buildmaster:z
+    environment:
+      REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
+    <<: *buildmaster_common
+
+  teleport:
+    image: mmlr/teleport
+    command: server 5825 auth.db
+    networks:
+      - buildmaster_net
+    ports:
+      - "0.0.0.0:5825:5825"
+    volumes:
+      - teleport:/var/teleport
+    restart: on-failure
+
+  frontend:
+    image: haikuports/buildmaster-frontend
+    volumes:
+      - sources:/var/sources:ro
+      - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
+      - data_master_x86_64:/var/instances/master/x86_64:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:buildmaster.${DOMAIN}"
+      - "traefik.basic.port=80"
+
+volumes:
+  sources:
+  data_master_x86_64:
+  data_master_x86_gcc2:
+  teleport:
+
+networks:
+  buildmaster_net:
