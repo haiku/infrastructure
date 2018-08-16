@@ -40,6 +40,8 @@ services:
 
   frontend:
     image: haikuports/buildmaster-frontend
+    networks:
+      - infrastructure_default
     volumes:
       - sources:/var/sources:ro
       - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
@@ -59,3 +61,5 @@ volumes:
 
 networks:
   buildmaster_net:
+  infrastructure_default:
+    external: true
