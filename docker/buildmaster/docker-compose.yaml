@@ -44,7 +44,9 @@ services:
       - infrastructure_default
     volumes:
       - sources:/var/sources:ro
-      - packages:/var/instances/haikuports:ro
+      - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
+      - data_master_x86_64:/var/instances/master/x86_64:ro
+#      - packages:/var/instances/haikuports:ro
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
@@ -52,7 +54,8 @@ services:
 
 volumes:
   sources:
-  packages:
+  data_master_x86_64:
+  data_master_x86_gcc2:
   teleport:
   infrastructure_s3_data:
     external: true
