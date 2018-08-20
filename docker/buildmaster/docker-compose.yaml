@@ -13,7 +13,7 @@ services:
     volumes:
       - sources:/var/sources:z
       - data_master_x86_64:/var/buildmaster:z
-      - infrastructure_s3_data:/cdn:z
+      - packages:/var/packages:z
     environment:
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
     <<: *buildmaster_common
@@ -22,7 +22,7 @@ services:
     volumes:
       - sources:/var/sources:z
       - data_master_x86_gcc2:/var/buildmaster:z
-      - infrastructure_s3_data:/cdn:z
+      - packages:/var/packages:z
     environment:
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
     <<: *buildmaster_common
@@ -44,6 +44,8 @@ services:
       - infrastructure_default
     volumes:
       - sources:/var/sources:ro
+      - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
+      - data_master_x86_64:/var/instances/master/x86_64:ro
       - packages:/var/instances/haikuports:ro
     labels:
       - "traefik.enable=true"
@@ -52,10 +54,10 @@ services:
 
 volumes:
   sources:
+  data_master_x86_64:
+  data_master_x86_gcc2:
   packages:
   teleport:
-  infrastructure_s3_data:
-    external: true
 
 networks:
   buildmaster_net:
