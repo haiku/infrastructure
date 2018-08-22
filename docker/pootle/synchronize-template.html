@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="shortcut icon" href="https://i18n.haiku-os.org/userguide/favicon.ico" type="image/x-icon"/>
+	<link rel="bookmark icon" href="https://i18n.haiku-os.org/userguide/favicon.ico" type="image/x-icon"/>
+	<title>Pootle Synchronization Status</title>
+	<link rel="stylesheet" type="text/css" href="https://i18n.haiku-os.org/userguide/export/docs/userguide/Haiku-doc.css"/>
+</head>
+<body>
+	<div id="banner">
+		<div><span>Pootle Synchronization Status</span></div>
+	</div>
+	<div id="content">
+		<div>
+			<!-- Header -->
+			<p>
+                <a href="https://www.haiku-os.org/" target="_blank">Haiku</a> is a free and open source operating system
+                with support for localization and translation. This page lists the latest status of the import of
+                translateable strings from the Haiku repository into Pootle. If you want to know more about translation,
+                go to <a href="https://i18n.haiku-os.org">the localization page</a>
+            </p>
+
+			<!-- Global information -->
+			<h1>Information about the most recent run</h1>
+            <p>The last run was at: {{ lastrun_date }}</p>
+            <table>
+                <tr>
+                    <th>Step</th><th>Result</th><th>&nbsp;</th>
+                </tr>
+                {% for step in steps %}
+                <tr>
+                    <td>{{ step.label }}({{ step.name}})</td><td>{{ step.pretty_status }}</td><td><a href="#{{ step.name }}">more info</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+
+			<!-- Information about the individual steps -->
+            {% for step in steps %}
+            <h2>{{ step.label }}</h2>
+            <p><em>Standard output:</em></p>
+            <p><pre>{{ step.output }}</pre></p>
+            {% endfor %}
+		</div>
+	</div>
+
+	<!-- This nonbreaking space right here raises compatibility concerns... -->
+	<div class="nav">
+		<div class="inner"><span>&nbsp;</span></div>
+	</div>
+</body>
+</html>

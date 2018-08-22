@@ -19,32 +19,5 @@ if [ "$1" = 'pootle' ]; then
 
     exec supervisord
 elif [ "$1" = 'synchronize' ]; then
-    # Save all the data to disk
-    pootle sync_stores --force --overwrite
-    check_errors $? "Error writing the current catalogs to disk"
-
-    # Go to the repository directory and generate catalogs
-    cd /var/pootle/repository
-    git pull
-    jam -q catkeys
-    check_errors $? "Error building catkeys"
-
-    # Merge the templates
-    python /app/import_templates_from_repository.py /var/pootle/repository/generated/objects/catalogs/ /var/pootle/catalogs/haiku/
-    check_errors $? "Error importing the new translations from the repository and merging them to the translated files"
-
-    # Load the translated files into Pootle
-    pootle update_stores
-    check_errors $? "Error importing the catalogs into pootle"
-
-    # Output the translated catalogs to the repository
-    python /app/finish_output_catalogs.py /var/pootle/catalogs/haiku /var/pootle/repository/data/catalogs/
-    check_errors $? "Error copying the updated translations to the git tree"
-    git add data/catalogs/ -A
-    git commit -m "Update translations from Pootle" --author "Autocomitter <noreply@haiku-os.org>"
-    check_errors $? "Git Error: Error committing the changes to the repository"
-    git pull --rebase
-    check_errors $? "Git Error: Error pulling the latest revisions into the repository"
-    git push
-    check_errors $? "Git Error: Error pushing the translations to the Haiku repository"
+    cd /var/pootle/repository && python /app/synchronize.py
 fi

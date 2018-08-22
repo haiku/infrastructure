@@ -1,0 +1,18 @@
+From: {{ sender }}
+To: {{ receiver }}
+MIME-Version: 1.0
+Content-type: text/html
+Subject: Pootle Synchronization Status for {{ lastrun_date }}
+
+<table>
+    <tr>
+        <th>Step</th><th>Result</th><th>&nbsp;</th>
+    </tr>
+    {% for step in steps %}
+    <tr>
+        <td>{{ step.label }}({{ step.name }})</td><td>{{ step.pretty_status }}</td><td><a href="https://i18n.haiku-os.org/pootle/sync-status.html#{{ step.name }}">more info</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p>Read the <a href="https://i18n.haiku-os.org/pootle/sync-status.html">full report</a>.</p>

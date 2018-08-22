@@ -6,9 +6,11 @@ WORKDIR /app
 # Copy the necessary files to the container
 ADD requirements.txt /app
 ADD pootle-entrypoint.sh /app
+ADD synchronize-template.html /app
 ADD scripts/finish_output_catalogs.py /app
 ADD scripts/fingerprint.py /app
 ADD scripts/import_templates_from_repository.py /app
+ADD scripts/synchronize.py /app
 RUN chmod +x /app/pootle-entrypoint.sh
 
 # Add software (to be used to extract new catalogs)

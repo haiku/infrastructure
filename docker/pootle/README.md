@@ -16,6 +16,7 @@ The volume should contain the following:
  - A `logs` directory
  - A `catalogs` directory with the pootle catalogs
  - A `repository` directory that contains the haiku repository
+ - A `sync` directory that will contain the synchronization status
 
 The pootle-entrypoint.sh contains two run commands:
  - `pootle` which starts an nginx frontend, a pootle server and a pootle rqworker

@@ -10,3 +10,6 @@ pytz
 
 # Optional package to speed up merging (will be standard from Pootle 2.8.*)
 python-levenshtein==0.12.0
+
+# Additional package for the synchronization script
+jinja2
