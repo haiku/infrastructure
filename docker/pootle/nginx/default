@@ -28,4 +28,8 @@ server {
    location /pootle/ {
      rewrite ^/pootle/(.*)$ /$1 last;
    }
+
+   location /sync-status.html {
+     alias /var/pootle/sync/sync-status.html;
+   }
 }
