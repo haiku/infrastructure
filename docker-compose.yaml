@@ -46,11 +46,15 @@ services:
       - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
     restart: on-failure
     environment:
-      - AUTH_TYPE=OAUTH
-      - GITWEB_TYPE=cgit
-      - JAVA_HEAPLIMIT=1024m
-      #- OAUTH_GITHUB_CLIENT_ID=XXXONBOOTSTRAPXXX
-      #- OAUTH_GITHUB_CLIENT_SECRET=XXXONBOOTSTRAPXX
+      - AUTH_TYPE: OAUTH
+      - GITWEB_TYPE: cgit
+      - JAVA_HEAPLIMIT: 1024m
+      #- OAUTH_GITHUB_CLIENT_ID: XXXONBOOTSTRAPXXX
+      #- OAUTH_GITHUB_CLIENT_SECRET: XXXONBOOTSTRAPXX
+      - SMTP_SERVER: infrastructure_smtp_1
+      - SMTP_SERVER_PORT: 25
+      - SMTP_FROM: Gerrit <review@review.haiku-os.org>
+      - SMTP_CONNECT_TIMEOUT: 30
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:review.${DOMAIN}"
