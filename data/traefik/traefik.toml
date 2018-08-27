@@ -23,7 +23,7 @@ dashboard = true
 # Metrics definition
 [metrics]
   [metrics.prometheus]
-    entryPoint = "traefik"
+    entryPoint = "api"
     buckets = [0.1,0.3,1.2,5.0]
 
 [retry]
