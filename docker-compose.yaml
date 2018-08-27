@@ -223,16 +223,24 @@ services:
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
       - 12000:12000
-  metrics:
+  prometheus:
     image: prom/prometheus
     restart: on-failure
     volumes:
       - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:z
       - metrics_data:/prometheus:z
+    environment:
+      GF_SERVER_ROOT_URL: https://metrics.${DOMAIN}
+      #GF_SECURITY_ADMIN_PASSWORD: secret
+  grafana:
+    image: grafana/grafana
+    restart: on-failure
+    volumes:
+      - grafana_data:/var/lib/grafana
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
-      - "traefik.basic.port=9090"
+      - "traefik.basic.port=3000"
 volumes:
   traefik_acme:
   buildbot_config:
@@ -245,7 +253,8 @@ volumes:
   redis_data:
   s3_data:
   s3_secrets:
-  metrics_data:
+  prometheus_data:
+  grafana_data:
   minio_config:
   discourse_shared:
   discourse_logs:
