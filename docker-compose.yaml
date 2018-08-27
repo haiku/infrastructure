@@ -229,12 +229,13 @@ services:
     volumes:
       - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:z
       - prometheus_data:/prometheus:z
-    environment:
-      GF_SERVER_ROOT_URL: https://metrics.${DOMAIN}
-      #GF_SECURITY_ADMIN_PASSWORD: secret
   grafana:
     image: grafana/grafana
     restart: on-failure
+    environment:
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: "infrastructure_smtp_1:25"
+      GF_SMTP_FROM_ADDRESS: "admin@metrics.haiku-os.org"
     volumes:
       - grafana_data:/var/lib/grafana
     labels:
