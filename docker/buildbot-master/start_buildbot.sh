@@ -19,7 +19,9 @@ fi
 cp $B/master.cfg $B/master.cfg.secret
 sed -i -e "s/@@GITHUB_CLIENT@@/$GITHUB_CLIENT/" $B/master.cfg.secret
 sed -i -e "s/@@GITHUB_SECRET@@/$GITHUB_SECRET/" $B/master.cfg.secret
-sed -i -e "s/@@DATABASE_URI@@/$DATABASE_URI/" $B/master.cfg.secret
+
+# # is less likely to be used in database uri vs /
+sed -i -e "s#@@DATABASE_URI@@#$DATABASE_URI#" $B/master.cfg.secret
 sed -i -e "s/'master.cfg'/'master.cfg.secret'/" $B/buildbot.tac
 
 rm -f $B/twistd.pid
