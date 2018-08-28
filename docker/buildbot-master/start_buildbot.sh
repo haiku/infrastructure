@@ -5,6 +5,9 @@
 
 B=`pwd`
 
+# Secure our secrets
+chmod 600 $B/secrets/*
+
 #https://github.com/buildbot/buildbot/issues/4137
 GITHUB_CLIENT=$(cat $B/secrets/github-auth-client)
 GITHUB_SECRET=$(cat $B/secrets/github-auth-secret)
