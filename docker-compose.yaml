@@ -189,6 +189,17 @@ services:
       - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
+  haikudepotserver:
+    image: haiku/haikudepotserver:1.0.104
+    restart: on-failure
+    volumes:
+      - hds_secrets:/secrets:z
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
+      - "traefik.basic.port=8080"
   buildbot:
     image: haiku/buildbot-master
     hostname: buildbot
@@ -255,6 +266,7 @@ volumes:
   redis_data:
   s3_data:
   s3_secrets:
+  hds_secrets:
   prometheus_data:
   grafana_data:
   minio_config:
