@@ -7,6 +7,7 @@ WORKDIR /app
 ADD requirements.txt /app
 ADD pootle-entrypoint.sh /app
 ADD synchronize-template.html /app
+ADD synchronize-email-template.txt /app
 ADD scripts/finish_output_catalogs.py /app
 ADD scripts/fingerprint.py /app
 ADD scripts/import_templates_from_repository.py /app
@@ -33,6 +34,7 @@ RUN apt-get update && \
                         genisoimage \
                         libtool \
                         mtools \
+                        clang \
                         postgresql-server-dev-9.6 \
                         python-pip \
                         libxml2-dev \
