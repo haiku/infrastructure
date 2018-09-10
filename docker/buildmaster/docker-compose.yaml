@@ -41,7 +41,10 @@ services:
   frontend:
     image: haikuports/buildmaster-frontend
     networks:
-      - infrastructure_default
+      # This is needed for HDS to access haikuports with a "legal" hostname without _'s
+      infrastructure_default:
+        aliases:
+          - buildmaster
     volumes:
       - sources:/var/sources:ro
       - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
