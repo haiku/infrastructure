@@ -1,0 +1,2 @@
+#!/bin/bash
+curl -s https://depot.haiku-os.org/__repository/haikuports/import
