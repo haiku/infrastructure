@@ -209,8 +209,8 @@ services:
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
       - /var/run/docker.sock:/var/run/docker.sock:z
       - s3_data:/data:z
-   ports:
-     - 9989:9989
+    ports:
+      - 9989:9989
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildbot/"
