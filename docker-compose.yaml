@@ -252,7 +252,7 @@ services:
       - grafana_data:/var/lib/grafana
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefix:/grafana/"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/grafana/"
       - "traefik.basic.port=3000"
   fathom:
     image: usefathom/fathom:latest
