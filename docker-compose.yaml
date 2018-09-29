@@ -264,8 +264,8 @@ services:
     command: /app/fathom --config=/var/lib/fathom/config.env server
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/fathom/"
-      - "traefik.basic.port=9000"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
+      - "traefik.basic.port=8080"
 volumes:
   traefik_acme:
   buildbot_config:
