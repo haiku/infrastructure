@@ -43,9 +43,6 @@ sub get_repos_name();
 
 # some parameters you may want to change
 
-# set this to something that takes "-s"
-my $mailer = "/usr/bin/mail";
-
 # JSON-fragment to use for Irker
 my $irker_json = '{"to":["irc://chat.freenode.net/haiku-dev", "irc://chat.freenode.net/haiku", "irc://chat.freenode.net/haiku-commits"],"privmsg":"%MESSAGE%"}';
 
@@ -229,7 +226,7 @@ sub mail_notification($$$@)
     else
     {
         # Open a pipe to sendmail.
-        my $command = "/usr/sbin/sendmail -S smtp:25 -oi '$target'";
+        my $command = "/usr/sbin/sendmail -S smtp:25 -oi '$target' -f '$mail_from'";
         if (open(SENDMAIL, "| $command"))
         {
             print SENDMAIL @head, map { "$_\n" } @body;
