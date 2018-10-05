@@ -51,7 +51,7 @@ services:
       JAVA_HEAPLIMIT: 1024m
       # OAUTH_GITHUB_CLIENT_ID: XXXONBOOTSTRAPXXX
       # OAUTH_GITHUB_CLIENT_SECRET: XXXONBOOTSTRAPXX
-      SMTP_SERVER: infrastructure_smtp_1
+      SMTP_SERVER: smtp
       SMTP_SERVER_PORT: 25
       SMTP_FROM: Gerrit <review@review.haiku-os.org>
       SMTP_CONNECT_TIMEOUT: 30
@@ -121,7 +121,7 @@ services:
       - smtp_keys:/etc/opendkim/keys:z
     environment:
       - POSTFIX_myhostname=maui.haiku-os.org
-      - OPENDKIM_DOMAINS=maui.haiku-os.org discuss.haiku-os.org
+      - OPENDKIM_DOMAINS=maui.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
   trac:
     image: haiku/trac
     restart: on-failure
@@ -245,7 +245,7 @@ services:
     restart: on-failure
     environment:
       GF_SMTP_ENABLED: "true"
-      GF_SMTP_HOST: "infrastructure_smtp_1:25"
+      GF_SMTP_HOST: "smtp:25"
       GF_SMTP_FROM_ADDRESS: "admin@metrics.${DOMAIN}"
       GF_SERVER_ROOT_URL: "https://metrics.${DOMAIN}/grafana/"
     volumes:
