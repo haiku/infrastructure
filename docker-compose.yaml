@@ -39,7 +39,7 @@ services:
   gerrit:
     # Disable in test environments
     ports:
-      - "94.130.158.38:22:29418" # PROD-ONLY
+      - "0.0.0.0:22:29418"
     image: haiku/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site:z
