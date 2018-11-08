@@ -38,14 +38,14 @@ env:
   DISCOURSE_DEVELOPER_EMAILS: 'jessica.l.hamilton@gmail.com'
 
   ## The SMTP mail server used to validate new accounts and send notifications
-  DISCOURSE_SMTP_ADDRESS: infrastructure_smtp_1
+  DISCOURSE_SMTP_ADDRESS: smtp
   DISCOURSE_SMTP_PORT: 25
   DISCOURSE_SMTP_AUTHENTICATION: none
   DISCOURSE_SMTP_ENABLE_START_TLS: false
 
   DISCOURSE_DB_USERNAME: discourse
-  DISCOURSE_DB_HOST: infrastructure_postgres_1
-  DISCOURSE_REDIS_HOST: infrastructure_redis_1
+  DISCOURSE_DB_HOST: postgres
+  DISCOURSE_REDIS_HOST: redis
 
 ## The Docker container is stateless; all data is stored in /shared
 volumes:
