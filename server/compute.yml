@@ -1,0 +1,10 @@
+---
+- name: Install software
+  hosts: localhost
+  become_method: sudo
+  become_user: root
+  vars:
+    iscsi_target:
+  tasks:
+  - name: install docker
+    yum: pkg=['docker','iscsi-initiator-utils'] state=installed
