@@ -20,7 +20,11 @@ services:
       - traefik_acme:/acme:z
   discourse:
     image: haiku/discuss
-    entrypoint: /sbin/boot
+    depends_on:
+      - postgres
+      - redis
+      - smtp
+    entrypoint: /shared/config.env && /sbin/boot
     environment:
       LANG: en_US.UTF-8
       RAILS_ENV: production
@@ -136,12 +140,12 @@ services:
       - "traefik.basic.port=80"
   userguide:
     image: haiku/userguide
-    restart: on-failure
-    volumes:
-      - userguide_data:/var/userguide:z
     depends_on:
       - postgres
       - smtp
+    restart: on-failure
+    volumes:
+      - userguide_data:/var/userguide:z
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/userguide/"
@@ -202,6 +206,8 @@ services:
       - "traefik.basic.port=8080"
   buildbot:
     image: haiku/buildbot-master
+    depends_on:
+      - postgres
     hostname: buildbot
     restart: on-failure
     volumes:
