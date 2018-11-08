@@ -41,10 +41,13 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
   gerrit:
+    image: haiku/gerrit
+    depends_on:
+      - smtp
+      - irker
     # Disable in test environments
     ports:
       - "0.0.0.0:22:29418"
-    image: haiku/gerrit
     volumes:
       - gerrit_data:/var/gerrit/review_site:z
       - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
