@@ -10,16 +10,63 @@
     shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   - name: Install standard software
     yum:
-      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils', 'epel-release', 'screen', 'iotop']
+      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils', 'epel-release', 'screen', 'iotop', 'iptables-utils', 'iptables-services']
   - name: Install docker-compose
     shell: pip install docker-compose
   - name: Force systemd to reread configs
     systemd:
       daemon_reload: yes
+  - name: Ensure firewalld is stopped + masked
+    systemd:
+      name: firewalld
+      state: stopped
+      masked: yes
   - name: Ensure docker is stopped
     systemd:
       name: docker
       state: stopped
+  - name: Flush all iptables rules
+    iptables:
+      flush: yes
+  - name: Accept SSH on iptables
+    iptables:
+      chain: INPUT
+      protocol: tcp
+      destination_port: 2222
+      ctstate: NEW
+      syn: match
+      jump: ACCEPT
+  - name: Accept GIT SSH in iptables
+    iptables:
+      chain: INPUT
+      protocol: tcp
+      destination_port: 22
+      ctstate: NEW
+      syn: match
+      jump: ACCEPT
+  - name: Accept HTTP in iptables
+    iptables:
+      chain: INPUT
+      protocol: tcp
+      destination_port: 80
+      ctstate: NEW
+      syn: match
+      jump: ACCEPT
+  - name: Accept HTTPS in iptables
+    iptables:
+      chain: INPUT
+      protocol: tcp
+      destination_port: 443
+      ctstate: NEW
+      syn: match
+      jump: ACCEPT
+  - name: Save iptables to disk
+    shell: iptables-save > /etc/sysconfig/iptables
+  - name: Start iptables
+    systemd:
+      name: iptables
+      state: started
+      enabled: yes
   - name: Configure docker
     copy:
       dest: "/etc/docker/daemon.json"
