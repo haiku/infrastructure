@@ -72,7 +72,8 @@
       path: "/var/lib/docker"
       src: "LABEL=DOCKER01"
       fstype: "btrfs"
-      opts: "rw,noatime"
+      opts: "rw,noatime,_netdev"
+      passno: 2
       state: mounted
   - name: Ensure docker is started
     systemd:
