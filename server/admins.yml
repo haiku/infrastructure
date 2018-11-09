@@ -1,0 +1,27 @@
+---
+- name: Setup Admin Users
+  hosts: compute
+  tasks:
+    - name: Provision kallisti5
+      user:
+        name: kallisti5
+        state: present
+        groups: docker, wheel
+        shell: /bin/bash
+    - name: Provision kallisti5 public keys
+      authorized_key:
+        user: kallisti5
+        state: present
+        key: "{{ lookup('file', 'keys/kallisti5.pub') }}"
+# Waiting on his approval to publish ssh public key in git.
+#    - name: Provision waddlesplash
+#      user:
+#        name: waddlesplash
+#        state: present
+#        groups: docker, wheel
+#        shell: /bin/bash
+#    - name: Provision waddlesplash public keys
+#      authorized_key:
+#        user: waddlesplash
+#        state: present
+#        key: "{{ lookup('file', 'keys/waddlesplash.pub') }}"
