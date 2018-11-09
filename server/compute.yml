@@ -10,7 +10,9 @@
     shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   - name: Install standard software
     yum:
-      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils']
+      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils', 'epel-release']
+  - name: Install docker-compose
+    shell: pip install docker-compose
   - name: Force systemd to reread configs
     systemd:
       daemon_reload: yes
@@ -18,7 +20,60 @@
     systemd:
       name: docker
       state: stopped
-  # TODO: Setup storage
+  - name: Configure docker
+    copy:
+      dest: "/etc/docker/daemon.json"
+      content: |
+        {
+          "storage-driver": "btrfs",
+          "userland-proxy": false
+        }
+  - name: Configure iSCSI
+    copy:
+      dest: "/etc/iscsi/iscsid.conf"
+      content: |
+        iscsid.startup = /bin/systemctl start iscsid.socket iscsiuio.socket
+        discovery.sendtargets.iscsi.MaxRecvDataSegmentLength = 32768
+        node.startup = automatic
+        node.leading_login = No
+        node.session.err_timeo.abort_timeout = 15
+        node.session.err_timeo.lu_reset_timeout = 30
+        node.session.err_timeo.tgt_reset_timeout = 30
+        node.session.initial_login_retry_max = 8
+        node.session.cmds_max = 128
+        node.session.queue_depth = 32
+        node.session.xmit_thread_priority = -20
+        node.session.iscsi.InitialR2T = No
+        node.session.iscsi.ImmediateData = Yes
+        node.session.iscsi.FirstBurstLength = 262144
+        node.session.iscsi.MaxBurstLength = 16776192
+        node.session.nr_sessions = 1
+        node.session.iscsi.FastAbort = Yes
+        node.session.scan = auto
+        node.session.timeo.replacement_timeout = 120
+        node.conn[0].iscsi.MaxXmitDataSegmentLength = 0
+        node.conn[0].timeo.login_timeout = 15
+        node.conn[0].timeo.logout_timeout = 15
+        node.conn[0].timeo.noop_out_interval = 0
+        node.conn[0].timeo.noop_out_timeout = 0
+        node.conn[0].iscsi.HeaderDigest = CRC32C,None
+        node.conn[0].iscsi.DataDigest = CRC32C,None
+  - name: Discover iSCSI
+    open_iscsi:
+      discover: yes
+      portal: "san-hdd-3.rpn.online.net"
+  - name: Open iSCSI
+    open_iscsi:
+      login: yes
+      auto_node_startup: yes
+      target: "iqn.2013-01.net.online:2vi8ffvihhfn"
+  - name: Setup DOCKER01
+    mount:
+      path: "/var/lib/docker"
+      src: "LABEL=DOCKER01"
+      fstype: "btrfs"
+      opts: "rw,noatime"
+      state: mounted
   - name: Ensure docker is started
     systemd:
       name: docker
