@@ -10,7 +10,7 @@
     shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   - name: Install standard software
     yum:
-      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils', 'epel-release']
+      pkg: ['yum-utils', 'vim', 'docker-ce', 'iscsi-initiator-utils', 'epel-release', 'screen', 'iotop']
   - name: Install docker-compose
     shell: pip install docker-compose
   - name: Force systemd to reread configs

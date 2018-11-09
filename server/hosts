@@ -1,5 +1,5 @@
 ---
 [compute]
-62.210.188.85
+walter.haiku-os.org
 [compute:vars]
 ansible_ssh_user=root
