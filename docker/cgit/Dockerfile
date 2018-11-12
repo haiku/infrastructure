@@ -4,7 +4,7 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 RUN apt-get -qq update && \
     apt-get upgrade -qy && \
-    apt-get -qy install apt-utils gettext-base \
+    apt-get -qy install apt-utils gettext-base curl \
                         fcgiwrap git cgit highlight perl \
                         ca-certificates nginx gettext-base \
                         markdown python-docutils groff && \
@@ -49,3 +49,4 @@ ENV CGIT_DESC "cgit under docker"
 ENV CGIT_VROOT "/"
 ENV CGIT_SECTION_FROM_STARTPATH 0
 
+HEALTHCHECK CMD curl --fail http://`hostname`:80/ || exit 1
