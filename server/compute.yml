@@ -119,7 +119,7 @@
       path: "/var/lib/docker"
       src: "LABEL=DOCKER01"
       fstype: "btrfs"
-      opts: "rw,noatime,_netdev"
+      opts: "rw,noatime,compress=lzo,_netdev"
       passno: 2
       state: mounted
   - name: Ensure docker is started
