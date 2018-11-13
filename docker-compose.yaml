@@ -127,8 +127,8 @@ services:
     volumes:
       - smtp_keys:/etc/opendkim/keys:z
     environment:
-      - POSTFIX_myhostname=maui.haiku-os.org
-      - OPENDKIM_DOMAINS=maui.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+      - POSTFIX_myhostname=walter.haiku-os.org
+      - OPENDKIM_DOMAINS=walter.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
   trac:
     image: haiku/trac
     restart: on-failure
