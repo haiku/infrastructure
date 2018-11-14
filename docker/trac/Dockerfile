@@ -11,7 +11,7 @@ ADD requirements.txt /app
 # Install the requirements
 RUN apk update && \
     apk add --virtual build-deps gcc python-dev musl-dev && \
-    apk add git postgresql-dev
+    apk add git postgresql-dev curl
 
 RUN pip install -r requirements.txt
 
@@ -22,3 +22,5 @@ CMD /usr/local/bin/tracd -b 0.0.0.0 -p 80 -s /var/trac/dev.haiku-os.org
 
 # Make port 80 available to the outside world
 EXPOSE 80
+
+HEALTHCHECK CMD curl --fail http://`hostname`:80/ || exit 1
