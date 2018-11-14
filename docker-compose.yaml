@@ -18,6 +18,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:z
       - ${TRAEFIK_TOML}:/traefik.toml:z
       - traefik_acme:/acme:z
+      - /var/log/traefik:/logs:z
   discourse:
     image: haiku/discuss
     depends_on:

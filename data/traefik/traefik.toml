@@ -3,7 +3,8 @@ debug = true
 logLevel = "ERROR"
 defaultEntryPoints = ["https"]
 
-#[accessLog]
+[accessLog]
+filePath = "/logs/access.log"
 
 [entryPoints]
   [entryPoints.http]
