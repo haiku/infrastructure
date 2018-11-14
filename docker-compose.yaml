@@ -142,6 +142,10 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:dev.${DOMAIN}"
       - "traefik.basic.port=80"
+      - "traefik.frontend.rateLimit.extractorFunc=client.ip"
+      - "traefik.frontend.rateLimit.rateSet.r1.period=10s"
+      - "traefik.frontend.rateLimit.rateSet.r1.average=75"
+      - "traefik.frontend.rateLimit.rateSet.r1.burst=150"
   userguide:
     image: haiku/userguide
     depends_on:
