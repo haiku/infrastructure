@@ -45,7 +45,7 @@ readme=:install
 css=/cgit-css/haiku-cgit.css
 logo=/cgit-css/haiku-logo.png
 
-clone-url=https://git.haiku-os.org/$CGIT_REPO_URL ssh://git.haiku-os.org/$CGIT_REPO_URL
+clone-url=https://review.haiku-os.org/$CGIT_REPO_URL ssh://git.haiku-os.org/$CGIT_REPO_URL
 
 # Cache
 cache-root=/var/cache/cgit
@@ -72,7 +72,7 @@ enable-commit-graph=1
 enable-follow-links=1
 
 # Allow http transport git clone
-enable-http-clone=1
+enable-http-clone=0
 
 # Enable blame page and create links to it from tree page
 enable-blame=1
