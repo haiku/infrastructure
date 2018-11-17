@@ -46,3 +46,14 @@
         user: axeld
         state: present
         key: "{{ lookup('file', 'keys/axeld.pub') }}"
+    - name: Provision mmlr
+      user:
+        name: mmlr
+        state: present
+        groups: docker, wheel
+        shell: /bin/bash
+    - name: Provision mmlr public keys
+      authorized_key:
+        user: mmlr
+        state: present
+        key: "{{ lookup('file', 'keys/mmlr.pub') }}"
