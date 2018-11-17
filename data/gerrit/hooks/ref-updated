@@ -1,7 +1,16 @@
 #!/bin/bash
-
 # This wrapper takes Gerrit hook calls from the Gerrit
 # plugin and makes them act like standard git hooks.
+
+#
+# Magic. Gerrit likes to break stuff... this will log everything we do
+# Close stdout, close stderr, redirect stdout to log, redirect stderr to log
+#
+LOG="/tmp/notify"
+exec 1<&-
+exec 2<&-
+exec 1<>$LOG
+exec 2>&1
 
 PROJECT=""
 REFNAME=""
@@ -25,12 +34,16 @@ while true; do
 	esac
 done
 
-echo "DEBUG: THE REFNAME IS: $REFNAME"
-echo "DEBUG: THE PROJECT IS: $PROJECT"
-echo "DEBUG: THE SUBMITTER IS $SUBMITTER"
-echo "DEBUG: THE USERNAME IS $USERNAME"
-echo "DEBUG: THE OLDREV is $OLDREV"
-echo "DEBUG: THE NEWREV is $NEWREV"
+# https://bugs.chromium.org/p/gerrit/issues/detail?id=10057
+SUBMITTER=$(echo $SUBMITTER | tr -d \")
+
+echo "-------------------------------"
+echo "DEBUG: THE REFNAME is: $REFNAME"
+echo "DEBUG: THE PROJECT is: $PROJECT"
+echo "DEBUG: THE SUBMITTER is: $SUBMITTER"
+echo "DEBUG: THE USERNAME is: $USERNAME"
+echo "DEBUG: THE OLDREV is: $OLDREV"
+echo "DEBUG: THE NEWREV is: $NEWREV"
 
 UPLOADER_EMAIL=$SUBMITTER
 if [ -z "${UPLOADER_USERNAME// }" ]; then
@@ -41,6 +54,9 @@ if [ -z "${UPLOADER_USERNAME// }" ]; then
 	# STILL no username? default to "nobody"
 	UPLOADER_USERNAME=nobody
 fi
+
+echo "DEBUG: THE UPLOADER_EMAIL is: $UPLOADER_EMAIL"
+echo "DEBUG: THE UPLOADER_USERNAME is: $UPLOADER_USERNAME"
 
 echo "Obtaining lock..."
 
@@ -65,6 +81,7 @@ with_lock_has_lock=1
 export GIT_DIR
 cd "$GIT_DIR"
 
+echo "-------------receive-notify--------------"
 # create hrev-tags and send e-mail & cia notifications
 echo "$OLDREV $NEWREV $REFNAME" | USER="$UPLOADER_USERNAME" USER_EMAIL="$UPLOADER_EMAIL" $GERRIT_SITE/hooks/receive-notify.pl
 
