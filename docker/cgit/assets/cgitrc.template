@@ -68,6 +68,9 @@ enable-log-linecount=1
 # Enable ASCII art commit history graph on the log pages
 enable-commit-graph=1
 
+# Allow users to optionally see the commit history with --follow
+enable-follow-links=1
+
 # Allow http transport git clone
 enable-http-clone=1
 
