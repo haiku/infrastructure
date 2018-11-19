@@ -7,19 +7,19 @@ OUTPUT="/var/backups"
 
 ZIPPASS=$(cat /root/.secret)
 
-# Every day of week, update backup-latest.tar
+# Every day of week, update backup-latest
 for i in $TARGETS; do
 	SIZE=$(du -s /var/lib/docker/volumes/$i | awk ' { print $1 } ')
 	TOTAL=$(expr $TOTAL + $SIZE)
-	tar -uvf $OUTPUT/backup-latest.tar /var/lib/docker/volumes/$i
+	7za u -up0q3r2x2y2z1w2 -t7z -p$ZIPPASS -mx=1 $OUTPUT/backup-latest-${i}.7z /var/lib/docker/volumes/$i
 done
 
-# Every Sunday, 'archive' the backup-latest.tar and start again.
+# Every Sunday, 'archive' the backup-latest and start again.
 # Also delete archives over 30 days old
 if [[ $(date +"%u") -eq 7 ]]; then
-	echo "Compressing..."
-	7za a -t7z -p$ZIPPASS -mx=1 $OUTPUT/backup-$DATE.tar.7z $OUTPUT/backup-latest.tar
-	rm $OUTPUT/backup-latest.tar
-	echo "Cleaning up over 30 days..."
-	find $OUTPUT  -mtime +30 | xargs rm
+	for i in $TARGETS; do
+		mv $OUTPUT/backup-latest-${i}.7z  $OUTPUT/backup-$DATE-${i}.7z
+		echo "Cleaning up over 30 days..."
+		find $OUTPUT -mtime +30 | xargs rm
+	done
 fi
