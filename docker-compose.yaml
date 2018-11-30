@@ -202,7 +202,7 @@ services:
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
   haikudepotserver:
-    image: haiku/haikudepotserver:1.0.105
+    image: haiku/haikudepotserver:1.0.107
     restart: on-failure
     volumes:
       - hds_secrets:/secrets:z
