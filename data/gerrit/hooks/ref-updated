@@ -91,12 +91,6 @@ if [ -f "$GIT_DIR/hooks/git_buildbot.py" ] ; then
 	echo -n "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot.py -v
 fi
 
-# tell (new) buildbot about new changes
-if [ -f "$GIT_DIR/hooks/git_buildbot_neu.py" ] ; then
-	echo "Notifying buildbot of $NEWREV @ $REFNAME"
-	echo -n "$OLDREV $NEWREV $REFNAME" | $GIT_DIR/hooks/git_buildbot_neu.py -v
-fi
-
 echo "Release lock..."
 
 # cleanup lockfile
