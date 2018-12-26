@@ -204,6 +204,9 @@ services:
   haikudepotserver:
     image: haiku/haikudepotserver:1.0.107
     restart: on-failure
+    # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
+    links:
+      - traefik:eu.hpkg.haiku-os.org
     volumes:
       - hds_secrets:/secrets:z
     depends_on:
