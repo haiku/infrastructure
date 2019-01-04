@@ -6,7 +6,7 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 ENV GERRIT_HOME /var/gerrit
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_WAR ${GERRIT_HOME}/gerrit.war
-ENV GERRIT_VERSION 2.15.3
+ENV GERRIT_VERSION 2.16.2
 ENV GERRIT_USER gerrit2
 ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
 
@@ -32,17 +32,17 @@ RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VE
 ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 
-# Download Plugins
-ENV PLUGINS="delete-project events-log gitiles importer admin-console webhooks"
-ENV PLUGIN_VERSION=bazel-stable-2.15
+# Download "stable" plugins
+ENV PLUGINS="delete-project events-log admin-console webhooks"
+ENV PLUGIN_VERSION=bazel-stable-2.16
 RUN for i in ${PLUGINS}; do \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
 		-o ${GERRIT_HOME}/$i.jar; \
 	done;
 
-# Download master-stable plugins
-ENV MASTER_PLUGINS="avatars-gravatar"
-ENV MASTER_PLUGIN_VERSION=bazel-master-stable-2.15
+# Download "master-stable" plugins
+ENV MASTER_PLUGINS="avatars-gravatar gitiles"
+ENV MASTER_PLUGIN_VERSION=bazel-master-stable-2.16
 
 RUN for i in ${MASTER_PLUGINS}; do \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${MASTER_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
@@ -50,8 +50,7 @@ RUN for i in ${MASTER_PLUGINS}; do \
 	done;
 
 #oauth2 plugin
-ENV GERRIT_OAUTH_VERSION 2.14.6.2
-
+ENV GERRIT_OAUTH_VERSION 2.16.1
 RUN curl -fSsL \
     https://github.com/davido/gerrit-oauth-provider/releases/download/v${GERRIT_OAUTH_VERSION}/gerrit-oauth-provider.jar \
     -o ${GERRIT_HOME}/gerrit-oauth-provider.jar

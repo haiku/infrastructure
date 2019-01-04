@@ -42,7 +42,7 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
   gerrit:
-    image: haiku/gerrit
+    image: haiku/gerrit:2.16
     depends_on:
       - smtp
       - irker
