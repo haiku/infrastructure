@@ -201,8 +201,8 @@ sub mail_notification($$$@)
 {
     my ($target, $subject, $content_type, @body) = @_;
 
-    my $committer = decode('UTF-8', $ENV{USER}, Encode::FB_CROAK);
-    my $mail_from = decode('UTF-8', $ENV{USER_EMAIL}, Encode::FB_CROAK);
+    my $committer = decode('UTF-8', $ENV{USER}, Encode::FB_CROAK | Encode::LEAVE_SRC);
+    my $mail_from = decode('UTF-8', $ENV{USER_EMAIL}, Encode::FB_CROAK | Encode::LEAVE_SRC);
     if (!length($mail_from))
     {
         $mail_from = "$committer\@git.haiku-os.org";
