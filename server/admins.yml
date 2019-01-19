@@ -24,6 +24,17 @@
         user: waddlesplash
         state: present
         key: "{{ lookup('file', 'keys/waddlesplash.pub') }}"
+    - name: Provision nielx
+      user:
+        name: nielx
+        state: present
+        groups: docker, wheel
+        shell: /bin/bash
+    - name: Provision nielx public keys
+      authorized_key:
+        user: nielx
+        state: present
+        key: "{{ lookup('file', 'keys/nielx.pub') }}"
     #- name: Provision pulkomandy
     #  user:
     #    name: pulkomandy
