@@ -11,6 +11,9 @@ services:
     # Traefik also handles letsencrypt renewals
     image: traefik:latest
     restart: always
+    cpu_percent: 75
+    memory_reservation: 1024m
+    mem_limit: 8589935000
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
@@ -21,6 +24,10 @@ services:
       - /var/log/traefik:/logs:z
   discourse:
     image: haiku/discuss
+    restart: on-failure
+    cpu_percent: 50
+    memory_reservation: 2048m
+    mem_limit: 8589935000
     depends_on:
       - postgres
       - redis
@@ -43,6 +50,9 @@ services:
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
   gerrit:
     image: haiku/gerrit:2.16
+    cpu_percent: 50
+    mem_reservation: 2048m
+    mem_limit: 8589935000
     depends_on:
       - smtp
       - irker
@@ -70,6 +80,9 @@ services:
   cgit:
     image: haiku/cgit
     restart: on-failure
+    cpu_percent: 25
+    mem_reservation: 256m
+    mem_limit: 536870900
     volumes:
       - gerrit_data:/var/git
     environment:
@@ -87,9 +100,15 @@ services:
   irker:
     image: haiku/irker
     restart: on-failure
+    mem_reservation: 8m
+    mem_limit: 16777220
+    cpu_percent: 5
   pootle:
     image: haiku/pootle
     restart: on-failure
+    mem_reservation: 512m
+    mem_limit: 4294967000
+    cpu_percent: 5
     volumes:
       - pootle_data:/var/pootle:z
     depends_on:
@@ -103,6 +122,9 @@ services:
   portsmirror:
     image: haiku/ports-mirror
     restart: on-failure
+    mem_reservation: 64m
+    mem_limit: 1073742000
+    cpu_percent: 15
     volumes:
       - ports_mirror:/ports-mirror
     labels:
@@ -112,6 +134,9 @@ services:
   postgres:
     image: postgres:9.6
     restart: on-failure
+    mem_reservation: 512m
+    mem_limit: 4294967000
+    cpu_percent: 50
     environment:
       POSTGRES_USER: "baron"
     volumes:
@@ -120,11 +145,17 @@ services:
     image: redis:4.0
     command: redis-server --appendonly yes
     restart: on-failure
+    mem_reservation: 512m
+    mem_limit: 4294967000
+    cpu_percent: 50
     volumes:
       - redis_data:/data:z
   smtp:
     image: mwader/postfix-relay
     restart: on-failure
+    mem_reservation: 256m
+    mem_limit: 536870900
+    cpu_percent: 15
     volumes:
       - smtp_keys:/etc/opendkim/keys:z
     environment:
@@ -133,6 +164,9 @@ services:
   trac:
     image: haiku/trac
     restart: on-failure
+    cpu_percent: 50
+    mem_reservation: 512m
+    mem_limit: 2147484000
     volumes:
       - trac_data:/var/trac:z
     depends_on:
@@ -152,6 +186,9 @@ services:
       - postgres
       - smtp
     restart: on-failure
+    cpu_percent: 15
+    mem_reservation: 64m
+    mem_limit: 1073742000
     volumes:
       - userguide_data:/var/userguide:z
     labels:
@@ -161,6 +198,9 @@ services:
   www-i18n:
     image: dragas/thttpd
     restart: on-failure
+    cpu_percent: 25
+    mem_reservation: 256m
+    mem_limit: 1073742000
     volumes:
       - ./data/static-html/i18n:/var/www/http:z
     labels:
@@ -173,6 +213,9 @@ services:
   www-build:
     image: dragas/thttpd
     restart: on-failure
+    cpu_percent: 25
+    mem_reservation: 256m
+    mem_limit: 1073742000
     volumes:
       - ./data/static-html/build:/var/www/http:z
     labels:
@@ -182,6 +225,9 @@ services:
   www-repo:
     image: haiku/nginx
     restart: on-failure
+    cpu_percent: 25
+    mem_reservation: 256m
+    mem_limit: 1073742000
     volumes:
       - ./data/www-repo:/etc/nginx/conf.d:z
       - ./data/static-html/repo:/usr/share/nginx/html:z
@@ -192,6 +238,9 @@ services:
   download:
     image: haiku/download
     restart: on-failure
+    cpu_percent: 50
+    mem_reservation: 256m
+    mem_limit: 1073742000
     volumes:
       - s3_secrets:/secrets:z
       - s3_data:/data:z
@@ -204,6 +253,9 @@ services:
   haikudepotserver:
     image: haiku/haikudepotserver:1.0.107
     restart: on-failure
+    cpu_percent: 25
+    mem_reservation: 1024m
+    mem_limit: 8589935000
     # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
     links:
       - traefik:eu.hpkg.haiku-os.org
@@ -219,6 +271,9 @@ services:
     image: haiku/buildbot-master
     depends_on:
       - postgres
+    cpu_percent: 25
+    mem_reservation: 512m
+    mem_limit: 8589935000
     hostname: buildbot
     restart: on-failure
     volumes:
@@ -234,6 +289,9 @@ services:
   cdn:
     image: minio/minio
     restart: on-failure
+    cpu_percent: 50
+    mem_reservation: 512m
+    mem_limit: 8589935000
     command: server /data
     volumes:
       - s3_data:/data:z
@@ -245,6 +303,9 @@ services:
   repo-mirror:
     image: haiku/repo-mirror
     restart: on-failure
+    cpu_percent: 15
+    mem_reservation: 128m
+    mem_limit: 1073742000
     volumes:
       - s3_data:/repo-data:ro,z
       - ./data/repo-mirror:/repo-whitelist:ro,z
