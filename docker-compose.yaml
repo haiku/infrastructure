@@ -161,6 +161,13 @@ services:
     environment:
       - POSTFIX_myhostname=walter.haiku-os.org
       - OPENDKIM_DOMAINS=walter.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+  smf:
+    image: zixia/simple-mail-forwarder
+    restart: on-failure
+    environment:
+      - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com
+    ports:
+      - "0.0.0.0:25:25"
   trac:
     image: haiku/trac
     restart: on-failure
