@@ -19,7 +19,7 @@ done
 if [[ $(date +"%u") -eq 7 ]]; then
 	for i in $TARGETS; do
 		mv $OUTPUT/backup-latest-${i}.7z  $OUTPUT/backup-$DATE-${i}.7z
-		echo "Cleaning up over 30 days..."
-		find $OUTPUT -mtime +30 | xargs rm
+		echo "Cleaning up over 15 days..."
+		find $OUTPUT -mtime +15 | xargs rm
 	done
 fi
