@@ -25,4 +25,4 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-      - targets: ['infrastructure_traefik_1:9191']
+      - targets: ['traefik:9191']
