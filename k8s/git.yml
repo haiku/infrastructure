@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: git-deployment
-  namespace: production
+  namespace: default
   labels:
     app: git
 spec:
@@ -52,7 +52,20 @@ spec:
           mountPath: /var/git
       volumes:
       - name: gerrit-data
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: gerrit-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gerrit-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 6Gi
+  storageClassName: do-block-storage
 ---
 apiVersion: v1
 kind: Service
@@ -61,7 +74,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    app: cgit
+    app: git
   ports:
   - name: web
     port: 80
@@ -74,7 +87,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    app: gerrit 
+    app: git
   ports:
   - name: web
     port: 80
