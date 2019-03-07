@@ -19,7 +19,8 @@
 
 ## Transition (bad) Days  (~$34 USD/mo)
 
-  * Old Drupal 6 for haiku-os.org was replaced with Hugo hosted at Netlify.
+  * waddlesplash replaced the old Drupal 6 for haiku-os.org with Hugo hosted at Netlify.
+    * kallisti5 was against it, but he was completely wrong. Netlify saved our bacon.
   * When we finally did upgrade, a major OpenSUSE update failed on the hypervisor.
   * The OS + huge amounts of nightly images were lost in the software RAID.
   * kallisti5 installed CentOS 7 and began to rebuild using containers + Docker
