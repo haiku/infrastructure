@@ -93,7 +93,7 @@ spec:
     port: 80
     targetPort: 8080
   - name: git
-    port: 22
+    port: 2222
     targetPort: 29418
 ---
 apiVersion: extensions/v1beta1
