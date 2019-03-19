@@ -18,3 +18,8 @@ docker-compose manifests to Kubernetes.
 ## Tearing down from a cluster
 
 ```kubectl delete -f service.yml```
+
+## Digital Ocean
+
+The "do" folder has things relevant to a deployment using the default Digital Ocean
+managed k8s environment.

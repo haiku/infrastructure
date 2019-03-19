@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: sshutility
+spec:
+  replicas: 2
+  selector:
+    app: sshutility
+  template:
+    metadata:
+      name: sshutility
+      labels:
+        app: sshutility
+    spec:
+      containers:
+      - name: sshutility
+        image: haiku/sshutility
+        ports:
+        - containerPort: 22
+        volumeMounts:
+        - name: gerrit-data
+          mountPath: /gerrit-data
+      volumes:
+      - name: gerrit-data
+        persistentVolumeClaim:
+          claimName: gerrit-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: sshutilityservice
+  name: sshutilityservice
+spec:
+  ports:
+    - port: 2222
+      targetPort: 22
+  selector:
+    app: sshutility
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gerrit-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 6Gi
+  storageClassName: do-block-storage-persist
