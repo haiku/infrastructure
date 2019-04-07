@@ -18,7 +18,7 @@ div#cgit a:hover {
 }
 
 div#cgit table {
-      border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 div#cgit table#header {
@@ -85,6 +85,12 @@ div#cgit table.tabs td a.active {
 	background-color: #ccc;
 }
 
+div#cgit table.tabs a[href^="http://"]:after, div#cgit table.tabs a[href^="https://"]:after {
+	content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgAhcJDQY+gm2TAAAAHWlUWHRDb21tZW50AAAAAABDcmVhdGVkIHdpdGggR0lNUGQuZQcAAABbSURBVAhbY2BABs4MU4CwhYHBh2Erww4wrGFQZHjI8B8IgUIscJWyDHcggltQhI4zGDCcRwhChPggHIggP1QoAVmQkSETrGoHsiAEsACtBYN0oDAMbgU6EBcAAL2eHUt4XUU4AAAAAElFTkSuQmCC);
+	opacity: 0.5;
+	margin: 0 0 0 5px;
+}
+
 div#cgit table.tabs td.form {
 	text-align: right;
 }
@@ -128,11 +134,31 @@ div#cgit table.list tr.logheader {
 	background: #eee;
 }
 
+div#cgit table.list tr:nth-child(even) {
+	background: #f7f7f7;
+}
+
+div#cgit table.list tr:nth-child(odd) {
+	background: white;
+}
+
 div#cgit table.list tr:hover {
 	background: #eee;
 }
 
+div#cgit table.list tr.nohover {
+	background: white;
+}
+
 div#cgit table.list tr.nohover:hover {
+	background: white;
+}
+
+div#cgit table.list tr.nohover-highlight:hover:nth-child(even) {
+	background: #f7f7f7;
+}
+
+div#cgit table.list tr.nohover-highlight:hover:nth-child(odd) {
 	background: white;
 }
 
@@ -274,13 +300,14 @@ div#cgit table.blob {
 	border-top: solid 1px black;
 }
 
+div#cgit table.blob td.hashes,
 div#cgit table.blob td.lines {
 	margin: 0; padding: 0 0 0 0.5em;
 	vertical-align: top;
 	color: black;
-	tab-size:4;
-	-moz-tab-size: 4;
-	-o-tab-size: 4;
+    /* HAIKU ADDITION */
+    tab-size: 4;
+    -moz-tab-size: 4;
 }
 
 div#cgit table.blob td.linenumbers {
@@ -304,6 +331,39 @@ div#cgit table.ssdiff td.lineno a {
 div#cgit table.blob td.linenumbers a:hover,
 div#cgit table.ssdiff td.lineno a:hover {
 	color: black;
+}
+
+div#cgit table.blame td.hashes,
+div#cgit table.blame td.lines,
+div#cgit table.blame td.linenumbers {
+	padding: 0;
+}
+
+div#cgit table.blame td.hashes div.alt,
+div#cgit table.blame td.lines div.alt {
+	padding: 0 0.5em 0 0.5em;
+}
+
+div#cgit table.blame td.linenumbers div.alt {
+	padding: 0 0.5em 0 0;
+}
+
+div#cgit table.blame div.alt:nth-child(even) {
+	background: #eee;
+}
+
+div#cgit table.blame div.alt:nth-child(odd) {
+	background: white;
+}
+
+div#cgit table.blame td.lines > div {
+	position: relative;
+}
+
+div#cgit table.blame td.lines > div > pre {
+	padding: 0 0 0 0.5em;
+	position: absolute;
+	top: 0;
 }
 
 div#cgit table.bin-blob {
@@ -484,9 +544,9 @@ div#cgit table.diff {
 div#cgit table.diff td {
 	font-family: monospace;
 	white-space: pre;
-	tab-size: 4;
-	-moz-tab-size: 4;
-	-o-tab-size: 4;
+    /* HAIKU ADDITION */
+    tab-size: 4;
+    -moz-tab-size: 4;
 }
 
 div#cgit table.diff td div.head {
@@ -590,19 +650,31 @@ div#cgit span.age-months {
 div#cgit span.age-years {
 	color: #bbb;
 }
+
+div#cgit span.insertions {
+	color: #080;
+}
+
+div#cgit span.deletions {
+	color: #800;
+}
+
 div#cgit div.footer {
 	margin-top: 0.5em;
 	text-align: center;
 	font-size: 80%;
 	color: #ccc;
 }
+
 div#cgit div.footer a {
 	color: #ccc;
 	text-decoration: none;
 }
+
 div#cgit div.footer a:hover {
 	text-decoration: underline;
 }
+
 div#cgit a.branch-deco {
 	color: #000;
 	margin: 0px 0.5em;
@@ -610,6 +682,7 @@ div#cgit a.branch-deco {
 	background-color: #88ff88;
 	border: solid 1px #007700;
 }
+
 div#cgit a.tag-deco {
 	color: #000;
 	margin: 0px 0.5em;
@@ -617,6 +690,15 @@ div#cgit a.tag-deco {
 	background-color: #ffff88;
 	border: solid 1px #777700;
 }
+
+div#cgit a.tag-annotated-deco {
+	color: #000;
+	margin: 0px 0.5em;
+	padding: 0px 0.25em;
+	background-color: #ffcc88;
+	border: solid 1px #777700;
+}
+
 div#cgit a.remote-deco {
 	color: #000;
 	margin: 0px 0.5em;
@@ -624,6 +706,7 @@ div#cgit a.remote-deco {
 	background-color: #ccccff;
 	border: solid 1px #000077;
 }
+
 div#cgit a.deco {
 	color: #000;
 	margin: 0px 0.5em;
@@ -634,6 +717,7 @@ div#cgit a.deco {
 
 div#cgit div.commit-subject a.branch-deco,
 div#cgit div.commit-subject a.tag-deco,
+div#cgit div.commit-subject a.tag-annotated-deco,
 div#cgit div.commit-subject a.remote-deco,
 div#cgit div.commit-subject a.deco {
 	margin-left: 1em;
@@ -803,9 +887,9 @@ div#cgit table.ssdiff td.head div.head {
 
 div#cgit table.ssdiff td.foot {
 	border-top: solid 1px #aaa;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
 }
 
 div#cgit table.ssdiff td.space {
