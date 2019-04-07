@@ -86,6 +86,7 @@ services:
     volumes:
       - gerrit_data:/var/git
     environment:
+      HTTP_HOST: "git.haiku-os.org"
       CGIT_TITLE: "Haiku's repositories"
       CGIT_DESC: 'Presented by cgit on Docker'
       # check section-from-path in cgit docs
