@@ -1,24 +1,11 @@
-FROM debian:testing
-ENV DEBIAN_FRONTEND noninteractive
+FROM alpine:latest
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
-RUN apt-get -qq update && \
-    apt-get upgrade -qy && \
-    apt-get -qy install apt-utils gettext-base curl \
-                        fcgiwrap git cgit highlight perl \
-                        ca-certificates nginx gettext-base \
-                        markdown python-docutils groff && \
-    echo 'UTC' > /etc/timezone && \
-    dpkg-reconfigure tzdata && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apk add --update \
+    tini gettext curl fcgiwrap spawn-fcgi git cgit highlight perl nginx markdown groff py-pip
+RUN pip install docutils
 
-# Add Tini
-ENV TINI_VERSION v0.13.2
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
-
-RUN useradd nginx
+ENTRYPOINT ["/sbin/tini", "--"]
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
@@ -26,7 +13,8 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 EXPOSE 80
 
-RUN mkdir /var/git
+RUN rmdir /var/git && mkdir /var/git
+RUN mkdir /run/nginx
 
 VOLUME ["/var/git"]
 #VOLUME ["/var/cache/cgit"]
@@ -37,14 +25,14 @@ COPY assets/commit-link-filter.sh /usr/lib/cgit/filters/
 COPY assets/haiku-cgit.css /usr/share/cgit/haiku-cgit.css
 COPY assets/haiku-logo.png /usr/share/cgit/haiku-logo.png
 
-COPY assets/default.conf /etc/nginx/sites-available/default
+COPY assets/default.conf /etc/nginx/conf.d/default.conf
 COPY assets/404.html /usr/share/nginx/html/
 COPY assets/401.html /usr/share/nginx/html/
 COPY assets/startup /
 
 CMD ["/startup"]
 
-ENV CGIT_TITLE "My cgit interface"
+ENV CGIT_TITLE "cgit interface"
 ENV CGIT_DESC "cgit under docker"
 ENV CGIT_VROOT "/"
 ENV CGIT_SECTION_FROM_STARTPATH 0
