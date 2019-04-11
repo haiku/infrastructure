@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: git-restore
+  namespace: default
+  labels:
+    app: git
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: gerrit-data
+        persistentVolumeClaim:
+          claimName: gerrit-data-pvc
+      containers:
+      - name: persistsync
+        image: haiku/persistsync
+        args:
+          - restore
+          - gerrit-data
+        env:
+          - name: S3_KEY
+            valueFrom:
+              secretKeyRef:
+                name: s3-backup
+                key: s3_key
+          - name: S3_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: s3-backup
+                key: s3_secret
+          - name: S3_BUCKET
+            value: persistent-snapshots
+          - name: TWOSECRET
+            valueFrom:
+              secretKeyRef:
+                name: s3-backup
+                key: twosecret
+        volumeMounts:
+          - name: gerrit-data
+            mountPath: /pvs/gerrit-data
