@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ $# -ne 5 ]]; then
+if [[ $# -ne 2 ]]; then
 	echo "Backup / Restore persistant volume data"
-	echo "Usage: $0 [backup|restore] <pv_name> <s3_key> <s3_secret> <gpg_secret>"
+	echo "Usage: $0 [backup|restore] <pv_name>"
 	exit 1
 fi
 
@@ -16,15 +16,35 @@ if ! [ -x "$(command -v gpg)" ]; then
   exit 1
 fi
 
+
 BASE="/pvs"
 ACTION="$1"
 VOLUME="$2"
+
 S3_NAME="s3remote"
 S3_HOST="http://s3.wasabisys.com"
-S3_BUCKET="persistent-snapshots"
-S3_KEY="$3"
-S3_SECRET="$4"
-SECRET="$5"
+
+#S3_BUCKET="persistent-snapshots"
+#S3_KEY=""
+#S3_SECRET=""
+#TWOSECRET=""
+
+if [ -z "$S3_BUCKET" ]; then
+	echo "Please set S3_BUCKET!"
+	exit 1
+fi
+if [ -z "$S3_KEY" ]; then
+	echo "Please set S3_KEY!"
+	exit 1
+fi
+if [ -z "$S3_SECRET" ]; then
+	echo "Please set S3_SECRET!"
+	exit 1
+fi
+if [ -z "$TWOSECRET" ]; then
+	echo "Please set TWOBUCKET!"
+	exit 1
+fi
 
 if [[ ! -d "$BASE/$VOLUME" ]]; then
 	echo "Error: '$BASE/$VOLUME' isn't present on local container! (pvc not mounted?)"
@@ -42,7 +62,7 @@ case $ACTION in
 			exit 1
 		fi
 		cd /tmp
-		echo $SECRET | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
+		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing encryption! (gpg)"
 			rm /tmp/$SNAPSHOT_NAME
@@ -80,7 +100,7 @@ case $ACTION in
 			rm /tmp/$LATEST
 			exit 1
 		fi
-		echo $SECRET | gpg --batch --yes --passphrase-fd 0 -o /tmp/$VOLUME-restore.tar.xz -d /tmp/$LATEST
+		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 -o /tmp/$VOLUME-restore.tar.xz -d /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted decrypting snapshot! (gpg)"
 			rm /tmp/$LATEST

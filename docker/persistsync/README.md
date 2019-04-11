@@ -7,10 +7,10 @@ I'm a simple container to backup/restore encrypted persistant volume data to an 
 ### Docker
 **Backup**
 ```
-docker run -it -V volume:/pvs/volume docker.io/haiku/persistsync pvsync backup volume s3user s3password encryptionpassword
+docker run -it -e S3_BUCKET="" -e S3_KEY="" -e S3_SECRET="" -e TWOSECRET="" -V volume:/pvs/volume docker.io/haiku/persistsync backup volume
 ```
 
 **Restore**
 ```
-docker run -it -V volume:/pvs/volume docker.io/haiku/persistsync pvsync restore volume s3user s3password encryptionpassword
+docker run -it -e S3_BUCKET="" -e S3_KEY="" -e S3_SECRET="" -e TWOSECRET="" -V volume:/pvs/volume docker.io/haiku/persistsync restore volume
 ```
