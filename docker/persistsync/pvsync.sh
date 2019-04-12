@@ -56,7 +56,7 @@ case $ACTION in
 		SNAPSHOT_NAME=${VOLUME}_$(date +"%Y-%m-%d").tar.xz
 		echo "Snapshot ${VOLUME}..."
 		cd $BASE/$VOLUME
-		tar -cvJf /tmp/$SNAPSHOT_NAME *
+		tar -cvJf /tmp/$SNAPSHOT_NAME --exclude 'tmp/*' *
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing snapshot! (tar)"
 			exit 1
