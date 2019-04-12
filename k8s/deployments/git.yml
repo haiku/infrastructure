@@ -108,7 +108,8 @@ spec:
   resources:
     requests:
       storage: 6Gi
-  storageClassName: do-block-storage-persist
+  storageClassName: do-block-storage
+  #storageClassName: do-block-storage-persist
 ---
 apiVersion: v1
 kind: Service
