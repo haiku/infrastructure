@@ -259,7 +259,7 @@ services:
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
   haikudepotserver:
-    image: haiku/haikudepotserver:1.0.109
+    image: haiku/haikudepotserver:1.0.111
     restart: on-failure
     cpu_percent: 25
     mem_reservation: 1024m
