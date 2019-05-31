@@ -10,16 +10,17 @@ and #haiku-dev are panicking. Lets go!
 
 ## Backup, Backup, Backup
 
-*everything* unique to maui should be contained within the following path:
+*everything* unique to our infrastructure should be contained within the following path:
 	/var/lib/docker/volumes
+
+This path is an iSCSI mount from online.net
 
 If you can get a 100% perfect copy of /var/lib/docker/volumes you're
 in the clear.  /var/lib/docker/volumes is *big* however since it
 contains all of our build artifacts.
 
-/var/lib/docker/volumes is rsync'ed to Hetzner's backup space for maui
-(except for the build artifacts. We skip infrastructure_s3_data since
-Hetzner gives us a 100GB limit)
+/var/lib/docker/volumes is continously snapshot and backed up to the local machine
+at /var/backup
 
 If you're in a bad way, (but have access to the filesystem), be sure
 to run a final sync of ```/var/lib/docker/volumes``` to Hetzner to have the
@@ -27,36 +28,33 @@ to run a final sync of ```/var/lib/docker/volumes``` to Hetzner to have the
 
 ## Reinstall!
 
-Do *NOT* use the "Linux" install option at Hetzner. It creates a horrid
-2TiB root mdadm/ext4 partition which is extremely difficult to resize.
-Use the VNC option and do the install there.  The VNC options are limited,
-but they do have Fedora which I like (you're the new boss, do what you like).
+Setup a new Linux machine. (I like CentOS, Fedora Server, etc... but you're the man
+now dog! It's your choice)
 
-Configure ~200GiB for root, leave the rest of the space empty. Make sure
-some RAID is in place. (I used btrfs RAID1 for the "current" maui since
-I now consider mdadm the devil on root filesystems)
+I'd recommend a small OS disk (in a RAID of some sort), and a seperate RAID or 
+remote NAS resource for the pesistant docker volumes at /var/lib/docker/volumes.
 
-* Set hostname to maui.haiku-os.org
-* Install, create yourself a non-root user.
-* Configure the static ip of 94.130.128.252.
+(I'd highly recommend a real hardware RAID... and *NEVER* use a software RAID
+for the OS boot disk and our persistant data. We have done this before, and when
+things go bad they go *BAD* and our persistant data gets put at risk)
 
-Reboot into your new maui.
+Reboot into your new server.
 
-Configure network (/etc/sysconfig/network-scripts/ifcfg-enp0s31f6):
+Configure network (/etc/sysconfig/network-scripts/ifcfg-en*):
 ```
-NAME="enp0s31f6"
-DEVICE="enp0s31f6"
+NAME="enwhatever"
+DEVICE="enwhatever"
 ONBOOT=yes
 NETBOOT=yes
 IPV6INIT=yes
 BOOTPROTO=static
-IPADDR=94.130.128.252
-NETMASK=255.255.255.192
-GATEWAY=94.130.128.193
-IPADDR1=94.130.158.38
-NETMASK1=255.255.255.248
+IPADDR=whatever
+NETMASK=whatever
+GATEWAY=whatever
+IPADDR1=whatever1
+NETMASK1=whatever1
 TYPE=Ethernet
-DNS1="213.133.99.99"
+DNS1=8.8.8.8
 ```
 
 Apply any available OS updates, reboot again.
@@ -65,12 +63,14 @@ Apply any available OS updates, reboot again.
 
 Install the packages you'll need. (These examples are for CentOS/Fedora)
 
-```dnf install git docker docker-compose iptables-service vim```
+```dnf install git docker docker-compose iptables-service vim wget```
 
-Configure your backend storage for docker. I did btrfs since it (once
-again) offers lightweight raid1 without mdadm. It should be mounted
-at /var/lib/docker.
+Configure your backend storage for docker. I did btrfs since i've had good
+experience using it for docker persistant volumes in prod... but RHEL seems to
+be dropping it :-(.  Just make sure whatever you choose is suitable for
+docker production.
 
+Setup your services, switch to iptables vs firewalld...
 ```
 setenforce 0
 systemctl disable firewall
@@ -87,6 +87,11 @@ As root, get infrastructure directory. Put into root's home.
 ```
 git clone https://github.com/haiku/infrastructure.git
 ```
+
+## Install vault client
+
+https://www.vaultproject.io/downloads.html
+extract vault binary to /usr/local/bin/
 
 ## Configure SSH
 
@@ -122,7 +127,30 @@ rsync --progress -e 'ssh -p23' --recursive uXXXXXX@uXXXXX.your-backup.de:./maui/
 Restore the build artifacts however you can to ```/var/lib/docker/volumes/infrastructure_s3_data```
 
 
-Start "everything"
+Start vault
+```
+cd ~/infrastructure
+docker-compose up -d vault
+export VAULT_ADDR=http://127.0.0.1:8200
+```
+
+Check vault connection
+```
+vault status
+```
+
+Unseal vault
+To unseal the vault, you'll need 3 of the 5 unseal keys.
+```
+vault operator unseal
+```
+
+Check vault is unsealed
+```
+vault status
+```
+
+Start "everything else"
 ```
 cd ~/infrastructure
 docker-compose up -d
