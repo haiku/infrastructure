@@ -6,6 +6,18 @@
 #
 version: "2.2"
 services:
+  vault:
+    image: vault:latest
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    ports:
+      - "127.0.0.1:8200:8200"
+    command: server
+    cap_add:
+      - IPC_LOCK
+    restart: always
+    volumes:
+      - vault_data:/vault
   traefik:
     # Traefik connects to docker and reads labels to form routes
     # Traefik also handles letsencrypt renewals
@@ -353,6 +365,7 @@ services:
       - "traefik.basic.port=8080"
 volumes:
   traefik_acme:
+  vault_data:
   buildbot_config:
   fathom_secrets:
   gerrit_data:
