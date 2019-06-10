@@ -331,6 +331,13 @@ services:
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
       - 12000:12000
+  node_exporter:
+    image: haiku/node_exporter
+    restart: on-failure
+    volumes:
+      - /sys:/host/sys:ro,rslave
+      - /proc:/host/proc:ro,rslave
+    command: --path.procfs /host/proc --path.sysfs /host/sys
   prometheus:
     image: prom/prometheus
     restart: on-failure
