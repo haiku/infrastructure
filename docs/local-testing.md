@@ -12,7 +12,7 @@ Requirements
 3. a persistant volume with the unique maui data
 4. Add the following to your /etc/hosts:
 ```
-127.0.0.1 review-local.haiku-os.org cgit-local.haiku-os.org git-local.haiku-os.org haiku-os.org api-local.haiku-os.org userguide-local.haiku-os.org ports-mirror-local.haiku-os.org
+127.0.0.1 review.haiku-test.org cgit.haiku-test.org git.haiku-test.org haiku-test.org api.haiku-test.org userguide.haiku-test.org ports-mirror.haiku-test.org
 ```
 
 Your test environment
@@ -22,7 +22,7 @@ From the root infrastructure directory...
 
 1. Disable ACME in data/traefik/traefik.toml
 2. docker-compose pull
-3. DOMAIN_POST="-local" docker-compose up -d
+3. DOMAIN="haiku-test.org" docker-compose up -d
 
 
 Helpful hints
