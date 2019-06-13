@@ -88,11 +88,6 @@ As root, get infrastructure directory. Put into root's home.
 git clone https://github.com/haiku/infrastructure.git
 ```
 
-## Install vault client
-
-https://www.vaultproject.io/downloads.html
-extract vault binary to /usr/local/bin/
-
 ## Configure SSH
 
 Ensure your ssh public key is in ~/.ssh/authorized_keys (and ensure it works).
@@ -126,31 +121,7 @@ rsync --progress -e 'ssh -p23' --recursive uXXXXXX@uXXXXX.your-backup.de:./maui/
 
 Restore the build artifacts however you can to ```/var/lib/docker/volumes/infrastructure_s3_data```
 
-
-Start vault
-```
-cd ~/infrastructure
-docker-compose up -d vault
-export VAULT_ADDR=http://127.0.0.1:8200
-```
-
-Check vault connection
-```
-vault status
-```
-
-Unseal vault
-To unseal the vault, you'll need 3 of the 5 unseal keys.
-```
-vault operator unseal
-```
-
-Check vault is unsealed
-```
-vault status
-```
-
-Start "everything else"
+Start "everything"
 ```
 cd ~/infrastructure
 docker-compose up -d
