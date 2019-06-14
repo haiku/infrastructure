@@ -1,12 +1,13 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-	echo "usage: $0 <branch> <secrets>"
+if [ $# -ne 3 ]; then
+	echo "usage: $0 <team> <branch> <secrets>"
 	exit 1
 fi
 
-BRANCH="$1"
-SECRETS="$2"
+TEAM="$1"
+BRANCH="$2"
+SECRETS="$3"
 
 if [ ! -f $SECRETS ]; then
 	echo "Unable to access secrets file $SECRETS!"
@@ -25,7 +26,7 @@ if [ -z "$S3_SECRET" ]; then
 fi
 
 CONCOURSE_URL="http://localhost:8080"
-FLY_CLI=~/fly
+FLY_CLI=fly
 
 ARCHES="x86_64 arm sparc riscv64 ppc m68k"
 
@@ -37,5 +38,5 @@ fi
 
 echo "Flight ready for boarding. Using template: haiku-$PROFILE.yml"
 for ARCH in $ARCHES; do
-	$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-$PROFILE.yml
+	$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-$PROFILE.yml
 done
