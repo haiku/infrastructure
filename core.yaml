@@ -1,0 +1,386 @@
+#
+# Haiku's infrastructure
+#
+version: "3.2"
+services:
+  discourse:
+    image: haiku/discuss
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    networks:
+      - ingress_core
+    depends_on:
+      - postgres
+      - redis
+      - smtp
+    entrypoint: /shared/config.env && /sbin/boot
+    environment:
+      LANG: en_US.UTF-8
+      RAILS_ENV: production
+      UNICORN_WORKERS: 6
+      UNICORN_SIDEKIQS: 1
+      DOCKER_USE_HOSTNAME: "true"
+    volumes:
+      - discourse_shared:/shared:z
+      - discourse_logs:/var/log:z
+    restart: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
+  gerrit:
+    image: haiku/gerrit:2.16
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    networks:
+      - default
+      - ingress_core
+    depends_on:
+      - smtp
+      - irker
+    # Disable in test environments
+    ports:
+      - "0.0.0.0:22:29418"
+    volumes:
+      - gerrit_data:/var/gerrit/review_site:z
+      - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
+    environment:
+      AUTH_TYPE: OAUTH
+      GITWEB_TYPE: cgit
+      JAVA_HEAPLIMIT: 1024m
+      # OAUTH_GITHUB_CLIENT_ID: XXXONBOOTSTRAPXXX
+      # OAUTH_GITHUB_CLIENT_SECRET: XXXONBOOTSTRAPXX
+      SMTP_SERVER: smtp
+      SMTP_SERVER_PORT: 25
+      SMTP_FROM: Gerrit <review@review.haiku-os.org>
+      SMTP_CONNECT_TIMEOUT: 30
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:review.${DOMAIN}"
+      - "traefik.basic.port=8080"
+  cgit:
+    image: haiku/cgit
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_core
+    volumes:
+      - gerrit_data:/var/git
+    environment:
+      HTTP_HOST: "git.haiku-os.org"
+      CGIT_TITLE: "Haiku's repositories"
+      CGIT_DESC: 'Presented by cgit on Docker'
+      # check section-from-path in cgit docs
+      CGIT_VROOT: '/'
+      CGIT_SECTION_FROM_STARTPATH: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:cgit.${DOMAIN},git.${DOMAIN}"
+      - "traefik.basic.frontend.redirect.regex=cgit.${DOMAIN}/(.*)"
+      - "traefik.basic.frontend.redirect.replacement=git.${DOMAIN}/$$1"
+      - "traefik.basic.port=80"
+  irker:
+    image: haiku/irker
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 16M
+        reservations:
+          cpus: '0.25'
+          memory: 8M
+    networks:
+      - ingress_core
+  pootle:
+    image: haiku/pootle
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 48M
+    networks:
+      - ingress_core
+    volumes:
+      - pootle_data:/var/pootle:z
+    depends_on:
+      - postgres
+      - redis
+      - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/pootle/"
+      - "traefik.basic.port=80"
+  portsmirror:
+    image: haiku/ports-mirror
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - ingress_core
+    volumes:
+      - ports_mirror:/ports-mirror
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
+      - "traefik.basic.port=80"
+  postgres:
+    image: postgres:9.6
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    networks:
+      - ingress_core
+    environment:
+      POSTGRES_USER: "baron"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:4.0
+    command: redis-server --appendonly yes
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    networks:
+      - ingress_core
+    volumes:
+      - redis_data:/data:z
+  smtp:
+    image: mwader/postfix-relay
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 1G
+        reservations:
+          cpus: '0.15'
+          memory: 256M
+    networks:
+      - ingress_core
+    volumes:
+      - smtp_keys:/etc/opendkim/keys:z
+    environment:
+      - POSTFIX_myhostname=walter.haiku-os.org
+      - OPENDKIM_DOMAINS=walter.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+  smf:
+    image: zixia/simple-mail-forwarder
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2G
+        reservations:
+          cpus: '0.15'
+          memory: 128M
+    networks:
+      - ingress_core
+    environment:
+      - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com
+    ports:
+      - "0.0.0.0:25:25"
+  trac:
+    image: haiku/trac
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.15'
+          memory: 512M
+    networks:
+      - ingress_core
+    volumes:
+      - trac_data:/var/trac:z
+    depends_on:
+      - postgres
+      - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:dev.${DOMAIN}"
+      - "traefik.basic.port=80"
+      - "traefik.frontend.rateLimit.extractorFunc=client.ip"
+      - "traefik.frontend.rateLimit.rateSet.r1.period=10s"
+      - "traefik.frontend.rateLimit.rateSet.r1.average=75"
+      - "traefik.frontend.rateLimit.rateSet.r1.burst=150"
+  userguide:
+    image: haiku/userguide
+    depends_on:
+      - postgres
+      - smtp
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - ingress_core
+    volumes:
+      - userguide_data:/var/userguide:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/userguide/"
+      - "traefik.basic.port=80"
+  www-i18n:
+    image: dragas/thttpd
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_core
+    volumes:
+      - ./data/static-html/i18n:/var/www/http:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN}"
+      # redirect /pootle & /userguide to forward to proper containers
+      - "traefik.basic.frontend.redirect.regex=i18n.${DOMAIN}/(pootle|userguide)$$"
+      - "traefik.basic.frontend.redirect.replacement=i18n.${DOMAIN}/$$1/"
+      - "traefik.basic.port=80"
+  haikudepotserver:
+    image: haiku/haikudepotserver:1.0.112
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.50'
+          memory: 1G
+    networks:
+      - ingress_core
+    # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
+    links:
+      - traefik:eu.hpkg.haiku-os.org
+    volumes:
+      - hds_secrets:/secrets:z
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
+      - "traefik.basic.port=8080"
+  node_exporter:
+    image: haiku/node_exporter
+    restart: on-failure
+    networks:
+      - ingress_core
+    volumes:
+      - /sys:/host/sys:ro,rslave
+      - /proc:/host/proc:ro,rslave
+    command: --path.procfs /host/proc --path.sysfs /host/sys
+  prometheus:
+    image: prom/prometheus
+    restart: on-failure
+    networks:
+      - ingress_core
+    volumes:
+      - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:z
+      - prometheus_data:/prometheus:z
+  grafana:
+    image: grafana/grafana
+    restart: on-failure
+    networks:
+      - ingress_core
+    environment:
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: "smtp:25"
+      GF_SMTP_FROM_ADDRESS: "admin@metrics.${DOMAIN}"
+      GF_SERVER_ROOT_URL: "https://metrics.${DOMAIN}/grafana/"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/grafana/"
+      - "traefik.basic.port=3000"
+  fathom:
+    image: usefathom/fathom:latest
+    depends_on:
+      - postgres
+    networks:
+      - ingress_core
+    restart: on-failure
+    volumes:
+      - fathom_secrets:/var/lib/fathom
+    command: /app/fathom --config=/var/lib/fathom/config.env server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
+      - "traefik.basic.port=8080"
+volumes:
+  traefik_acme:
+  fathom_secrets:
+  gerrit_data:
+  pootle_data:
+  ports_mirror:
+  postgres_data:
+  userguide_data:
+  trac_data:
+  redis_data:
+  hds_secrets:
+  prometheus_data:
+  grafana_data:
+  minio_config:
+  discourse_shared:
+  discourse_logs:
+  smtp_keys:
+
+networks:
+  ingress_core:
+    external: true

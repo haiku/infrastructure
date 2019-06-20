@@ -1,0 +1,101 @@
+version: "3.2"
+services:
+  www:
+    image: dragas/thttpd
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_ci
+    volumes:
+      - ./data/static-html/build:/var/www/http:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
+      - "traefik.basic.port=80"
+  buildbot:
+    image: haiku/buildbot-master
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    depends_on:
+      - postgres
+    hostname: buildbot
+    volumes:
+      - buildbot_config:/var/lib/buildbot:z
+      - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
+    networks:
+      - ingress_ci
+    ports:
+      - 9989:9989
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildbot/"
+      - "traefik.basic.port=80"
+  buildmaster_master_x86_64:
+    image: haikuports/buildmaster
+    command: loop
+    networks:
+      - buildmaster_private
+    volumes:
+      - sources:/var/sources:z
+      - data_master_x86_64:/var/buildmaster:z
+      - packages:/var/packages:z
+    environment:
+      REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
+  buildmaster_master_x86_gcc2:
+    image: haikuports/buildmaster
+    command: loop
+    networks:
+      - buildmaster_private
+    volumes:
+      - sources:/var/sources:z
+      - data_master_x86_gcc2:/var/buildmaster:z
+      - packages:/var/packages:z
+    environment:
+      REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
+  buildmaster_teleport:
+    image: mmlr/teleport
+    command: server 5825 auth.db
+    networks:
+      - buildmaster_private
+    ports:
+      - "0.0.0.0:5825:5825"
+    volumes:
+      - teleport:/var/teleport
+    restart: on-failure
+  buildmaster_frontend:
+    image: haikuports/buildmaster-frontend
+    networks:
+      - ingress_ci
+    volumes:
+      - sources:/var/sources:ro
+      - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
+      - data_master_x86_64:/var/instances/master/x86_64:ro
+      - packages:/var/instances/haikuports:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
+      - "traefik.basic.port=80"
+volumes:
+  buildbot_config:
+  teleport:
+  sources:
+  packages:
+  data_master_x86_gcc2:
+  data_master_x86_64:
+networks:
+  buildmaster_private:
+    driver: overlay
+  ingress_ci:
+    external: true

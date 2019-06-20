@@ -1,0 +1,49 @@
+version: "3.2"
+services:
+  secure:
+    image: alpine:latest
+    command: "yes"
+  traefik:
+    # Traefik connects to docker and reads labels to form routes
+    # Traefik also handles letsencrypt renewals
+    image: traefik:latest
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role==manager]
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: any
+        delay: 5s
+    networks:
+      - default
+      - ci
+      - core
+      - cdn
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:9191:9191"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:z
+      - ./data/traefik/traefik.toml:/traefik.toml:z
+      - traefik_acme:/acme:z
+      - /var/log/traefik:/logs:z
+volumes:
+  traefik_acme:
+networks:
+  core:
+    driver: overlay
+  cdn:
+    driver: overlay
+  ci:
+    driver: overlay

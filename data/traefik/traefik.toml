@@ -59,6 +59,10 @@ endpoint = "unix:///var/run/docker.sock"
 domain = "haiku-os.org"
 watch = true
 exposedByDefault = false
+# Yes, we run swarm mode... we don't want this though. This limits
+# the scope of containers discovered to the stack. We run our backend
+# apps in other stacks.. so we want traefik to ignore stacks.
+swarmMode = false
 
 [acme]
 email = "haiku-inc@gmail.com"

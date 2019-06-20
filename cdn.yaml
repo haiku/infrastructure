@@ -1,0 +1,88 @@
+version: "3.2"
+services:
+  minio:
+    image: minio/minio
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    networks:
+      - ingress_cdn
+    command: server /data
+    volumes:
+      - s3_data:/data:z
+      - minio_config:/root/.minio/:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:cdn.${DOMAIN}"
+      - "traefik.basic.port=9000"
+  download:
+    image: haiku/download
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_cdn
+    volumes:
+      - s3_secrets:/secrets:z
+      - s3_data:/data:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:download.${DOMAIN}"
+      - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
+      - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
+      - "traefik.basic.port=80"
+  www:
+    image: haiku/nginx
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_cdn
+    volumes:
+      - ./data/www-repo:/etc/nginx/conf.d:z
+      - ./data/static-html/repo:/usr/share/nginx/html:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:eu.hpkg.${DOMAIN}"
+      - "traefik.basic.port=80"
+  repo-mirror:
+    image: haiku/repo-mirror
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    networks:
+      - default
+    volumes:
+      - s3_data:/repo-data:ro,z
+      - ./data/repo-mirror:/repo-whitelist:ro,z
+    ports:
+      - 12000:12000
+volumes:
+  minio_config:
+  s3_secrets:
+  s3_data:
+networks:
+  ingress_cdn:
+    external: true
