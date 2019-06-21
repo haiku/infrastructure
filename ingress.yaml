@@ -1,3 +1,15 @@
+#
+# Haiku's ingress
+#
+# Description:
+#   All inbound http/https traffic flows through here into the destination containers.
+#   Traefik routes data to destination containers by polling docker for labels on each
+#   container about what should be exposed where.
+#   All http/https traffic should flow through here!
+#
+#   Since the ingress is critical to service "all requests", we run 2 of them and roll
+#   updates across one replica at a time.
+#
 version: "3.2"
 services:
   secure:
@@ -29,6 +41,7 @@ services:
       - ci
       - core
       - cdn
+      - sysadmin
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
@@ -46,4 +59,6 @@ networks:
   cdn:
     driver: overlay
   ci:
+    driver: overlay
+  sysadmin:
     driver: overlay

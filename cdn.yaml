@@ -1,3 +1,12 @@
+#
+# Haiku's content delivery network
+#
+# Description:
+#   These containers service all requests for Haiku packages, os images, and repositories.
+#
+# TODO: Paths in here are bit of a redirect mess and need detangled + simplified.
+# TODO: replicas 2 for the "critical" things like package repos!!
+#
 version: "3.2"
 services:
   minio:

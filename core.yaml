@@ -1,5 +1,10 @@
 #
-# Haiku's infrastructure
+# Haiku's public facing systems
+#
+# Description:
+#   These containers service all requests for Haiku packages, os images, and repositories.
+#
+# TODO: Paths in here are bit of a redirect mess and need detangled + simplified.
 #
 version: "3.2"
 services:
@@ -316,39 +321,6 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
       - "traefik.basic.port=8080"
-  node_exporter:
-    image: haiku/node_exporter
-    restart: on-failure
-    networks:
-      - ingress_core
-    volumes:
-      - /sys:/host/sys:ro,rslave
-      - /proc:/host/proc:ro,rslave
-    command: --path.procfs /host/proc --path.sysfs /host/sys
-  prometheus:
-    image: prom/prometheus
-    restart: on-failure
-    networks:
-      - ingress_core
-    volumes:
-      - ./data/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:z
-      - prometheus_data:/prometheus:z
-  grafana:
-    image: grafana/grafana
-    restart: on-failure
-    networks:
-      - ingress_core
-    environment:
-      GF_SMTP_ENABLED: "true"
-      GF_SMTP_HOST: "smtp:25"
-      GF_SMTP_FROM_ADDRESS: "admin@metrics.${DOMAIN}"
-      GF_SERVER_ROOT_URL: "https://metrics.${DOMAIN}/grafana/"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    labels:
-      - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/grafana/"
-      - "traefik.basic.port=3000"
   fathom:
     image: usefathom/fathom:latest
     depends_on:
@@ -364,7 +336,6 @@ services:
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
       - "traefik.basic.port=8080"
 volumes:
-  traefik_acme:
   fathom_secrets:
   gerrit_data:
   pootle_data:
@@ -374,9 +345,6 @@ volumes:
   trac_data:
   redis_data:
   hds_secrets:
-  prometheus_data:
-  grafana_data:
-  minio_config:
   discourse_shared:
   discourse_logs:
   smtp_keys:

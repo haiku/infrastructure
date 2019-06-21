@@ -1,3 +1,10 @@
+#
+# Haiku's continious integration
+#
+# Description:
+#   These containers manage builds of various components of Haiku such as package
+#   repositories, nightly os images, release os images, and haikuports builds.
+#
 version: "3.2"
 services:
   www:

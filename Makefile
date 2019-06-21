@@ -7,9 +7,11 @@ deploy:
 	sleep 5
 	DOMAIN=$(DOMAIN) docker stack deploy -c ci.yaml ci
 	DOMAIN=$(DOMAIN) docker stack deploy -c cdn.yaml cdn
+	DOMAIN=$(DOMAIN) docker stack deploy -c sysadmin.yaml sysadmin
 	#DOMAIN=$(DOMAIN) docker stack deploy -c core.yaml core
 clean:
 	#docker stack rm core
+	docker stack rm sysadmin
 	docker stack rm cdn
 	docker stack rm ci
 	sleep 5
