@@ -14,7 +14,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
+          cpus: '2.0'
           memory: 4G
         reservations:
           cpus: '0.25'
@@ -36,9 +36,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     networks:
       - ingress_cdn
     volumes:
@@ -57,9 +54,6 @@ services:
         limits:
           cpus: '0.50'
           memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     networks:
       - ingress_cdn
     volumes:
@@ -76,9 +70,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 128M
     networks:
       - default
     volumes:

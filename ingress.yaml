@@ -40,14 +40,10 @@ services:
         delay: 10s
     networks:
       - sysadmin
-  traefik_bootstrap:
-    image: traefik:latest
-    command: traefik storeconfig -c/traefik.toml
   traefik:
     # Traefik connects to docker and reads labels to form routes
     # Traefik also handles letsencrypt renewals
     image: traefik:latest
-    command: traefik storeconfig -c/traefik.toml
     deploy:
       replicas: 2
       placement:

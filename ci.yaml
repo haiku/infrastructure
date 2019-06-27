@@ -14,9 +14,6 @@ services:
         limits:
           cpus: '0.50'
           memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     networks:
       - ingress_ci
     volumes:
@@ -32,9 +29,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 4G
-        reservations:
-          cpus: '0.25'
-          memory: 512M
     depends_on:
       - postgres
     hostname: buildbot
