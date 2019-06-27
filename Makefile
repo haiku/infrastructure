@@ -2,6 +2,8 @@ DOMAIN=haiku-test.org
 default:
 	@echo "Usage: make (deploy|upgrade)"
 	exit 1
+bootstrap_kv:
+	docker run --rm --network ingress_sysadmin -v $(PWD)/data/traefik/traefik.toml:/traefik.toml -v infrastructure_traefik_acme:/acme traefik:latest storeconfig
 deploy:
 	DOMAIN=$(DOMAIN) docker stack deploy -c ingress.yaml ingress
 	sleep 5

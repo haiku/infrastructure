@@ -12,13 +12,42 @@
 #
 version: "3.2"
 services:
-  secure:
+  admin:
     image: alpine:latest
-    command: "yes"
+    command: "sleep 86400"
+    networks:
+      - ci
+      - core
+      - cdn
+      - sysadmin
+  etcd:
+    image: quay.io/coreos/etcd:latest
+    command: "etcd"
+    environment:
+      - ETCD_ADVERTISE_CLIENT_URLS=http://ingress_etcd:2379
+      - ETCD_NAME=ingress_etcd.1
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      #- ETCD_INITIAL_CLUSTER=http://ingress_etcd.1:2380
+      #- ETCD_INITIAL_CLUSTER_STATE=new
+      #- ETCD_INITIAL_CLUSTER_TOKEN=ingress-cluster-1
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role==manager]
+      update_config:
+        parallelism: 1
+        delay: 10s
+    networks:
+      - sysadmin
+  traefik_bootstrap:
+    image: traefik:latest
+    command: traefik storeconfig -c/traefik.toml
   traefik:
     # Traefik connects to docker and reads labels to form routes
     # Traefik also handles letsencrypt renewals
     image: traefik:latest
+    command: traefik storeconfig -c/traefik.toml
     deploy:
       replicas: 2
       placement:
@@ -62,3 +91,4 @@ networks:
     driver: overlay
   sysadmin:
     driver: overlay
+    attachable: true

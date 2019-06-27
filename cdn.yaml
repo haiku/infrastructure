@@ -52,7 +52,6 @@ services:
       - "traefik.basic.port=80"
   www:
     image: haiku/nginx
-    restart: on-failure
     deploy:
       resources:
         limits:
@@ -72,7 +71,6 @@ services:
       - "traefik.basic.port=80"
   repo-mirror:
     image: haiku/repo-mirror
-    restart: on-failure
     deploy:
       resources:
         limits:

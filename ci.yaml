@@ -80,7 +80,6 @@ services:
       - "0.0.0.0:5825:5825"
     volumes:
       - teleport:/var/teleport
-    restart: on-failure
   buildmaster_frontend:
     image: haikuports/buildmaster-frontend
     networks:

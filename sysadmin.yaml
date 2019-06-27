@@ -8,7 +8,6 @@ version: "3.2"
 services:
   node_exporter:
     image: haiku/node_exporter
-    restart: on-failure
     networks:
       - ingress_sysadmin
     volumes:
@@ -17,7 +16,6 @@ services:
     command: --path.procfs /host/proc --path.sysfs /host/sys
   prometheus:
     image: prom/prometheus
-    restart: on-failure
     networks:
       - ingress_sysadmin
     volumes:
@@ -25,7 +23,6 @@ services:
       - prometheus_data:/prometheus:z
   grafana:
     image: grafana/grafana
-    restart: on-failure
     networks:
       - ingress_sysadmin
     environment:
