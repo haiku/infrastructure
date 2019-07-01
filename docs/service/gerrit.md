@@ -8,6 +8,8 @@ As of Gerrit 2.15, users are "in" "noteDB"
 
 > WARNING: We don't fully understand how this stuff works (and documentation is sparse). Don't *push* changes.
 
+* Reference: https://blog.nanpuyue.com/2018/044.html
+
 00 is the last two digits of the account_id.  1000000 is the account_id
 
 ```
