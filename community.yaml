@@ -1,0 +1,41 @@
+#
+# Haiku's community resources
+#
+# Description:
+#   These containers manage the community facing systems such as the forums.
+#
+version: "3.2"
+services:
+  discourse:
+    image: haiku/discuss
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    networks:
+      - ingress_community
+    entrypoint: /shared/config.env && /sbin/boot
+    environment:
+      LANG: en_US.UTF-8
+      RAILS_ENV: production
+      UNICORN_WORKERS: 6
+      UNICORN_SIDEKIQS: 1
+      DOCKER_USE_HOSTNAME: "true"
+    volumes:
+      - discourse_shared:/shared:z
+      - discourse_logs:/var/log:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
+volumes:
+  discourse_shared:
+  discourse_logs:
+networks:
+  ingress_community:
+    external: true
+  ingress_support:
+    external: true

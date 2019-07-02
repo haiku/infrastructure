@@ -1,0 +1,101 @@
+#
+# Haiku's development resources
+#
+# Description:
+#   These containers provide backend support to various parts of our infrastructure.
+#   Things here should not be exposed via http/https
+#
+version: "3.2"
+services:
+  irker:
+    image: haiku/irker
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 16M
+        reservations:
+          cpus: '0.25'
+          memory: 8M
+  smtp:
+    image: mwader/postfix-relay
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 1G
+        reservations:
+          cpus: '0.15'
+          memory: 256M
+    volumes:
+      - smtp_keys:/etc/opendkim/keys:z
+    environment:
+      - POSTFIX_myhostname=walter.haiku-os.org
+      - OPENDKIM_DOMAINS=walter.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+  etcd:
+    image: quay.io/coreos/etcd:latest
+    command: "etcd"
+    environment:
+      - ETCD_ADVERTISE_CLIENT_URLS=http://support_etcd:2379
+      - ETCD_NAME=support_etcd
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      #- ETCD_INITIAL_CLUSTER=http://ingress_etcd.1:2380
+      #- ETCD_INITIAL_CLUSTER_STATE=new
+      #- ETCD_INITIAL_CLUSTER_TOKEN=ingress-cluster-1
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role==manager]
+      update_config:
+        parallelism: 1
+        delay: 10s
+  smf:
+    image: zixia/simple-mail-forwarder
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2G
+        reservations:
+          cpus: '0.15'
+          memory: 128M
+    environment:
+      - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com
+    ports:
+      - "0.0.0.0:25:25"
+  postgres:
+    image: postgres:9.6
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    environment:
+      POSTGRES_USER: "baron"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:4.0
+    command: redis-server --appendonly yes
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    volumes:
+      - redis_data:/data:z
+volumes:
+  smtp_keys:
+  postgres_data:
+  redis_data:
+networks:
+  default:
+    driver: overlay
+    attachable: true

@@ -17,28 +17,10 @@ services:
     command: "sleep 86400"
     networks:
       - ci
-      - core
+      - community
       - cdn
-      - sysadmin
-  etcd:
-    image: quay.io/coreos/etcd:latest
-    command: "etcd"
-    environment:
-      - ETCD_ADVERTISE_CLIENT_URLS=http://ingress_etcd:2379
-      - ETCD_NAME=ingress_etcd.1
-      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
-      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
-      #- ETCD_INITIAL_CLUSTER=http://ingress_etcd.1:2380
-      #- ETCD_INITIAL_CLUSTER_STATE=new
-      #- ETCD_INITIAL_CLUSTER_TOKEN=ingress-cluster-1
-    deploy:
-      replicas: 1
-      placement:
-        constraints: [node.role==manager]
-      update_config:
-        parallelism: 1
-        delay: 10s
-    networks:
+      - dev
+      - support_default
       - sysadmin
   traefik:
     # Traefik connects to docker and reads labels to form routes
@@ -63,9 +45,11 @@ services:
         delay: 5s
     networks:
       - default
+      - support_default
       - ci
-      - core
+      - community
       - cdn
+      - dev
       - sysadmin
     ports:
       - "0.0.0.0:80:80"
@@ -79,11 +63,15 @@ services:
 volumes:
   traefik_acme:
 networks:
-  core:
+  support_default:
+    external: true
+  dev:
     driver: overlay
   cdn:
     driver: overlay
   ci:
+    driver: overlay
+  community:
     driver: overlay
   sysadmin:
     driver: overlay

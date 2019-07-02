@@ -36,7 +36,22 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/grafana/"
       - "traefik.basic.port=3000"
+  fathom:
+    image: usefathom/fathom:latest
+    depends_on:
+      - postgres
+    networks:
+      - ingress_sysadmin
+    restart: on-failure
+    volumes:
+      - fathom_secrets:/var/lib/fathom
+    command: /app/fathom --config=/var/lib/fathom/config.env server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
+      - "traefik.basic.port=8080"
 volumes:
+  fathom_secrets:
   prometheus_data:
   grafana_data:
 networks:

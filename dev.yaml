@@ -1,0 +1,196 @@
+#
+# Haiku's development resources
+#
+# Description:
+#   These containers manage the day to day development of Haiku such as issue
+#   trackers, code review, i18n, and other developer focused tools.
+#
+version: "3.2"
+services:
+  gerrit:
+    image: haiku/gerrit:2.16
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    networks:
+      - ingress_dev
+    depends_on:
+      - smtp
+      - irker
+    # Disable in test environments
+    ports:
+      - "0.0.0.0:22:29418"
+    volumes:
+      - gerrit_data:/var/gerrit/review_site:z
+      - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
+    environment:
+      AUTH_TYPE: OAUTH
+      GITWEB_TYPE: cgit
+      JAVA_HEAPLIMIT: 1024m
+      # OAUTH_GITHUB_CLIENT_ID: XXXONBOOTSTRAPXXX
+      # OAUTH_GITHUB_CLIENT_SECRET: XXXONBOOTSTRAPXX
+      SMTP_SERVER: smtp
+      SMTP_SERVER_PORT: 25
+      SMTP_FROM: Gerrit <review@review.haiku-os.org>
+      SMTP_CONNECT_TIMEOUT: 30
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:review.${DOMAIN}"
+      - "traefik.basic.port=8080"
+  cgit:
+    image: haiku/cgit
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_dev
+    volumes:
+      - gerrit_data:/var/git
+    environment:
+      HTTP_HOST: "git.haiku-os.org"
+      CGIT_TITLE: "Haiku's repositories"
+      CGIT_DESC: 'Presented by cgit on Docker'
+      # check section-from-path in cgit docs
+      CGIT_VROOT: '/'
+      CGIT_SECTION_FROM_STARTPATH: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:cgit.${DOMAIN},git.${DOMAIN}"
+      - "traefik.basic.frontend.redirect.regex=cgit.${DOMAIN}/(.*)"
+      - "traefik.basic.frontend.redirect.replacement=git.${DOMAIN}/$$1"
+      - "traefik.basic.port=80"
+  trac:
+    image: haiku/trac
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.15'
+          memory: 512M
+    networks:
+      - ingress_dev
+    volumes:
+      - trac_data:/var/trac:z
+    depends_on:
+      - postgres
+      - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:dev.${DOMAIN}"
+      - "traefik.basic.port=80"
+      - "traefik.frontend.rateLimit.extractorFunc=client.ip"
+      - "traefik.frontend.rateLimit.rateSet.r1.period=10s"
+      - "traefik.frontend.rateLimit.rateSet.r1.average=75"
+      - "traefik.frontend.rateLimit.rateSet.r1.burst=150"
+  pootle:
+    image: haiku/pootle
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 48M
+    networks:
+      - ingress_dev
+    volumes:
+      - pootle_data:/var/pootle:z
+    depends_on:
+      - postgres
+      - redis
+      - smtp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/pootle/"
+      - "traefik.basic.port=80"
+  userguide:
+    image: haiku/userguide
+    depends_on:
+      - postgres
+      - smtp
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - ingress_dev
+    volumes:
+      - userguide_data:/var/userguide:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/userguide/"
+      - "traefik.basic.port=80"
+  www-i18n:
+    image: dragas/thttpd
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - ingress_dev
+    volumes:
+      - ./data/static-html/i18n:/var/www/http:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN}"
+      # redirect /pootle & /userguide to forward to proper containers
+      - "traefik.basic.frontend.redirect.regex=i18n.${DOMAIN}/(pootle|userguide)$$"
+      - "traefik.basic.frontend.redirect.replacement=i18n.${DOMAIN}/$$1/"
+      - "traefik.basic.port=80"
+  haikudepotserver:
+    image: haiku/haikudepotserver:1.0.112
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.50'
+          memory: 1G
+    networks:
+      - ingress_dev
+    # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
+    links:
+      - traefik:eu.hpkg.haiku-os.org
+    volumes:
+      - hds_secrets:/secrets:z
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
+      - "traefik.basic.port=8080"
+volumes:
+  gerrit_data:
+  pootle_data:
+  postgres_data:
+  userguide_data:
+  trac_data:
+  redis_data:
+  hds_secrets:
+networks:
+  ingress_support:
+    external: true
+  ingress_dev:
+    external: true

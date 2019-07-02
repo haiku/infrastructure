@@ -77,7 +77,26 @@ services:
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
       - 12000:12000
+  portsmirror:
+    image: haiku/ports-mirror
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - ingress_cdn
+    volumes:
+      - ports_mirror:/ports-mirror
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
+      - "traefik.basic.port=80"
 volumes:
+  ports_mirror:
   minio_config:
   s3_secrets:
   s3_data:
