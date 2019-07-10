@@ -17,79 +17,33 @@ resources:
 #      user: haiku-ci-bot
 #      password: thisisastupidfield
 #      usetls: false
-#  - name: nightly-s3
-#    type: s3
-#    bucket: haiku-nightly
-#    access_key_id: ((s3key))
-#    secret_access_key: ((s3secret))
-#    endpoint: https://s3.wasabisys.com
-  - name: buildtools-git
-    type: git
-    icon: git
-    source:
-      uri: https://review.haiku-os.org/buildtools.git
+  - name: nightly-s3
+    type: s3
+    bucket: haiku-nightly
+    access_key_id: ((s3key))
+    secret_access_key: ((s3secret))
+    endpoint: https://s3.wasabisys.com
   - name: haiku-git
     type: git
     icon: git
     source:
       uri: https://review.haiku-os.org/haiku.git
-
-# Common Tasks
-task-build-jam: &task-build-jam
-  platform: linux
-  image_resource:
-    type: registry-image
-    source: { repository: haiku/general-worker }
-  inputs:
-    - name: buildtools-git
-  run:
-    path: /bin/sh
-    args:
-      - -c
-      - |
-        cd buildtools-git/jam
-        make -j2
-        mv bin.linuxx86/jam ../../jam
-  outputs:
-    - name: jam
-
-task-build-crosstools: &task-build-crosstools
-  platform: linux
-  image_resource:
-    type: registry-image
-    source: { repository: haiku/general-worker }
-  inputs:
-    - name: haiku-git
-    - name: buildtools-git
-  run:
-    path: /bin/sh
-    args:
-      - -c
-      - |
-        ls -la
-        cd crosstools.((arch))
-        ../haiku-git/configure --build-cross-tools ((arch)) ../buildtools-git -j2
-  outputs:
-    - name: crosstools.((arch))
+      branch: ((branch))
 
 task-build-anyboot: &task-build-anyboot
   platform: linux
   image_resource:
     type: registry-image
-    source: { repository: haiku/general-worker }
+    source: { repository: haiku/toolchain-worker }
   inputs:
     - name: haiku-git
-    - name: crosstools.((arch))
-    - name: jam
   run:
     path: /bin/bash
     args:
       - -c
       - |
-        cp jam/jam /usr/local/bin/jam
-        cp -R crosstools.((arch))/* generated.((arch))/
         cd generated.((arch))
-        ../haiku-git/configure --update
+        ../haiku-git/configure --cross-tools-prefix /toolchains/bin/((arch))-unknown-haiku-
         jam -q @((profile))-anyboot
   outputs:
     - name: generated.((arch))
@@ -99,18 +53,8 @@ jobs:
   - name: haiku-((branch))-((arch))
     public: true
     plan:
-      - in_parallel:
-        - get: haiku-git
-          trigger: false
-        - get: buildtools-git
-          trigger: true
-      - in_parallel:
-        - task: compile jam
-          config:
-            << : *task-build-jam
-        - task: compile ((arch)) crosstools 
-          config:
-            << : *task-build-crosstools
+      - get: haiku-git
+        trigger: true
       - task: build ((branch)) anyboot
         config:
           << : *task-build-anyboot
