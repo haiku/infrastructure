@@ -21,16 +21,18 @@ resources:
     icon: git
     source:
       uri: https://review.haiku-os.org/buildtools.git
+      branch: ((branch))
   - name: haiku-git
     type: git
     icon: git
     source:
       uri: https://review.haiku-os.org/haiku.git
+      branch: ((branch))
   - name: haiku-toolchain-container
     type: docker-image
     source:
       email: contact@haiku-inc.org
-      username: kallisti5
+      username: ((docker-hub-user))
       password: ((docker-hub-password))
       repository: haiku/toolchain-worker
 
@@ -92,13 +94,13 @@ jobs:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.arm
-      - task: compile m68k crosstools 
-        params:
-          TOOLARCH: m68k
-        config:
-          << : *task-build-crosstools
-          outputs:
-            - name: crosstools.m68k
+      #- task: compile m68k crosstools
+      #  params:
+      #    TOOLARCH: m68k
+      #  config:
+      #    << : *task-build-crosstools
+      #    outputs:
+      #      - name: crosstools.m68k
       - task: compile ppc crosstools 
         params:
           TOOLARCH: ppc
@@ -146,6 +148,14 @@ jobs:
           platform: linux
           inputs:
             - name: jam
+            - name: crosstools.arm
+            #- name: crosstools.m68k
+            - name: crosstools.ppc
+            - name: crosstools.riscv64
+            - name: crosstools.sparc
+            - name: crosstools.x86
+            - name: crosstools.x86_64
+            - name: crosstools.x86_gcc2
           outputs:
             - name: container-context
           image_resource:
