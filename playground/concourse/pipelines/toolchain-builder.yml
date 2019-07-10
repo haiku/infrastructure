@@ -1,0 +1,170 @@
+---
+resource_types:
+  - name: irc-notification
+    type: docker-image
+    source:
+      repository: flavorjones/irc-notification-resource
+resources:
+#  - name: haiku-irc
+#    type: irc-notification
+#    icon: bullhorn
+#    source:
+#      server: irc.freenode.net
+#      port: 6667
+#      channel: "#haiku"
+#      join: true
+#      user: haiku-ci-bot
+#      password: thisisastupidfield
+#      usetls: false
+  - name: buildtools-git
+    type: git
+    icon: git
+    source:
+      uri: https://review.haiku-os.org/buildtools.git
+  - name: haiku-git
+    type: git
+    icon: git
+    source:
+      uri: https://review.haiku-os.org/haiku.git
+  - name: haiku-toolchain-container
+    type: docker-image
+    source:
+      email: contact@haiku-inc.org
+      username: kallisti5
+      password: ((docker-hub-password))
+      repository: haiku/toolchain-worker
+
+# Common Tasks
+task-build-jam: &task-build-jam
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/general-worker }
+  inputs:
+    - name: buildtools-git
+  run:
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        pwd
+        ls -la
+        cd buildtools-git/jam
+        make -j2
+        mv bin.linuxx86/jam ../../jam
+  outputs:
+    - name: jam
+
+task-build-crosstools: &task-build-crosstools
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/general-worker }
+  inputs:
+    - name: haiku-git
+    - name: buildtools-git
+  run: 
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        ls -la
+        cd crosstools.${TOOLARCH}
+        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j2
+
+# Jobs
+jobs:
+  - name: buildtools-((branch))
+    public: true
+    plan:
+      - in_parallel:
+        - get: haiku-git
+          trigger: false
+        - get: buildtools-git
+          trigger: true
+      - task: compile jam
+        config:
+          << : *task-build-jam
+      - task: compile arm crosstools 
+        params:
+          TOOLARCH: arm
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.arm
+      - task: compile m68k crosstools 
+        params:
+          TOOLARCH: m68k
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.m68k
+      - task: compile ppc crosstools 
+        params:
+          TOOLARCH: ppc
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.ppc
+      - task: compile riscv64 crosstools 
+        params:
+          TOOLARCH: riscv64
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.riscv64
+      - task: compile sparc crosstools 
+        params:
+          TOOLARCH: sparc
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.sparc
+      - task: compile x86 crosstools 
+        params:
+          TOOLARCH: x86
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86
+      - task: compile x86_64 crosstools 
+        params:
+          TOOLARCH: x86_64
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86_64
+      - task: compile x86_gcc2 crosstools 
+        params:
+          TOOLARCH: x86_gcc2
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86_gcc2
+      - task: prepare container context
+        config:
+          platform: linux
+          inputs:
+            - name: jam
+          outputs:
+            - name: container-context
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/general-worker }
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                mkdir container-context/jam
+                cp jam/jam container-context/jam
+                mkdir container-context/toolchains
+                cp -R crosstools.*/cross-tools-* container-context/toolchains/
+                echo "FROM haiku/general-worker" > container-context/Dockerfile
+                echo "ADD jam/jam /usr/bin/jam" >> container-context/Dockerfile
+                echo "RUN mkdir /toolchains" >> container-context/Dockerfile
+                echo "ADD toolchains/* /toolchains" >> container-context/Dockerfile
+                find container-context
+      - put: haiku-toolchain-container
+        params:
+          build: container-context
