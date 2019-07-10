@@ -24,6 +24,14 @@ if [ -z "$S3_SECRET" ]; then
 	echo "S3_SECRET is undefined in provided secrets!"
 	exit 1
 fi
+if [ -z "$DOCKER_HUB_USER" ]; then
+	echo "DOCKER_HUB_USER is undefined in provided secrets!"
+	exit 1
+fi
+if [ -z "$DOCKER_HUB_PASSWORD" ]; then
+	echo "DOCKER_HUB_USER is undefined in provided secrets!"
+	exit 1
+fi
 
 CONCOURSE_URL="http://localhost:8080"
 FLY_CLI=fly
@@ -35,6 +43,10 @@ if [ $BRANCH == "master" ]; then
 else
 	PROFILE="release"
 fi
+
+
+echo "Deploy toolchain builder..."
+$FLY_CLI -t $TEAM set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -v docker-hub-user=$DOCKER_HUB_USER -v docker-hub-password=$DOCKER_HUB_PASSWORD -c pipelines/toolchain-builder.yml
 
 echo "Flight ready for boarding. Using template: haiku-$PROFILE.yml"
 for ARCH in $ARCHES; do
