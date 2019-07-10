@@ -173,7 +173,7 @@ jobs:
                 echo "FROM haiku/general-worker" > container-context/Dockerfile
                 echo "ADD jam/jam /usr/bin/jam" >> container-context/Dockerfile
                 echo "RUN mkdir /toolchains" >> container-context/Dockerfile
-                echo "ADD toolchains/* /toolchains" >> container-context/Dockerfile
+                echo "ADD toolchains/* /toolchains/" >> container-context/Dockerfile
                 find container-context
       - put: haiku-toolchain-container
         params:
