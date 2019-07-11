@@ -72,7 +72,7 @@ task-build-crosstools: &task-build-crosstools
       - |
         ls -la
         cd crosstools.${TOOLARCH}
-        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j2
+        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j4
 
 # Jobs
 jobs:
@@ -147,6 +147,8 @@ jobs:
         config:
           platform: linux
           inputs:
+            - name: buildtools-git
+            - name: haiku-git
             - name: jam
             - name: crosstools.arm
             #- name: crosstools.m68k
@@ -166,6 +168,13 @@ jobs:
             args:
               - -c
               - |
+                BUILDTOOLS_SHA=$(git -C buildtools-git rev-parse HEAD)
+                HAIKU_SHA=$(git -C haiku-git rev-parse HEAD)
+                echo "{" > container-context/labels.json
+                echo "  \"buildtools\": \"$BUILDTOOLS_SHA\"," >> container-context/labels.json
+                echo "  \"haiku\": \"$HAIKU_SHA\"" >> container-context/labels.json
+                echo "}" >> container-context/labels.json
+                echo "$BUILDTOOLS_SHA" > container-context/tag
                 mkdir container-context/jam
                 cp jam/jam container-context/jam
                 mkdir container-context/toolchains
@@ -177,4 +186,6 @@ jobs:
                 find container-context
       - put: haiku-toolchain-container
         params:
+          tag_file: container-context/tag
+          labels_file: container-context/labels.json
           build: container-context
