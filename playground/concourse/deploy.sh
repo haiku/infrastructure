@@ -1,8 +1,15 @@
 #!/bin/bash
 
 # Create-team also logs in.
-./create-team.sh test continuous
-./create-team.sh test r1beta1
+fly -t continuous status
+if [[ $? -ne 0 ]]; then
+	./create-team.sh test continuous
+fi
+
+fly -t r1beta1 status
+if [[ $? -ne 0 ]]; then
+	./create-team.sh test r1beta1
+fi
 
 # Deploy pipelines
 ./apply-pipeline.sh continuous master secrets.source
