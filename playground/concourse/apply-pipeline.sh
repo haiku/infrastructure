@@ -36,12 +36,12 @@ fi
 CONCOURSE_URL="http://localhost:8080"
 FLY_CLI=fly
 
-ARCHES="x86_64 arm sparc riscv64 ppc m68k"
-
 if [ $BRANCH == "master" ]; then
 	PROFILE="nightly"
+	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
 else
 	PROFILE="release"
+	ARCHES="x86_64 x86_gcc2h"
 fi
 
 
