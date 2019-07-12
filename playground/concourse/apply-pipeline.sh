@@ -24,6 +24,10 @@ if [ -z "$S3_SECRET" ]; then
 	echo "S3_SECRET is undefined in provided secrets!"
 	exit 1
 fi
+if [ -z "$S3_ENDPOINT" ]; then
+	echo "S3_ENDPOINT is undefined in provided secrets!"
+	exit 1
+fi
 if [ -z "$DOCKER_HUB_USER" ]; then
 	echo "DOCKER_HUB_USER is undefined in provided secrets!"
 	exit 1
@@ -48,7 +52,7 @@ fi
 echo "Deploy toolchain builder..."
 $FLY_CLI -t $TEAM set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -v docker-hub-user=$DOCKER_HUB_USER -v docker-hub-password=$DOCKER_HUB_PASSWORD -c pipelines/toolchain-builder.yml
 
-echo "Flight ready for boarding. Using template: haiku-$PROFILE.yml"
+echo "Flight ready for boarding..."
 for ARCH in $ARCHES; do
-	$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-$PROFILE.yml
+	$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-release.yml
 done

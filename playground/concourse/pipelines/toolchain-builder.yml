@@ -28,13 +28,20 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-  - name: haiku-toolchain-container
+  - name: toolchain-container-((branch))-sha
     type: docker-image
     source:
       email: contact@haiku-inc.org
       username: ((docker-hub-user))
       password: ((docker-hub-password))
-      repository: haiku/toolchain-worker
+      repository: haiku/toolchain-worker-((branch))
+  - name: toolchain-container-((branch))-latest
+    type: docker-image
+    source:
+      email: contact@haiku-inc.org
+      username: ((docker-hub-user))
+      password: ((docker-hub-password))
+      repository: haiku/toolchain-worker-((branch))
 
 # Common Tasks
 task-build-jam: &task-build-jam
@@ -171,10 +178,12 @@ jobs:
                 BUILDTOOLS_SHA=$(git -C buildtools-git rev-parse HEAD)
                 HAIKU_SHA=$(git -C haiku-git rev-parse HEAD)
                 echo "{" > container-context/labels.json
+                echo "  \"build_date\": \"$(date)\"," >> container-context/labels.json
                 echo "  \"buildtools\": \"$BUILDTOOLS_SHA\"," >> container-context/labels.json
                 echo "  \"haiku\": \"$HAIKU_SHA\"" >> container-context/labels.json
                 echo "}" >> container-context/labels.json
                 echo "$BUILDTOOLS_SHA" > container-context/tag
+                echo "latest" > container-context/latesttag
                 mkdir container-context/jam
                 cp jam/jam container-context/jam
                 mkdir container-context/toolchains
@@ -184,8 +193,13 @@ jobs:
                 echo "RUN mkdir /toolchains" >> container-context/Dockerfile
                 echo "ADD toolchains/* /toolchains/" >> container-context/Dockerfile
                 find container-context
-      - put: haiku-toolchain-container
+      - put: toolchain-container-((branch))-sha
         params:
           tag_file: container-context/tag
+          labels_file: container-context/labels.json
+          build: container-context
+      - put: toolchain-container-((branch))-latest
+        params:
+          tag_file: container-context/latesttag
           labels_file: container-context/labels.json
           build: container-context

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $# -ne 1 ]]; then
+	echo "Usage: $0 <secrets>"
+	exit 1
+fi
+
 # Create-team also logs in.
 fly -t continuous status
 if [[ $? -ne 0 ]]; then
@@ -12,5 +17,5 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Deploy pipelines
-./apply-pipeline.sh continuous master secrets.source
-./apply-pipeline.sh r1beta1 r1beta1 secrets.source
+./apply-pipeline.sh continuous master $1
+./apply-pipeline.sh r1beta1 r1beta1 $1
