@@ -79,7 +79,7 @@ task-build-crosstools: &task-build-crosstools
       - |
         ls -la
         cd crosstools.${TOOLARCH}
-        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j4
+        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j2
 
 # Jobs
 jobs:

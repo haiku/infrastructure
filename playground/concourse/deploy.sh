@@ -11,6 +11,11 @@ if [[ $? -ne 0 ]]; then
 	./create-team.sh test continuous
 fi
 
+fly -t nightly status
+if [[ $? -ne 0 ]]; then
+	./create-team.sh test nightly
+fi
+
 fly -t r1beta1 status
 if [[ $? -ne 0 ]]; then
 	./create-team.sh test r1beta1
@@ -18,4 +23,5 @@ fi
 
 # Deploy pipelines
 ./apply-pipeline.sh continuous master $1
+./apply-pipeline.sh nightly master $1
 ./apply-pipeline.sh r1beta1 r1beta1 $1
