@@ -16,10 +16,17 @@ resources:
 #      user: haiku-ci-bot
 #      password: thisisastupidfield
 #      usetls: false
-  - name: release-wasabi
+  - name: upload-image
     type: s3
     source:
       bucket: haiku-((profile))-test
+      access_key_id: ((s3key))
+      secret_access_key: ((s3secret))
+      endpoint: ((s3endpoint))
+  - name: upload-repo
+    type: s3
+    source:
+      bucket: haiku-repositories-test
       access_key_id: ((s3key))
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
@@ -29,36 +36,32 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-
-task-build-anyboot: &task-build-anyboot
-  platform: linux
-  image_resource:
-    type: registry-image
-    source: { repository: haiku/toolchain-worker-((branch)) }
-  inputs:
-    - name: haiku-git
-  outputs:
-    - name: generated.((arch))
-  run:
-    path: /bin/bash
-    args:
-      - -c
-      - |
-        cd generated.((arch))
-        TOOLCHAIN_PREFIX=/toolchains/bin/((arch))-unknown-haiku-
-        ../haiku-git/configure --cross-tools-prefix $TOOLCHAIN_PREFIX
-        jam -q @((profile))-anyboot
-
 # Jobs
 jobs:
-  - name: haiku-((branch))-((arch))
+  - name: image-((branch))-((arch))
     public: true
     plan:
       - get: haiku-git
-        trigger: true
+        trigger: false
       - task: build ((branch)) anyboot
         config:
-          << : *task-build-anyboot
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/toolchain-worker-((branch)) }
+          inputs:
+            - name: haiku-git
+          outputs:
+            - name: generated.((arch))
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                cd generated.((arch))
+                TOOLCHAIN_PREFIX=/toolchains/bin/((arch))-unknown-haiku-
+                ../haiku-git/configure --cross-tools-prefix $TOOLCHAIN_PREFIX
+                jam -q @((profile))-anyboot
       - task: package ((branch)) anyboot
         config:
           platform: linux
@@ -75,12 +78,60 @@ jobs:
             args:
               - -c
               - |
-                RELEASE=git -C haiku-git tag -l --points-at HEAD
+                RELEASE=$(git -C haiku-git tag -l --points-at HEAD)
                 cp generated.((arch))/haiku-((profile))-anyboot.iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-anyboot.iso
                 cp haiku-git/ReadMe.md artifacts.((arch))/ReadMe.md
                 cd artifacts.((arch))
                 zip -9 haiku-((branch))-$RELEASE-((arch))-anyboot.zip ReadMe.md artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-anyboot.iso
-      - put: release-wasabi
+      - put: upload-image
         params:
           file: artifacts.((arch))/*.zip
+          acl: public-read
+  - name: repo-((branch))-((arch))
+    public: true
+    plan:
+      - get: haiku-git
+      - task: build ((branch)) repository
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/toolchain-worker-((branch)) }
+          inputs:
+            - name: haiku-git
+          outputs:
+            - name: generated.((arch))
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                RELEASE=$(git -C haiku-git tag -l --points-at HEAD)
+                TOOLCHAIN_PREFIX=/toolchains/bin/((arch))-unknown-haiku-
+                ../haiku-git/configure --cross-tools-prefix $TOOLCHAIN_PREFIX
+                jam -q @((profile))-raw <repository>Haiku
+      - task: prepare ((branch)) repository
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/generic-worker }
+          inputs:
+            - name: haiku-git
+            - name: generated.((arch))
+          outputs:
+            - name: repository.((arch))
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                REPODIR="generated.((arch))/objects/haiku/$targetArch/packaging/repositories/Haiku"
+                VERSION=$(basename $REPODIR/packages/haiku-*.hpkg | cut -d- -f2)
+                TARGET_REPO="repository.((arch))/((arch))/$VERSION"
+                mkdir -p $TARGET_REPO
+                cp -R $REPODIR $TARGET_REPO
+      - put: upload-repo
+        params:
+          file: repository.((arch))/((arch))/*
           acl: public-read
