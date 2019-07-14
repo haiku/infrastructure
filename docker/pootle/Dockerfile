@@ -43,7 +43,7 @@ RUN apt-get update && \
                         supervisor
 
 # Create a working jam
-RUN git clone https://git.haiku-os.org/buildtools
+RUN git clone --depth 1 https://review.haiku-os.org/buildtools
 WORKDIR /app/buildtools/jam
 RUN make
 RUN ./jam0 install

@@ -12,6 +12,7 @@ SYNC_EMAIL_SENDER_EMAIL = "noreply@haiku-os.org"
 SYNC_EMAIL_SENDER_LINE = "Haiku Pootle Sync <noreply@haiku-os.org>"
 SYNC_EMAIL_RECEIVER_EMAIL = ["haiku-i18n@freelists.org", "haiku-sysadmin@freelists.org"]
 SYNC_EMAIL_RECEIVER_LINE = "haiku-i18n@freelists.org, haiku-sysadmin@freelists.org"
+SYNC_EMAIL_SERVER = "infrastructure_smtp_1_dd5b55c358b4"
 
 REPOSITORY_DIR = "/var/pootle/repository"
 TEMPLATES_DIR = os.path.join(REPOSITORY_DIR, "generated/objects/catalogs")
@@ -33,7 +34,7 @@ class Step:
     def execute(self):
         try:
             print("Executing step %s" % self.name)
-            self.output = subprocess.check_output(self.command, stderr=subprocess.STDOUT, cwd=self.work_dir)
+            self.output = subprocess.check_output(self.command, stderr=subprocess.STDOUT, cwd=self.work_dir).decode("utf-8")
             self.return_code = 0
         except subprocess.CalledProcessError as e:
             self.output = e.output
@@ -103,7 +104,7 @@ with open(SYNC_STATUS_OUTPUT_FILE, "w") as f:
 template = template_env.get_template("synchronize-email-template.txt")
 email_message = template.render(sender=SYNC_EMAIL_SENDER_EMAIL, receiver=SYNC_EMAIL_RECEIVER_LINE, lastrun_date=datetime.datetime.now(), steps=step_list)
 try:
-   smtp = smtplib.SMTP('infrastructure_smtp_1')
+   smtp = smtplib.SMTP(SYNC_EMAIL_SERVER)
    smtp.sendmail(SYNC_EMAIL_SENDER_EMAIL, SYNC_EMAIL_RECEIVER_EMAIL, email_message)
    print "Successfully sent email"
 except smtplib.SMTPException:
