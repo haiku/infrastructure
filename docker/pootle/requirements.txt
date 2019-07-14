@@ -13,3 +13,6 @@ python-levenshtein==0.12.0
 
 # Additional package for the synchronization script
 jinja2
+
+# Fix redis to 2.10.6 (see https://github.com/translate/pootle/issues/6887)
+redis==2.10.6
