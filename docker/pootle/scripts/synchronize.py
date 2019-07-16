@@ -12,7 +12,7 @@ SYNC_EMAIL_SENDER_EMAIL = "noreply@haiku-os.org"
 SYNC_EMAIL_SENDER_LINE = "Haiku Pootle Sync <noreply@haiku-os.org>"
 SYNC_EMAIL_RECEIVER_EMAIL = ["haiku-i18n@freelists.org", "haiku-sysadmin@freelists.org"]
 SYNC_EMAIL_RECEIVER_LINE = "haiku-i18n@freelists.org, haiku-sysadmin@freelists.org"
-SYNC_EMAIL_SERVER = "infrastructure_smtp_1_dd5b55c358b4"
+SYNC_EMAIL_SERVER = "smtp"
 
 REPOSITORY_DIR = "/var/pootle/repository"
 TEMPLATES_DIR = os.path.join(REPOSITORY_DIR, "generated/objects/catalogs")
@@ -97,8 +97,8 @@ for step in step_list:
 template_loader = jinja2.FileSystemLoader(searchpath=SYNC_STATUS_TEMPLATE_DIR)
 template_env = jinja2.Environment(loader=template_loader)
 template = template_env.get_template("synchronize-template.html")
-with open(SYNC_STATUS_OUTPUT_FILE, "w") as f:
-    f.write(template.render(lastrun_date=datetime.datetime.now(), steps=step_list))
+with open(SYNC_STATUS_OUTPUT_FILE, "w" ) as f:
+    f.write(template.render(lastrun_date=datetime.datetime.now(), steps=step_list).encode("utf-8"))
 
 # Log through e-mail
 template = template_env.get_template("synchronize-email-template.txt")
