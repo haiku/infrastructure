@@ -5,17 +5,17 @@ resource_types:
     source:
       repository: flavorjones/irc-notification-resource
 resources:
-  - name: haiku-irc
-    type: irc-notification
-    icon: bullhorn
-    source:
-      server: irc.freenode.net
-      port: 6667
-      channel: "#haiku"
-      join: true
-      user: haiku-ci-bot
-      password: thisisastupidfield
-      usetls: false
+#  - name: haiku-irc
+#    type: irc-notification
+#    icon: bullhorn
+#    source:
+#      server: irc.freenode.net
+#      port: 6667
+#      channel: "#haiku"
+#      join: true
+#      user: haiku-ci-bot
+#      password: thisisastupidfield
+#      usetls: false
   - name: haiku-git
     type: git
     icon: git
@@ -52,7 +52,7 @@ jobs:
       - task: build ((branch)) anyboot
         config:
           << : *task-build-anyboot
-      - put: haiku-irc
-        params:
-          message: >
-            Haiku build ${BUILD_ID} of ((branch)) ((arch)) is complete! ${BUILD_URL}
+#      - put: haiku-irc
+#        params:
+#          message: >
+#            Haiku build ${BUILD_ID} of ((branch)) ((arch)) is complete! ${BUILD_URL}
