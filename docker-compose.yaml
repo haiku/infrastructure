@@ -398,3 +398,4 @@ volumes:
   discourse_shared:
   discourse_logs:
   smtp_keys:
+  concourse_keys:
