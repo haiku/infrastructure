@@ -86,7 +86,6 @@ jobs:
       - put: upload-image
         params:
           file: artifacts.((arch))/*.zip
-          acl: public-read
   - name: repo-((branch))-((arch))
     public: true
     plan:
@@ -108,8 +107,9 @@ jobs:
               - |
                 RELEASE=$(git -C haiku-git tag -l --points-at HEAD)
                 TOOLCHAIN_PREFIX=/toolchains/bin/((arch))-unknown-haiku-
+                cd generated.((arch))
                 ../haiku-git/configure --cross-tools-prefix $TOOLCHAIN_PREFIX
-                jam -q @((profile))-raw <repository>Haiku
+                jam -q @((profile))-raw build \<repository\>Haiku
       - task: prepare ((branch)) repository
         config:
           platform: linux
@@ -134,4 +134,3 @@ jobs:
       - put: upload-repo
         params:
           file: repository.((arch))/((arch))/*
-          acl: public-read
