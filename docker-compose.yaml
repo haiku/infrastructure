@@ -275,6 +275,23 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
       - "traefik.basic.port=8080"
+  concourse:
+    image: haiku/concourse-web
+    command: web
+    environment:
+      CONCOURSE_EXTERNAL_URL: https://ci.haiku-os.org
+      #CONCOURSE_EXTERNAL_URL: https://build.haiku-os.org/concourse/
+      CONCOURSE_SESSION_SIGNING_KEY: /keys/session_signing_key
+      CONCOURSE_TSA_HOST_KEY: /keys/tsa_host_key
+      CONCOURSE_TSA_AUTHORIZED_KEYS: /keys/authorized_worker_keys
+    depends_on:
+      - postgres
+    volumes:
+      - concourse_keys:/keys
+    labels:
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:ci.${DOMAIN}"
+      - "traefik.basic.port=8080"
   buildbot:
     image: haiku/buildbot-master
     depends_on:
