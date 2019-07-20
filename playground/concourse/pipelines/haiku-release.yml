@@ -18,6 +18,7 @@ resources:
 #      usetls: false
   - name: upload-image
     type: s3
+    icon: minidisc
     source:
       bucket: haiku-((profile))-test
       access_key_id: ((s3key))
@@ -25,6 +26,7 @@ resources:
       endpoint: ((s3endpoint))
   - name: upload-repo
     type: s3
+    icon: package
     source:
       bucket: haiku-repositories-test
       access_key_id: ((s3key))
