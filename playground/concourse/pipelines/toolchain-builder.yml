@@ -1,4 +1,10 @@
 ---
+roles:
+  - name: owner
+    github:
+      teams: ["haiku:infrastructure"]
+    local:
+      users: ["admin"]
 resource_types:
   - name: irc-notification
     type: docker-image
@@ -30,6 +36,7 @@ resources:
       branch: ((branch))
   - name: toolchain-container-((branch))-sha
     type: docker-image
+    icon: docker
     source:
       email: contact@haiku-inc.org
       username: ((docker-hub-user))
@@ -37,12 +44,12 @@ resources:
       repository: haiku/toolchain-worker-((branch))
   - name: toolchain-container-((branch))-latest
     type: docker-image
+    icon: docker
     source:
       email: contact@haiku-inc.org
       username: ((docker-hub-user))
       password: ((docker-hub-password))
       repository: haiku/toolchain-worker-((branch))
-
 # Common Tasks
 task-build-jam: &task-build-jam
   platform: linux

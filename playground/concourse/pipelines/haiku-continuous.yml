@@ -1,4 +1,10 @@
 ---
+roles:
+  - name: owner
+    github:
+      teams: ["haiku:infrastructure"]
+    local:
+      users: ["admin"]
 resource_types:
   - name: irc-notification
     type: docker-image
