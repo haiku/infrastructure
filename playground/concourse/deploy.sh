@@ -8,17 +8,17 @@ fi
 # Create-team also logs in.
 fly -t continuous status
 if [[ $? -ne 0 ]]; then
-	./create-team.sh test continuous
+	./create-team.sh continuous $1
 fi
 
 fly -t nightly status
 if [[ $? -ne 0 ]]; then
-	./create-team.sh test nightly
+	./create-team.sh nightly $1
 fi
 
 fly -t r1beta1 status
 if [[ $? -ne 0 ]]; then
-	./create-team.sh test r1beta1
+	./create-team.sh r1beta1 $1
 fi
 
 # Deploy pipelines

@@ -37,7 +37,6 @@ if [ -z "$DOCKER_HUB_PASSWORD" ]; then
 	exit 1
 fi
 
-CONCOURSE_URL="http://localhost:8080"
 FLY_CLI=fly
 
 if [ $BRANCH == "master" ]; then
@@ -52,6 +51,7 @@ fi
 if [ "$TEAM" != "continuous" ]; then
 	echo "Deploy toolchain builder..."
 	$FLY_CLI -t $TEAM set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -v docker-hub-user=$DOCKER_HUB_USER -v docker-hub-password=$DOCKER_HUB_PASSWORD -c pipelines/toolchain-builder.yml
+	$FLY_CLI -t $TEAM expose-pipeline -p toolchain-$BRANCH
 fi
 
 echo "Flight ready for boarding..."
@@ -61,4 +61,5 @@ for ARCH in $ARCHES; do
 	else
 		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-release.yml
 	fi
+	$FLY_CLI -t $TEAM expose-pipeline -p $BRANCH-$ARCH
 done
