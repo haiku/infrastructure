@@ -86,7 +86,7 @@ task-build-crosstools: &task-build-crosstools
       - |
         ls -la
         cd crosstools.${TOOLARCH}
-        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j2
+        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j4
 
 # Jobs
 jobs:
@@ -197,8 +197,7 @@ jobs:
                 cp -R crosstools.*/cross-tools-* container-context/toolchains/
                 echo "FROM haiku/general-worker" > container-context/Dockerfile
                 echo "ADD jam/jam /usr/bin/jam" >> container-context/Dockerfile
-                echo "RUN mkdir /toolchains" >> container-context/Dockerfile
-                echo "ADD toolchains/* /toolchains/" >> container-context/Dockerfile
+                echo "ADD toolchains /toolchains" >> container-context/Dockerfile
                 find container-context
       - put: toolchain-container-((branch))-sha
         params:
