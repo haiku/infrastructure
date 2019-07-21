@@ -44,8 +44,35 @@ task-build-anyboot: &task-build-anyboot
       - -c
       - |
         cd generated.((arch))
-        TOOLCHAIN_PREFIX=/toolchains/bin/((arch))-unknown-haiku-
-        ../haiku-git/configure --cross-tools-prefix $TOOLCHAIN_PREFIX
+        TOOLCHAIN_PRIMARY=""
+        TOOLCHAIN_SECONDARY=""
+        case "((arch))" in
+            "ppc")
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/powerpc-apple-haiku-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+            "sparc")
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/sparc64-unknown-haiku-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+            "x86_gcc2" | "x86")
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/i586-pc-haiku-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+            "x86_gcc2h")
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/i586-pc-haiku-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                ;;
+            "x86_64h")
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/x86_64-unknown-haiku-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                ;;
+            *)
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/((arch))-unknown-haiku-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+        esac
+        ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
         jam -q @((profile))-anyboot
 
 # Jobs
