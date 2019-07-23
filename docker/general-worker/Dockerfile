@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   u-boot-tools \
   util-linux \
   vim \
+  zip \
   unzip \
   wget \
   xorriso \
