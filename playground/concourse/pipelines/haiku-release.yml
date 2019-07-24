@@ -30,6 +30,7 @@ resources:
       access_key_id: ((s3key))
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
+      regexp: ((arch))/haiku-((branch))-(.*)-((arch))-.*\.zip\.*.*
   - name: upload-repo
     type: s3
     icon: package
@@ -38,6 +39,7 @@ resources:
       access_key_id: ((s3key))
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
+      regexp: ((arch))/(.*)
   - name: haiku-git
     type: git
     icon: git
@@ -117,10 +119,13 @@ jobs:
                 cp generated.((arch))/haiku-((profile))-anyboot.iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-anyboot.iso
                 cp haiku-git/ReadMe.md artifacts.((arch))/ReadMe.md
                 cd artifacts.((arch))
-                zip -9 haiku-((branch))-$RELEASE-((arch))-anyboot.zip ReadMe.md artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-anyboot.iso
+                zip -9 haiku-((branch))-$RELEASE-((arch))-anyboot.zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-anyboot.iso
+                rm *.md
+                rm *.iso
+                sha256sum --tag haiku-((branch))-$RELEASE-((arch))-anyboot.zip > haiku-((branch))-$RELEASE-((arch))-anyboot.zip.sha256
       - put: upload-image
         params:
-          file: artifacts.((arch))/*.zip
+          file: artifacts.((arch))/haiku-((branch))-*
   - name: repo-((branch))-((arch))
     public: true
     plan:
