@@ -61,7 +61,7 @@ for ARCH in $ARCHES; do
 
 	# Some architectures are special
 	if [ "$ARCH" == "arm" ]; then
-		PROFILE="minimal"
+		PROFILE="minimum"
 		TYPE="mmc"
 	fi
 
