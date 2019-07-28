@@ -7,7 +7,7 @@ require 'pathname'
 
 # Thresholds
 # Young - Keep all builds
-@YOUNG_THRESH = 500
+@YOUNG_THRESH = 200
 # Then, only keep odd hrev numbers
 
 if ARGV.count != 1
