@@ -22,6 +22,27 @@ resources:
 #      user: haiku-ci-bot
 #      password: thisisastupidfield
 #      usetls: false
+  - name: nightly-time-trigger
+    type: time
+    source:
+      start: 1:00 AM
+      stop: 6:00 AM
+      location: America/Chicago
+# https://github.com/concourse/concourse/issues/4177
+#  - name: r1beta1-time-trigger
+#    type: time
+#    source:
+#      days: [Sunday]
+#      start: 1:00 AM
+#      stop: 6:00 AM
+#      location: America/Chicago
+#  - name: r1beta2-time-trigger
+#    type: time
+#    source:
+#      days: [Monday,Friday]
+#      start: 1:00 AM
+#      stop: 6:00 AM
+#      location: America/Chicago
   - name: upload-image
     type: s3
     icon: minidisc
@@ -60,6 +81,8 @@ jobs:
   - name: image-((branch))-((arch))
     public: true
     plan:
+      - get: nightly-time-trigger
+        trigger: true
       - get: haiku-git
         trigger: false
       - task: build ((branch)) anyboot
@@ -142,6 +165,9 @@ jobs:
     public: true
     plan:
       - get: haiku-git
+        trigger: false
+      - get: nightly-time-trigger
+        trigger: true
       - task: build ((branch)) repository
         config:
           platform: linux
