@@ -40,10 +40,10 @@ fi
 FLY_CLI=fly
 
 if [ $BRANCH == "master" ]; then
-	PROFILE="nightly"
+	BRANCH_PROFILE="nightly"
 	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
 else
-	PROFILE="release"
+	BRANCH_PROFILE="release"
 	ARCHES="x86_64 x86_gcc2h"
 fi
 
@@ -55,15 +55,18 @@ if [ "$TEAM" != "continuous" ]; then
 fi
 
 # Anyboot is the "ideal image type"
-TYPE="anyboot"
 echo "Flight ready for boarding..."
 for ARCH in $ARCHES; do
+	PROFILE=$BRANCH_PROFILE
+	TYPE="anyboot"
 
 	# Some architectures are special
 	if [ "$ARCH" == "arm" ]; then
 		PROFILE="minimum"
 		TYPE="mmc"
 	fi
+
+	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$TYPE"
 
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-continuous.yml
