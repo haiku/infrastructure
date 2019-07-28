@@ -5,31 +5,14 @@ roles:
       teams: ["haiku:infrastructure"]
     local:
       users: ["admin"]
-resource_types:
-  - name: irc-notification
-    type: docker-image
-    source:
-      repository: flavorjones/irc-notification-resource
 resources:
-#  - name: haiku-irc
-#    type: irc-notification
-#    icon: bullhorn
-#    source:
-#      server: irc.freenode.net
-#      port: 6667
-#      channel: "#haiku"
-#      join: true
-#      user: haiku-ci-bot
-#      password: thisisastupidfield
-#      usetls: false
   - name: haiku-git
     type: git
     icon: git
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-
-task-build-anyboot: &task-build-anyboot
+task-build-image: &task-build-image
   platform: linux
   image_resource:
     type: registry-image
@@ -73,7 +56,7 @@ task-build-anyboot: &task-build-anyboot
                 ;;
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-        jam -q @((profile))-anyboot
+        jam -q @((profile))-((type))
 
 # Jobs
 jobs:
@@ -82,10 +65,6 @@ jobs:
     plan:
       - get: haiku-git
         trigger: true
-      - task: build ((branch)) anyboot
+      - task: build ((branch)) @((profile))-((type))
         config:
-          << : *task-build-anyboot
-#      - put: haiku-irc
-#        params:
-#          message: >
-#            Haiku build ${BUILD_ID} of ((branch)) ((arch)) is complete! ${BUILD_URL}
+          << : *task-build-image

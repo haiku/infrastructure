@@ -54,12 +54,21 @@ if [ "$TEAM" != "continuous" ]; then
 	$FLY_CLI -t $TEAM expose-pipeline -p toolchain-$BRANCH
 fi
 
+# Anyboot is the "ideal image type"
+TYPE="anyboot"
 echo "Flight ready for boarding..."
 for ARCH in $ARCHES; do
+
+	# Some architectures are special
+	if [ "$ARCH" == "arm" ]; then
+		PROFILE="minimal"
+		TYPE="mmc"
+	fi
+
 	if [ "$TEAM" == "continuous" ]; then
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-continuous.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-continuous.yml
 	else
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -c pipelines/haiku-release.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t $TEAM expose-pipeline -p $BRANCH-$ARCH
 done
