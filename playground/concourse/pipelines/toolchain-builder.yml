@@ -198,6 +198,11 @@ jobs:
                 echo "FROM haiku/general-worker" > container-context/Dockerfile
                 echo "ADD jam/jam /usr/bin/jam" >> container-context/Dockerfile
                 echo "ADD toolchains /toolchains" >> container-context/Dockerfile
+                # Hack for https://dev.haiku-os.org/ticket/15197. Please fix me!
+                GCC2PATH=$(strings container-context/toolchains/cross-tools-x86_gcc2/bin/i586-pc-haiku-cpp | grep gcc-lib | grep crosstools | cut -d/ -f1,2,3,4,5)
+                echo "RUN mkdir -p $GCC2PATH" >> container-context/Dockerfile
+                echo "RUN ln -s /toolchains/cross-tools-x86_gcc2 $GCC2PATH/cross-tools-x86_gcc2" >> container-context/Dockerfile
+                # Dump the context of the container for reference
                 find container-context
       - put: toolchain-container-((branch))-sha
         params:
