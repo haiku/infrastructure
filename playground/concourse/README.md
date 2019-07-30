@@ -21,3 +21,7 @@ Creating docs_concourse_1 ... done
 Concourse is now running on localhost:8080. The username / password is test/test.
 
 Install the fly CLI by downloading it from the web ui and placing it at /usr/local/bin/fly
+
+## Deploying
+
+./deploy.sh secrets.fly secrets.yml

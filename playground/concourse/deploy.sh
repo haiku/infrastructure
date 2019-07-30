@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ $# -ne 1 ]]; then
-	echo "Usage: $0 <secrets>"
+if [[ $# -ne 2 ]]; then
+	echo "Usage: $0 <fly_secrets> <secrets>"
 	exit 1
 fi
 
@@ -22,6 +22,6 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Deploy pipelines
-./apply-pipeline.sh continuous master $1
-./apply-pipeline.sh nightly master $1
-./apply-pipeline.sh r1beta1 r1beta1 $1
+./apply-pipeline.sh continuous master $2
+./apply-pipeline.sh nightly master $2
+./apply-pipeline.sh r1beta1 r1beta1 $2
