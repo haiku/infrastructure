@@ -6,27 +6,14 @@ roles:
     local:
       users: ["admin"]
 resources:
-  - name: nightly-time-trigger
+  - name: pipeline-time-trigger
     type: time
+    icon: alarm
     source:
       start: 1:00 AM
       stop: 6:00 AM
       location: America/Chicago
-# https://github.com/concourse/concourse/issues/4177
-#  - name: r1beta1-time-trigger
-#    type: time
-#    source:
-#      days: [Sunday]
-#      start: 1:00 AM
-#      stop: 6:00 AM
-#      location: America/Chicago
-#  - name: r1beta2-time-trigger
-#    type: time
-#    source:
-#      days: [Monday,Friday]
-#      start: 1:00 AM
-#      stop: 6:00 AM
-#      location: America/Chicago
+      days: [((days))]
   - name: upload-image
     type: s3
     icon: minidisc
@@ -65,7 +52,7 @@ jobs:
   - name: image-((branch))-((arch))
     public: true
     plan:
-      - get: nightly-time-trigger
+      - get: pipeline-time-trigger
         trigger: true
       - get: haiku-git
         trigger: false
@@ -150,7 +137,7 @@ jobs:
     plan:
       - get: haiku-git
         trigger: false
-      - get: nightly-time-trigger
+      - get: pipeline-time-trigger
         trigger: true
       - task: build ((branch)) repository
         config:

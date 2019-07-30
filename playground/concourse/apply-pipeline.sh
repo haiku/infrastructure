@@ -39,14 +39,19 @@ fi
 
 FLY_CLI=fly
 
-if [ $BRANCH == "master" ]; then
-	BRANCH_PROFILE="nightly"
-	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
-else
+if [ $BRANCH == "r1beta1" ]; then
 	BRANCH_PROFILE="release"
 	ARCHES="x86_64 x86_gcc2h"
+	DAYS="Sunday"
+elif [ $BRANCH == "r1beta2" ]; then
+	BRANCH_PROFILE="release"
+	ARCHES="x86_64 x86_gcc2h"
+	DAYS="Monday,Friday"
+else
+	BRANCH_PROFILE="nightly"
+	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
+	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 fi
-
 
 if [ "$TEAM" != "continuous" ]; then
 	echo "Deploy toolchain builder..."
@@ -71,7 +76,7 @@ for ARCH in $ARCHES; do
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-continuous.yml
 	else
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-release.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -v s3endpoint=$S3_ENDPOINT -v s3key=$S3_KEY -v s3secret=$S3_SECRET -v profile=$PROFILE -v type=$TYPE -v days=$DAYS -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t $TEAM expose-pipeline -p $BRANCH-$ARCH
 done
