@@ -75,28 +75,21 @@ jobs:
                 TOOLCHAIN_PRIMARY=""
                 TOOLCHAIN_SECONDARY=""
                 case "((arch))" in
-                    "ppc")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/powerpc-apple-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
-                    "sparc")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/sparc64-unknown-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
-                    "x86_gcc2" | "x86")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/i586-pc-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
                     "x86_gcc2h")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/i586-pc-haiku-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
+                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/${PRI_TRIPLET}-"
+                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
                         ;;
                     "x86_64h")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/x86_64-unknown-haiku-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_64)
+                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/${PRI_TRIPLET}-"
+                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
                         ;;
                     *)
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/((arch))-unknown-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
                         TOOLCHAIN_SECONDARY=""
                         ;;
                 esac
@@ -158,28 +151,21 @@ jobs:
                 TOOLCHAIN_PRIMARY=""
                 TOOLCHAIN_SECONDARY=""
                 case "((arch))" in
-                    "ppc")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/powerpc-apple-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
-                    "sparc")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/sparc64-unknown-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
-                    "x86_gcc2" | "x86")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/i586-pc-haiku-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
                     "x86_gcc2h")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/i586-pc-haiku-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
+                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/${PRI_TRIPLET}-"
+                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
                         ;;
                     "x86_64h")
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/x86_64-unknown-haiku-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/i586-pc-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_64)
+                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/${PRI_TRIPLET}-"
+                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
                         ;;
                     *)
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/((arch))-unknown-haiku-"
+                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
+                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
                         TOOLCHAIN_SECONDARY=""
                         ;;
                 esac
