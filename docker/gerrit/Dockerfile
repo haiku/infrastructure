@@ -6,7 +6,7 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 ENV GERRIT_HOME /var/gerrit
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_WAR ${GERRIT_HOME}/gerrit.war
-ENV GERRIT_VERSION 2.16.2
+ENV GERRIT_VERSION 2.16.10
 ENV GERRIT_USER gerrit2
 ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
 
@@ -30,10 +30,10 @@ RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VE
 #COPY gerrit-${GERRIT_VERSION}.war $GERRIT_WAR
 
 ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
-ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
+ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
 
 # Download "stable" plugins
-ENV PLUGINS="delete-project events-log admin-console webhooks"
+ENV PLUGINS="delete-project events-log admin-console webhooks gitiles"
 ENV PLUGIN_VERSION=bazel-stable-2.16
 RUN for i in ${PLUGINS}; do \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
@@ -41,7 +41,7 @@ RUN for i in ${PLUGINS}; do \
 	done;
 
 # Download "master-stable" plugins
-ENV MASTER_PLUGINS="avatars-gravatar gitiles"
+ENV MASTER_PLUGINS="avatars-gravatar"
 ENV MASTER_PLUGIN_VERSION=bazel-master-stable-2.16
 
 RUN for i in ${MASTER_PLUGINS}; do \
