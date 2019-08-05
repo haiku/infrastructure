@@ -304,6 +304,7 @@ sub add_revision_tag_to_commit($$)
         return '';
     }
 
+
     # add branch name to 'hrev' unless we're dealing with 'master':
     my $tagBase = $ref eq 'master' ? $revision_tag : "$revision_tag$ref";
 
@@ -528,7 +529,7 @@ sub prepare_commit_notice($$$$)
         {
             my $changedDirsString = summarize_changed_dirs($obj);
 
-            my $branchSpec = $refInfo->{ref} eq 'master' ? '' : ".$refInfo->{ref}";
+            my $branchSpec = $refInfo->{branch} eq 'master' ? '' : ".$refInfo->{branch}";
             $subject = qq{$repos_name$branchSpec: $revision - $changedDirsString};
         }
 
@@ -568,7 +569,7 @@ sub prepare_irker_notice($$)
     my $shortTo = substr($refInfo->{newSha1}, 0, $shortGitObjLength);
     my $commitCount = @$commits;
     my $commitCountString = $commitCount == 1 ? '1 commit' : "$commitCount commits";
-    my @irker_text = ( "$repos_name.$refInfo->{ref}: $ENV{USER} * $revision [$commitCountString] $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
+    my @irker_text = ( "$repos_name.$refInfo->{branch}: $ENV{USER} * $revision [$commitCountString] $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
 
     foreach my $commit (@$commits) {
         my $info = $objectInfoMap{$commit};
@@ -610,7 +611,7 @@ sub send_global_notice($$)
     my $shortFrom = substr($refInfo->{oldSha1}, 0, $shortGitObjLength);
     my $shortTo = substr($refInfo->{newSha1}, 0, $shortGitObjLength);
     my @overview = (
-        "$refInfo->{revision} adds " . @$commits . (@$commits > 1 ? ' changesets' : ' changeset' ) . " to branch '$refInfo->{ref}'",
+        "$refInfo->{revision} adds " . @$commits . (@$commits > 1 ? ' changesets' : ' changeset' ) . " to branch '$refInfo->{branch}'",
         "old head: $refInfo->{oldSha1}",
         "new head: $refInfo->{newSha1}",
         "overview: $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom",
@@ -654,12 +655,51 @@ sub send_global_notice($$)
 
     unshift(@allNotices, @overview);
 
-    my $branchSpec = $refInfo->{ref} eq 'master' ? '' : ".$refInfo->{ref}";
+    my $branchSpec = $refInfo->{branch} eq 'master' ? '' : ".$refInfo->{branch}";
     my $subject = qq{$repos_name$branchSpec: $refInfo->{revision} - $changedDirsString};
     mail_notification($commitlist_address, $subject, "text/plain; charset=UTF-8", @allNotices);
 
     my $irkerNotice = prepare_irker_notice( $refInfo, $commits);
     irker_notification($irkerNotice);
+}
+
+sub find_branch_for_ref($)
+{
+    my ($ref) = @_;
+    my $branch = "";
+
+    if ($ref =~ m/refs\/changes\//) {
+        print "Detected accepted Gerrit Changeset. Parsing for accepted patches...";
+        $ref =~ s/\/meta$//;
+        # This is kind of shite.  Gerrit gives us "refs/changes/79/1679/meta" while
+        # merging the "patchset id" into master. (refs/changes/79/1679/3 for example)
+        # We run git branch --contains refs/changes/79/1679/1..50 searching for the
+        # accepted patchset. Please improve if you can.
+        foreach my $patchset (0..50) {
+            if ($branch ne "") {
+                next;
+            }
+            open BRANCHES, "-|" or exec "git", "branch", "--contains", "$ref/$patchset" or die "cannot exec git-branch";
+            map
+            {
+            chomp;
+                die "invalid branch $_" unless /^.*[0-9a-f]*$/;
+                $branch = $_;
+                $branch =~ s/^\s*\**\s*//;
+                print $branch;
+                $branch
+            } <BRANCHES>;
+            close BRANCHES;
+        }
+    } elsif ($ref =~ m/refs\/heads\//) {
+        print "Detected direct commit to branch.";
+        my $branch = $ref;
+        $branch =~ s/refs\/heads\///;
+    }
+    die "unable to determine '$ref' to branch linkage!\n" unless $branch ne "";
+    $branch =~ s/^\s+|\s+$//g;
+    print "Determined that branch is '$branch' from '$ref'!\n";
+    return $branch;
 }
 
 # gather all commits that have been pushed for given ref
@@ -742,13 +782,12 @@ else  # read them from stdin
 my @allCommits;
 foreach my $refInfo (@refInfos)
 {
-    $refInfo->{ref} =~ s/^refs\/heads\///;
     $refInfo->{diff_lines} = 0;
-    $refInfo->{commits} = gather_commits_for_ref($refInfo->{oldSha1}, $refInfo->{newSha1}, $refInfo->{ref});
+    $refInfo->{branch} = find_branch_for_ref($refInfo->{ref});
+    $refInfo->{commits} = gather_commits_for_ref($refInfo->{oldSha1}, $refInfo->{newSha1}, $refInfo->{branch});
+    $refInfo->{revision} = add_revision_tag_to_commit($refInfo->{newSha1}, $refInfo->{branch});
 
-    $refInfo->{revision} = add_revision_tag_to_commit($refInfo->{newSha1}, $refInfo->{ref});
-
-    print "$refInfo->{ref} -> $refInfo->{revision}\n";
+    print "$refInfo->{ref} -> $refInfo->{revision} on $refInfo->{branch}\n";
 
     push @allCommits, @{$refInfo->{commits}};
 }
