@@ -459,7 +459,7 @@ sub prepare_commit_notice($$$$)
         '',
         @ticketInfo,
         $logStr;
-	my $firstLogLine = ${$info{log}}[0];
+        my $firstLogLine = ${$info{log}}[0];
         $subject = qq{$repos_name.$info{tag}: $firstLogLine};
     }
     else
@@ -507,7 +507,7 @@ sub prepare_commit_notice($$$$)
                 }
                 $#diff = $diff_lines - 1;
                 while (<DIFF>) {
-		    ++$diff_lines;
+                    ++$diff_lines;
                 }
             }
             close DIFF;
@@ -576,7 +576,7 @@ sub prepare_irker_notice($$)
 
         push @irker_text, "    $shortObj: " . $info->{"log"}->[0];
 
-	if (@irker_text == 10) {
+    if (@irker_text == 10) {
             push @irker_text, '    ...';
             last;
         }
