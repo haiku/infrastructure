@@ -7,9 +7,9 @@
 # Close stdout, close stderr, redirect stdout to log, redirect stderr to log
 #
 LOG="/tmp/notify"
-exec 1<&-
-exec 2<&-
-exec 1<>$LOG
+#exec 1<&-
+#exec 2<&-
+exec 1>$LOG
 exec 2>&1
 
 PROJECT=""
@@ -57,6 +57,11 @@ fi
 
 echo "DEBUG: THE UPLOADER_EMAIL is: $UPLOADER_EMAIL"
 echo "DEBUG: THE UPLOADER_USERNAME is: $UPLOADER_USERNAME"
+
+if [[ "$REFNAME" =~ "refs/changes/" ]]; then
+        echo "WARNING: Skipping git changeset ref!"
+        exit 0
+fi
 
 echo "Obtaining lock..."
 

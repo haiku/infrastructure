@@ -668,30 +668,7 @@ sub find_branch_for_ref($)
     my ($ref) = @_;
     my $branch = "";
 
-    if ($ref =~ m/refs\/changes\//) {
-        print "Detected accepted Gerrit Changeset. Parsing for accepted patches...\n";
-        $ref =~ s/\/meta$//;
-        # This is kind of shite.  Gerrit gives us "refs/changes/79/1679/meta" while
-        # merging the "patchset id" into master. (refs/changes/79/1679/3 for example)
-        # We run git branch --contains refs/changes/79/1679/1..50 searching for the
-        # accepted patchset. Please improve if you can.
-        foreach my $patchset (0..50) {
-            if ($branch ne "") {
-                next;
-            }
-            open BRANCHES, "-|" or exec "git", "branch", "--contains", "$ref/$patchset" or die "cannot exec git-branch";
-            map
-            {
-            chomp;
-                die "invalid branch $_" unless /^.*[0-9a-f]*$/;
-                $branch = $_;
-                $branch =~ s/^\s*\**\s*//;
-                print $branch;
-                $branch
-            } <BRANCHES>;
-            close BRANCHES;
-        }
-    } elsif ($ref =~ m/refs\/heads\//) {
+    if ($ref =~ m/refs\/heads\//) {
         print "Detected direct commit to branch.\n";
         $branch = $ref;
         $branch =~ s/refs\/heads\///;
