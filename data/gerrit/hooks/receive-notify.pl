@@ -669,7 +669,7 @@ sub find_branch_for_ref($)
     my $branch = "";
 
     if ($ref =~ m/refs\/changes\//) {
-        print "Detected accepted Gerrit Changeset. Parsing for accepted patches...";
+        print "Detected accepted Gerrit Changeset. Parsing for accepted patches...\n";
         $ref =~ s/\/meta$//;
         # This is kind of shite.  Gerrit gives us "refs/changes/79/1679/meta" while
         # merging the "patchset id" into master. (refs/changes/79/1679/3 for example)
@@ -692,8 +692,8 @@ sub find_branch_for_ref($)
             close BRANCHES;
         }
     } elsif ($ref =~ m/refs\/heads\//) {
-        print "Detected direct commit to branch.";
-        my $branch = $ref;
+        print "Detected direct commit to branch.\n";
+        $branch = $ref;
         $branch =~ s/refs\/heads\///;
     }
     die "unable to determine '$ref' to branch linkage!\n" unless $branch ne "";
@@ -782,6 +782,7 @@ else  # read them from stdin
 my @allCommits;
 foreach my $refInfo (@refInfos)
 {
+    print "Processing '$refInfo->{ref}'...";
     $refInfo->{diff_lines} = 0;
     $refInfo->{branch} = find_branch_for_ref($refInfo->{ref});
     $refInfo->{commits} = gather_commits_for_ref($refInfo->{oldSha1}, $refInfo->{newSha1}, $refInfo->{branch});
