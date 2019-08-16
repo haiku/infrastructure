@@ -40,3 +40,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   xorriso \
   xz-utils \
   zlib1g-dev
+
+ADD https://dl.min.io/client/mc/release/linux-amd64/mc /usr/local/bin/mc
+RUN chmod 755 /usr/local/bin/mc
