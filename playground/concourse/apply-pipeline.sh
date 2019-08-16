@@ -53,7 +53,7 @@ for ARCH in $ARCHES; do
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-continuous.yml
 	else
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v type=$TYPE -v days=$DAYS -c pipelines/haiku-release.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v type=$TYPE -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t $TEAM expose-pipeline -p $BRANCH-$ARCH
 done

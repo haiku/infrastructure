@@ -13,7 +13,7 @@ resources:
       start: 1:00 AM
       stop: 6:00 AM
       location: America/Chicago
-      days: [((days))]
+      days: ((days))
   - name: upload-image
     type: s3
     icon: minidisc
@@ -32,15 +32,6 @@ resources:
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
       regexp: ((arch))/haiku-((branch))-(.*)-((arch))-.*\.zip\.*.*
-  - name: upload-repo
-    type: s3
-    icon: package
-    source:
-      bucket: haiku-repositories-test
-      access_key_id: ((s3key))
-      secret_access_key: ((s3secret))
-      endpoint: ((s3endpoint))
-      regexp: ((arch))/(.*)
   - name: haiku-git
     type: git
     icon: git
@@ -128,10 +119,10 @@ jobs:
   - name: repo-((branch))-((arch))
     public: true
     plan:
-      - get: haiku-git
-        trigger: false
       - get: pipeline-time-trigger
         trigger: true
+      - get: haiku-git
+        trigger: false
       - task: build ((branch)) repository
         config:
           platform: linux
@@ -182,6 +173,10 @@ jobs:
             - name: generated.((arch))
           outputs:
             - name: repository.((arch))
+          params:
+            S3_ENDPOINT: ((s3endpoint))
+            S3_SECRET: secretstuff
+            S3_KEY: keystuff
           run:
             path: /bin/bash
             args:
@@ -192,6 +187,4 @@ jobs:
                 TARGET_REPO="repository.((arch))/((arch))/$VERSION"
                 mkdir -p $TARGET_REPO
                 cp -R $REPODIR $TARGET_REPO
-      - put: upload-repo
-        params:
-          file: repository.((arch))/((arch))/*
+                mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
