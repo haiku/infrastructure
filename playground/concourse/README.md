@@ -30,7 +30,9 @@ Install the fly CLI by downloading it from the web ui and placing it at /usr/loc
     * TSA - A managed SSH reverse proxy. All worker communication occurs here.
   * worker - A host which runs containers. Accessed over SSH.
     * Beacon - Manages the worker processes
-    * Garden - A horrible container management API. Concourse planning on replacing with containerd
+    * Baggageclaim - An API to manage container volumes on the local host.
+    * Garden - An API to manage containers running on the local host.
+      * Concourse planning on replacing with containerd
 * Object Storage - S3 repositories where we upload build artifacts for public consumption
 * General Worker - A container we build which has "the basics to build Haiku and upload artifacts"
 * Toolchain Container - A docker container we push to docker hub with *all* of our toolchains pre-compiled.
