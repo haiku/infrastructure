@@ -38,7 +38,12 @@ mkdir -p /var/log/nginx
 #touch /var/log/kern.log && chown -f syslog:adm /var/log/kern.log*
 
 # Overlay our secrets
-source /shared/secrets.env
+if [[ -f /shared/secrets.env ]]; then
+	echo "Processing /shared/secrets.env..."
+	source /shared/secrets.env
+else
+	echo "Warning: No secrets found at /shared/secrets.env!"
+fi
 
 # Write out config
 env > ~/boot_env
@@ -46,5 +51,7 @@ conf=/apps/discourse/config/discourse.conf
 # find DISCOURSE_ env vars, strip the leader, lowercase the key
 ruby -e 'ENV.each{|k,v| puts "#{$1.downcase} = '\''#{v}'\''" if k =~ /^DISCOURSE_(.*)/}' > $conf
 
+# Apply migrations
+cd /apps/discourse && bundle exec rake db:migrate
 
 supervisord --nodaemon --configuration /etc/supervisord.conf
