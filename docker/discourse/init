@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Setup Symlinks
+if [[ ! -L /var/lib/logrotate ]]; then
+  rm -fr /var/lib/logrotate
+  mkdir -p /shared/state/logrotate
+  ln -s /shared/state/logrotate /var/lib/logrotate
+fi
+if [[ ! -L /var/spool/anacron ]]; then
+  rm -fr /var/spool/anacron
+  mkdir -p /shared/state/anacron-spool
+  ln -s /shared/state/anacron-spool /var/spool/anacron
+fi
+if [[ ! -d /shared/log/rails ]]; then
+  mkdir -p /shared/log/rails
+  #chown -R discourse:www-data /shared/log/rails
+fi
+if [[ ! -d /shared/uploads ]]; then
+  mkdir -p /shared/uploads
+  #chown -R discourse:www-data /shared/uploads
+fi
+if [[ ! -d /shared/backups ]]; then
+  mkdir -p /shared/backups
+  #chown -R discourse:www-data /shared/backups
+fi
+
+rm -rf /shared/tmp/{backups,restores}
+mkdir -p /shared/tmp/{backups,restores}
+#chown -R discourse:www-data /shared/tmp/{backups,restores}
+
+# Setup
+mkdir -p /var/log/nginx
+#chown -R www-data:www-data /var/log/nginx
+#chmod -R 644 /var/log/nginx
+#chmod 755 /var/log/nginx
+#touch /var/log/syslog   && chown -f syslog:adm /var/log/syslog*
+#touch /var/log/auth.log && chown -f syslog:adm /var/log/auth.log*
+#touch /var/log/kern.log && chown -f syslog:adm /var/log/kern.log*
+
+# Overlay our secrets
+source /shared/secrets.env
+
+# Write out config
+env > ~/boot_env
+conf=/apps/discourse/config/discourse.conf
+# find DISCOURSE_ env vars, strip the leader, lowercase the key
+ruby -e 'ENV.each{|k,v| puts "#{$1.downcase} = '\''#{v}'\''" if k =~ /^DISCOURSE_(.*)/}' > $conf
+
+
+supervisord --nodaemon --configuration /etc/supervisord.conf
