@@ -13,7 +13,7 @@ test:
 	docker run -d --name redis --network discourse redis:latest
 	sleep 20
 	docker rm discourse || true
-	docker run --name discourse_bootstrap --network discourse --env-file test.env docker.io/haiku/discourse:latest bundle exec rake db:create
+	docker run --rm --network discourse --env-file test.env docker.io/haiku/discourse:latest bundle exec rake db:create
 	docker run -d --name discourse --network discourse -P --env-file test.env docker.io/haiku/discourse:latest
 test_murder:
 	docker kill redis || true

@@ -23,6 +23,10 @@ if [[ ! -d /shared/backups ]]; then
   mkdir -p /shared/backups
   #chown -R discourse:www-data /shared/backups
 fi
+if [[ ! -d /shared/cache ]]; then
+  mkdir -p /shared/cache
+  chown -R www-data:www-data /shared/cache
+fi
 
 rm -rf /shared/tmp/{backups,restores}
 mkdir -p /shared/tmp/{backups,restores}
