@@ -23,7 +23,7 @@ services:
       - traefik_acme:/acme:z
       - /var/log/traefik:/logs:z
   discourse:
-    image: haiku/discuss
+    image: haiku/discourse
     restart: on-failure
     cpu_percent: 50
     mem_reservation: 2048m
@@ -39,6 +39,17 @@ services:
       UNICORN_WORKERS: 6
       UNICORN_SIDEKIQS: 1
       DOCKER_USE_HOSTNAME: "true"
+      RUBY_GLOBAL_METHOD_CACHE_SIZE: 131072
+      #RUBY_ALLOCATOR=/usr/lib/libjemalloc.so.1
+      DISCOURSE_DEVELOPER_EMAILS: contact@haiku-os.org
+      DISCOURSE_HOSTNAME: discuss.haiku-os.org
+      DISCOURSE_SMTP_PORT: 25
+      DISCOURSE_SMTP_ADDRESS: smtp
+      DISCOURSE_SMTP_ENABLE_START_TLS: false
+      DISCOURSE_SMTP_AUTHENTICATION: none
+      DISCOURSE_REDIS_HOST: redis
+      DISCOURSE_DB_HOST: postgres
+      DISCOURSE_DB_PORT: 5432
     expose:
       - "80"
     volumes:
