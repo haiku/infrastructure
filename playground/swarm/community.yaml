@@ -7,7 +7,7 @@
 version: "3.2"
 services:
   discourse:
-    image: haiku/discuss
+    image: haiku/discourse
     deploy:
       resources:
         limits:
@@ -18,13 +18,23 @@ services:
           memory: 2G
     networks:
       - ingress_community
-    entrypoint: /shared/config.env && /sbin/boot
     environment:
       LANG: en_US.UTF-8
       RAILS_ENV: production
       UNICORN_WORKERS: 6
       UNICORN_SIDEKIQS: 1
       DOCKER_USE_HOSTNAME: "true"
+      RUBY_GLOBAL_METHOD_CACHE_SIZE: 131072
+      #RUBY_ALLOCATOR=/usr/lib/libjemalloc.so.1
+      DISCOURSE_DEVELOPER_EMAILS: contact@haiku-os.org
+      DISCOURSE_HOSTNAME: discuss.haiku-os.org
+      DISCOURSE_SMTP_PORT: 25
+      DISCOURSE_SMTP_ADDRESS: smtp
+      DISCOURSE_SMTP_ENABLE_START_TLS: false
+      DISCOURSE_SMTP_AUTHENTICATION: none
+      DISCOURSE_REDIS_HOST: redis
+      DISCOURSE_DB_HOST: postgres
+      DISCOURSE_DB_PORT: 5432
     volumes:
       - discourse_shared:/shared:z
       - discourse_logs:/var/log:z
@@ -33,6 +43,9 @@ services:
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
 volumes:
   discourse_shared:
+    driver: rexray/dobs
+    driver_opts:
+      size: 20
   discourse_logs:
 networks:
   ingress_community:
