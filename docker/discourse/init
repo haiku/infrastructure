@@ -51,6 +51,9 @@ conf=/apps/discourse/config/discourse.conf
 # find DISCOURSE_ env vars, strip the leader, lowercase the key
 ruby -e 'ENV.each{|k,v| puts "#{$1.downcase} = '\''#{v}'\''" if k =~ /^DISCOURSE_(.*)/}' > $conf
 
+# Pre-compile assets
+cd /apps/discourse && bundle exec rake assets:precompile
+
 # Apply migrations
 cd /apps/discourse && bundle exec rake db:migrate
 

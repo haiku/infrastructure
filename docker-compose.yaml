@@ -32,7 +32,6 @@ services:
       - postgres
       - redis
       - smtp
-    entrypoint: /shared/config.env && /sbin/boot
     environment:
       LANG: en_US.UTF-8
       RAILS_ENV: production

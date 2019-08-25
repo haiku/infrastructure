@@ -7,10 +7,11 @@ MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
 ENV DISCOURSE_VERSION=2.3.2
 
-RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python python-pip cron nginx pngquant optipng gifsicle jpegoptim jhead && pip install supervisor
+RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python python-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli && pip install supervisor
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Install Discourse
+RUN gem install uglifier
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
 RUN mkdir -p /apps && cd /apps && tar xvf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
 RUN cd /apps/discourse && bundle install
@@ -30,6 +31,7 @@ COPY assets/images/* /apps/discourse/public/images/
 EXPOSE 80/tcp
 
 WORKDIR /apps/discourse
+
 CMD "/init"
 
 HEALTHCHECK CMD curl --fail http://`hostname`:80/ || exit 1
