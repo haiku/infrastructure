@@ -16,6 +16,9 @@ services:
     command: --path.procfs /host/proc --path.sysfs /host/sys
   prometheus:
     image: prom/prometheus
+    deploy:
+      placement:
+        constraints: [node.labels.tier == small ]
     networks:
       - ingress_sysadmin
     volumes:
@@ -23,6 +26,9 @@ services:
       - prometheus_data:/prometheus:z
   grafana:
     image: grafana/grafana
+    deploy:
+      placement:
+        constraints: [node.labels.tier == small ]
     networks:
       - ingress_sysadmin
     environment:
@@ -38,6 +44,9 @@ services:
       - "traefik.basic.port=3000"
   fathom:
     image: usefathom/fathom:latest
+    deploy:
+      placement:
+        constraints: [node.labels.tier == small ]
     depends_on:
       - postgres
     networks:
