@@ -184,10 +184,8 @@ services:
 volumes:
   gerrit_data:
   pootle_data:
-  postgres_data:
   userguide_data:
   trac_data:
-  redis_data:
   hds_secrets:
 networks:
   ingress_support:
