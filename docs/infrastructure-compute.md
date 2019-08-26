@@ -40,3 +40,17 @@ docker swarm join --token XXXXX YYYYYY
 ```
 docker plugin install rexray/dobs DOBS_CONVERTUNDERSCORES=true DOBS_REGION=ams3 DOBS_TOKEN=XXXX
 ```
+
+## Assign Node Labels
+
+Our environment requires node labels to ensure containers sharing storage reside on the same host.
+One node in the environment needs to have each of the following labels:
+
+  * git
+  * cdn
+  * build
+
+Labels can be applied to nodes via:
+```
+docker node update --label-add git=true (node_hostname)
+```

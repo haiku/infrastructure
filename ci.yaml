@@ -45,6 +45,9 @@ services:
       - "traefik.basic.port=80"
   buildmaster_master_x86_64:
     image: haikuports/buildmaster
+    deploy:
+      placement:
+        constraints: [node.labels.build == true ]
     command: loop
     networks:
       - buildmaster_private
@@ -56,6 +59,9 @@ services:
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
   buildmaster_master_x86_gcc2:
     image: haikuports/buildmaster
+    deploy:
+      placement:
+        constraints: [node.labels.build == true ]
     command: loop
     networks:
       - buildmaster_private
@@ -76,6 +82,9 @@ services:
       - teleport:/var/teleport
   buildmaster_frontend:
     image: haikuports/buildmaster-frontend
+    deploy:
+      placement:
+        constraints: [node.labels.build == true ]
     networks:
       - ingress_ci
     volumes:

@@ -17,6 +17,8 @@ services:
         reservations:
           cpus: '1.0'
           memory: 2G
+      placement:
+        constraints: [node.labels.git == true ]
     networks:
       - ingress_dev
     depends_on:
@@ -52,6 +54,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+      placement:
+        constraints: [node.labels.git == true ]
     networks:
       - ingress_dev
     volumes:
