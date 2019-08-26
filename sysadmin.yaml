@@ -52,8 +52,17 @@ services:
       - "traefik.basic.port=8080"
 volumes:
   fathom_secrets:
+    driver: rexray/dobs
+    driver_opts:
+      size: 1
   prometheus_data:
+    driver: rexray/dobs
+    driver_opts:
+      size: 5
   grafana_data:
+    driver: rexray/dobs
+    driver_opts:
+      size: 1
 networks:
   ingress_sysadmin:
     external: true

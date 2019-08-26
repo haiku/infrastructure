@@ -103,7 +103,7 @@ volumes:
   redis_data:
     driver: rexray/dobs
     driver_opts:
-      size: 5
+      size: 2
 networks:
   default:
     driver: overlay
