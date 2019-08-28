@@ -40,9 +40,9 @@ services:
       - ETCD_NAME=support_etcd
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
-      #- ETCD_INITIAL_CLUSTER=http://ingress_etcd.1:2380
-      #- ETCD_INITIAL_CLUSTER_STATE=new
-      #- ETCD_INITIAL_CLUSTER_TOKEN=ingress-cluster-1
+      - ETCD_DATA_DIR=/etcd/support_etcd.1
+    volumes:
+      - etcd_data:/etcd
     deploy:
       replicas: 1
       placement:
@@ -95,6 +95,10 @@ services:
     volumes:
       - redis_data:/data:z
 volumes:
+  etcd_data:
+    driver: rexray/dobs
+    driver_opts:
+      size: 5
   smtp_keys:
     driver: rexray/dobs
     driver_opts:
