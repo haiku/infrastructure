@@ -59,7 +59,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:z
       - ./data/traefik/traefik.toml:/traefik.toml:z
       - traefik_acme:/acme:z
-      - /var/log/traefik:/logs:z
 volumes:
   traefik_acme:
     driver: rexray/dobs
