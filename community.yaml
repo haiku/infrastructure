@@ -18,6 +18,7 @@ services:
           memory: 2G
     networks:
       - ingress_community
+      - support_default
     environment:
       LANG: en_US.UTF-8
       RAILS_ENV: production
@@ -48,5 +49,5 @@ volumes:
 networks:
   ingress_community:
     external: true
-  ingress_support:
+  support_default:
     external: true
