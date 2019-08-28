@@ -18,6 +18,4 @@ if [ "$1" = 'pootle' ]; then
     fi
 
     exec supervisord
-elif [ "$1" = 'synchronize' ]; then
-    cd /var/pootle/repository && python /app/synchronize.py
 fi

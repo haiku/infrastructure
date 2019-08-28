@@ -20,11 +20,21 @@ The volume should contain the following:
  - A `repository` directory that contains the haiku repository
  - A `sync` directory that will contain the synchronization status
 
-The pootle-entrypoint.sh contains two run commands:
- - `pootle` which starts an nginx frontend, a pootle server and a pootle rqworker
- - `synchronize` which collects the updated English catalogs, merges the
-   existing translations, writes the merged files to disk and then commits
-   them to the Haiku repository
+The pootle-entrypoint.sh contains on specialized run command:
+ - `pootle` which starts an nginx frontend, cron for the weekly sync, a pootle server and a pootle rqworker
 
-The synchronization step requires that there is a haiku repository that is
-configured for building. In the test setup the x86_gcc2 +x86 architectures are used.
+## Synchronization
+
+Synchronization is a list of actions that need to be taken to roughly:
+ - Write the latest translations to the disk (using pootle's `sync_stores` command)
+ - Extract the latest catalog templates in English from the source (`jam -q catkeys`)
+ - Update the translated files to include new strings, and drop old ones (`import_templates_from_repository.py`)
+ - Update the state of the database to represent the merged files (pootle's `update_stores`)
+ - Post process the translated files, like remove the empty (untranslated) lines (`finish_output_catalogs.py`)
+ - Commit them to the Haiku repository, and push them upstream.
+
+These steps are executed by the `/app/synchronize.py` script. The steps are configured in the 
+`/var/pootle/sync-config.toml` file. Most notably, the list of output languages can be configured there.
+
+The image is set up in such a way that every Saturday at 08:00 AM, the script will run. The script will output all the
+console output online (`https://i18n.haiku-os.org/pootle/sync-status.html`), as well as send an email. 
