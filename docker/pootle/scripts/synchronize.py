@@ -99,9 +99,11 @@ step_list = [
          work_dir=SYNC_SETTINGS["repository_dir"]),
     Step("commit_rebase", "Rebase commit to any changes in the repository",
           ["git", "pull", "--rebase"], work_dir=SYNC_SETTINGS["repository_dir"]),
-    Step("commit_push", "Push the changes to the Haiku Repository", ["git", "push"],
-         work_dir=SYNC_SETTINGS["repository_dir"])
 ]
+# Allow for the setting 'skip_push' to allow for a debugging mode where all the steps are executed, except for the push
+if settings.get("skip_push", False):
+    step_list.append(Step("commit_push", "Push the changes to the Haiku Repository", ["git", "push"],
+         work_dir=SYNC_SETTINGS["repository_dir"]))
 
 # Check if we are running in the repository dir. This goes way over my head, but jam seems to ignore any way we set the
 # current working directory from python, including os.setcwd() and using the cwd-arguments for the subprocess functions.

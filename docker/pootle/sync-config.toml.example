@@ -22,3 +22,4 @@ repository_catalogs_dir = "/var/pootle/repository/data/catalogs"
 languages = ['be', 'ca', 'de', 'el', 'en_GB', 'es', 'fi', 'fr', 'fur', 'hu', 'id',
              'it', 'ja', 'ko', 'lt', 'nl', 'pl', 'pt_BR', 'ro', 'ru', 'sk', 'sv',
              'uk', 'zh-Hans']
+skip_push = false # Allows for a debugging of the process by skipping the 'destructive' push step
