@@ -27,7 +27,7 @@ services:
     # Traefik also handles letsencrypt renewals
     image: traefik:latest
     deploy:
-      replicas: 2
+      replicas: 1
       placement:
         constraints: [node.role==manager]
       resources:

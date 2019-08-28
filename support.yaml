@@ -32,24 +32,6 @@ services:
     environment:
       - POSTFIX_myhostname=walter.haiku-os.org
       - OPENDKIM_DOMAINS=walter.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
-  etcd:
-    image: quay.io/coreos/etcd:latest
-    command: "etcd"
-    environment:
-      - ETCD_ADVERTISE_CLIENT_URLS=http://support_etcd:2379
-      - ETCD_NAME=support_etcd
-      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
-      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
-      - ETCD_DATA_DIR=/etcd/support_etcd.1
-    volumes:
-      - etcd_data:/etcd
-    deploy:
-      replicas: 1
-      placement:
-        constraints: [node.role==manager]
-      update_config:
-        parallelism: 1
-        delay: 10s
   smf:
     image: zixia/simple-mail-forwarder
     deploy:
@@ -95,10 +77,6 @@ services:
     volumes:
       - redis_data:/data:z
 volumes:
-  etcd_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 5
   smtp_keys:
     driver: rexray/dobs
     driver_opts:

@@ -6,13 +6,14 @@ default:
 	@echo "       clean: Remove all of the haiku infrastructure from this host (persistant volumes remain)"
 	@echo "       upgrade: Roll-out updates as safely as possible. (Services with replicas of >1 shouldn't see an outage)"
 	@exit 1
-bootstrap:
-	# Seed our etcd with the initial Traefik kv's
-	docker stack deploy -c support.yaml support
-	sleep 15
-	docker run --rm --network support_default -v $(PWD)/data/traefik/traefik.toml:/traefik.toml -v infrastructure_traefik_acme:/acme traefik:latest storeconfig
-	sleep 15
-	docker stack rm support
+#Not needed until we do a multi-traefik deployment.
+#bootstrap:
+#	# Seed our etcd with the initial Traefik kv's
+#	docker stack deploy -c support.yaml support
+#	sleep 15
+#	docker run --rm --network support_default -v $(PWD)/data/traefik/traefik.toml:/traefik.toml -v infrastructure_traefik_acme:/acme traefik:latest storeconfig
+#	sleep 15
+#	docker stack rm support
 deploy:
 	DOMAIN=$(DOMAIN) docker stack deploy -c support.yaml support
 	sleep 5
