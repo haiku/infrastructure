@@ -1,0 +1,24 @@
+# Sample TOML file to configure the catalog synchronization of Pootle with the Haiku repository
+#
+# Place the working copy of this file in the location in the SYNC_CONFIG environment variable
+# All the  keys in this configuration file are required.
+
+[report]
+template_dir = "/app"
+report_output_file = "/var/pootle/sync/sync-status.html"
+
+[email]
+sender_address = 'noreply@haiku-os.org'
+sender_line = 'Haiku Pootle Sync <noreply@haiku-os.org'
+receiver_addresses = ["haiku-i18n@freelists.org", "haiku-sysadmin@freelists.org"]
+receiver_line = "haiku-i18n@freelists.org, haiku-sysadmin@freelists.org"
+server = "smtp"
+
+[sync.haiku]
+repository_dir = "/var/pootle/repository"
+templates_dir = "/var/pootle/repository/generated/objects/catalogs"
+pootle_catalogs_dir = "/var/pootle/catalogs/haiku"
+repository_catalogs_dir = "/var/pootle/repository/data/catalogs"
+languages = ['be', 'ca', 'de', 'el', 'en_GB', 'es', 'fi', 'fr', 'fur', 'hu', 'id',
+             'it', 'ja', 'ko', 'lt', 'nl', 'pl', 'pt_BR', 'ro', 'ru', 'sk', 'sv',
+             'uk', 'zh-Hans']

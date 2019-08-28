@@ -13,6 +13,8 @@ On the actual instance, it is good to use a persistent volume mounted at
 The volume should contain the following:
  - A configuration file named `settings.conf` (this is created automatically
    the first time)
+ - A configuration file named `sync-config.toml` (this file should follow the
+   format of the sync-config.toml.example file that will be inst)
  - A `logs` directory
  - A `catalogs` directory with the pootle catalogs
  - A `repository` directory that contains the haiku repository

@@ -8,10 +8,9 @@ parser.add_argument('pootle_catalogs_dir', metavar='input_catalogs', type=str,
                    help='the location of the input catalogs')
 parser.add_argument('repository_catalogs_dir', metavar="output_catalogs", 
                    type=str, help='the location of the output catalogs')
+parser.add_argument('language_list', metavar="languages", nargs="+",
+                    type=str, help='a list of languages that you want to export')
 args = parser.parse_args()
-
-# The language code (without the catkeys extension)
-LANG = ['be', 'ca', 'de', 'el', 'en_GB', 'es', 'fi', 'fr', 'hu', 'id', 'it', 'ja', 'ko', 'lt', 'nl', 'pl', 'pt_BR', 'ro', 'ru', 'sk', 'sv', 'uk', 'zh-Hans']
 
 ############
 # Script
@@ -20,7 +19,7 @@ LANG = ['be', 'ca', 'de', 'el', 'en_GB', 'es', 'fi', 'fr', 'hu', 'id', 'it', 'ja
 from fingerprint import computefingerprint
 import os
 
-for language in LANG:
+for language in args.language_list:
     source_list = []
 
     for root, dirs, files in os.walk(args.pootle_catalogs_dir):

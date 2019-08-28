@@ -8,6 +8,7 @@ ADD requirements.txt /app
 ADD pootle-entrypoint.sh /app
 ADD synchronize-template.html /app
 ADD synchronize-email-template.txt /app
+ADD sync-config.toml.example /app/sync-config.toml.example
 ADD scripts/finish_output_catalogs.py /app
 ADD scripts/fingerprint.py /app
 ADD scripts/import_templates_from_repository.py /app
@@ -53,6 +54,7 @@ RUN rm -rf buildtools
 # Install Pootle
 RUN pip install -r requirements.txt
 ENV POOTLE_SETTINGS /var/pootle/settings.conf
+ENV SYNC_CONFIG /var/pootle/sync-config.toml
 
 # Set up Supervisor.
 RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf
