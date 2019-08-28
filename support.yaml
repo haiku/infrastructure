@@ -27,6 +27,8 @@ services:
         reservations:
           cpus: '0.15'
           memory: 256M
+      placement:
+        constraints: [node.labels.tier == small ]
     volumes:
       - smtp_keys:/etc/opendkim/keys:z
     environment:
