@@ -1,0 +1,1 @@
+0 8 * * 6 cd /var/pootle/repository && python /app/synchronize.py >> /var/pootle/logs/synchronize-cron.log 2>&1

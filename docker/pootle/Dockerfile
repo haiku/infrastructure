@@ -40,6 +40,7 @@ RUN apt-get update && \
                         python-pip \
                         libxml2-dev \
                         libxslt1-dev \
+                        cron \
                         nginx \
                         supervisor
 
@@ -58,10 +59,15 @@ ENV SYNC_CONFIG /var/pootle/sync-config.toml
 
 # Set up Supervisor.
 RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf
-ADD supervisor/pootle.conf supervisor/nginx.conf /etc/supervisor/conf.d/
+ADD supervisor/pootle.conf supervisor/nginx.conf supervisor/cron.conf /etc/supervisor/conf.d/
 
 # Set up nginx
 ADD nginx/default /etc/nginx/sites-available/
+
+# Set up cron
+ADD scripts/synchronize-cron /etc/cron.d/synchronize-cron
+RUN chmod 0644 /etc/cron.d/synchronize-cron
+RUN crontab /etc/cron.d/synchronize-cron
 
 ENTRYPOINT ["/app/pootle-entrypoint.sh"]
 
