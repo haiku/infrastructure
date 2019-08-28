@@ -6,6 +6,7 @@ server {
    listen [::]:80 default_server;
 
    access_log /var/pootle/logs/nginx-access.log;
+   error_log /var/pootle/logs/nginx-error.log;
    gzip on; # Enable gzip compression
 
    charset utf-8;
