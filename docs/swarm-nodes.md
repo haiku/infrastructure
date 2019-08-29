@@ -1,10 +1,10 @@
-# Deploying Haiku Compute Nodes
+# Deploying Haiku Swarm Compute Nodes
 
 This guide will walk you through deploying Haiku compute nodes. In this document we will be using
 DigitalOcean, however anything https://rexray.io supports should work in theory.
 
-> DigitalOcean has a *fixed* limit of 7 volume attachments per node, and 10 volumes per **account**
-> We're requesting to raise the account limit to 25.
+> DigitalOcean has a *fixed* limit of 7 volume attachments per node! Keep nodes small unless you
+> *really* need the cpu / memory!
 
 ## Common steps
 
@@ -19,7 +19,7 @@ systemctl start docker
 
 ## Setup Docker Swarm
 
-**On the first node of the region**
+**On the first (master) node of the region**
 
 > XX.XX.XX.XX is the private IP of the instance
 
@@ -31,6 +31,18 @@ docker swarm init --advertise-addr XX.XX.XX.XX
 
 > XXXXX YYYYY are provided by the init above
 
+```
+docker swarm join --token XXXXX YYYYYY
+```
+
+**If you're attaching additional nodes to an existing cluster**
+
+Generate a new join-token:
+```
+docker swarm join-token worker
+```
+
+Join the new node to the swarm:
 ```
 docker swarm join --token XXXXX YYYYYY
 ```
@@ -50,6 +62,8 @@ docker plugin install rexray/dobs DOBS_CONVERTUNDERSCORES=true DOBS_REGION=ams3 
 
 Our environment requires node labels to ensure containers sharing storage reside on the same host.
 One node in the environment needs to have each of the following labels:
+
+> Please add additional shared disk labels as required to this list!
 
   * git
   * cdn
