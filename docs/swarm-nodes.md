@@ -61,7 +61,7 @@ docker swarm join --token XXXXX YYYYYY
 
 **Install rexray for DigitalOcean on each node**
 ```
-docker plugin install rexray/dobs DOBS_CONVERTUNDERSCORES=true DOBS_REGION=ams3 DOBS_TOKEN=XXXX
+docker plugin install rexray/dobs DOBS_CONVERTUNDERSCORES=true DOBS_REGION=ams3 DOBS_STATUSINITIALDELAY="500ms" DOBS_TOKEN=XXXX
 ```
 
 ## Assign Node Labels
