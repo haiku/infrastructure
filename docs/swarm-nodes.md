@@ -17,6 +17,7 @@ iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 2222 -j ACCEPT
 semanage port -a -t ssh_port_t -p tcp 2222
 systemctl restart sshd
 (reconnect on port 2222)
+cd /root && git clone https://github.com/haiku/infrastructure.git
 curl -fsSL https://get.docker.com/ | sh
 curl -sSL https://rexray.io/install | sh
 systemctl restart iptables
