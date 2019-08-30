@@ -17,6 +17,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 8M
+      placement:
+        constraints: [node.labels.tier == small ]
   smtp:
     image: mwader/postfix-relay
     deploy:
@@ -44,6 +46,8 @@ services:
         reservations:
           cpus: '0.15'
           memory: 128M
+      placement:
+        constraints: [node.labels.tier == small ]
     environment:
       - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com
     ports:
