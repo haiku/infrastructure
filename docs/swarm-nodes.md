@@ -10,9 +10,16 @@ DigitalOcean, however anything https://rexray.io supports should work in theory.
 
 **Install Base Requirements**
 ```
-yum install git vim
+yum install git vim iptables-services
+sed -i -e 's/^#Port 22/Port 2222/g' /etc/ssh/sshd_config
+sed -i 's/^-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT/-A INPUT -p tcp -m state --state NEW -m tcp --dport 2222 -j ACCEPT/' /etc/sysconfig/iptables
+iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 2222 -j ACCEPT
+semanage port -a -t ssh_port_t -p tcp 2222
+systemctl restart sshd
+(reconnect on port 2222)
 curl -fsSL https://get.docker.com/ | sh
 curl -sSL https://rexray.io/install | sh
+systemctl restart iptables
 systemctl enable docker
 systemctl start docker
 ```
