@@ -25,10 +25,10 @@ services:
       resources:
         limits:
           cpus: '0.25'
-          memory: 1G
+          memory: 64M
         reservations:
           cpus: '0.15'
-          memory: 256M
+          memory: 32M
       placement:
         constraints: [node.labels.tier == small ]
     volumes:
@@ -42,7 +42,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 2G
+          memory: 256M
         reservations:
           cpus: '0.15'
           memory: 128M
