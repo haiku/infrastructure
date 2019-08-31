@@ -17,5 +17,8 @@ if [ "$1" = 'pootle' ]; then
         pootle init --config $POOTLE_SETTINGS
     fi
 
+    # update /app/cron.env to set environment variables for the cron job
+    declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /app/cron.env
+
     exec supervisord
 fi
