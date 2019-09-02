@@ -1,4 +1,4 @@
-DOMAIN=haiku-test.org
+DOMAIN=haiku-os.org
 default:
 	@echo "Usage: make (bootstrap|deploy|upgrade|clean)"
 	@echo "       bootstrap: Setup required services in a new environment"
@@ -20,7 +20,7 @@ deploy:
 	DOMAIN=$(DOMAIN) docker stack deploy -c ingress.yaml ingress
 	sleep 5
 	DOMAIN=$(DOMAIN) docker stack deploy -c sysadmin.yaml sysadmin
-	#DOMAIN=$(DOMAIN) docker stack deploy -c ci.yaml ci
+	DOMAIN=$(DOMAIN) docker stack deploy -c ci.yaml ci
 	DOMAIN=$(DOMAIN) docker stack deploy -c cdn.yaml cdn
 	DOMAIN=$(DOMAIN) docker stack deploy -c dev.yaml dev
 	DOMAIN=$(DOMAIN) docker stack deploy -c community.yaml community
@@ -28,7 +28,7 @@ clean:
 	docker stack rm community
 	docker stack rm dev
 	docker stack rm cdn
-	#docker stack rm ci
+	docker stack rm ci
 	docker stack rm sysadmin
 	sleep 5
 	docker stack rm ingress
