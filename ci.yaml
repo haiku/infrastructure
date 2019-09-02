@@ -50,7 +50,7 @@ services:
         constraints: [node.labels.build == true ]
     command: loop
     networks:
-      - buildmaster_private
+      - private
     volumes:
       - sources:/var/sources:z
       - data_master_x86_64:/var/buildmaster:z
@@ -64,7 +64,7 @@ services:
         constraints: [node.labels.build == true ]
     command: loop
     networks:
-      - buildmaster_private
+      - private
     volumes:
       - sources:/var/sources:z
       - data_master_x86_gcc2:/var/buildmaster:z
@@ -75,7 +75,7 @@ services:
     image: mmlr/teleport
     command: server 5825 auth.db
     networks:
-      - buildmaster_private
+      - private
     ports:
       - "0.0.0.0:5825:5825"
     volumes:
@@ -122,7 +122,7 @@ volumes:
     driver_opts:
       size: 15
 networks:
-  buildmaster_private:
+  private:
     driver: overlay
   ingress_ci:
     external: true
