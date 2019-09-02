@@ -87,6 +87,7 @@ services:
         constraints: [node.labels.build == true ]
     networks:
       - ingress_ci
+      - private
     volumes:
       - sources:/var/sources:ro
       - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro

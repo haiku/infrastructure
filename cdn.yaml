@@ -60,6 +60,7 @@ services:
           memory: 1G
     networks:
       - ingress_cdn
+      - ci_private
     volumes:
       - ./data/www-repo:/etc/nginx/conf.d:z
       - ./data/static-html/repo:/usr/share/nginx/html:z
@@ -119,5 +120,7 @@ volumes:
     driver_opts:
       size: 250
 networks:
+  ci_private:
+    external: true
   ingress_cdn:
     external: true
