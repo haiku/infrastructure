@@ -49,10 +49,13 @@ services:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
       - "traefik.basic.port=8080"
-  dashboard:
-    image: skep/app
+  skep:
+    image: haiku/skepapp
+    #https://github.com/bobf/skep/pull/18
+    #image: skep/app
     networks:
-      - skep
+      - ingress_sysadmin
+      - private
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     deploy:
@@ -61,8 +64,21 @@ services:
           - node.role == manager
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/swarm/"
+      - "traefik.basic.frontend.rule=Host:skep.${DOMAIN}"
       - "traefik.basic.port=8080"
+  skepstat:
+    image: skep/stats
+    networks:
+      - private
+    deploy:
+      mode: global
+    volumes:
+      - "/dev:/hostfs/dev:ro"
+      #- "/etc:/hostfs/etc:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      SKEP_APP_URL: http://dashboard:8080
 volumes:
   fathom_secrets:
     driver: rexray/dobs
@@ -77,5 +93,7 @@ volumes:
     driver_opts:
       size: 1
 networks:
+  private:
+    driver: overlay
   ingress_sysadmin:
     external: true
