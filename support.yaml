@@ -75,17 +75,8 @@ services:
       - redis_data:/data:z
 volumes:
   smtp_keys:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   postgres_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 10
   redis_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 2
 networks:
   default:
     driver: overlay

@@ -43,9 +43,6 @@ services:
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
 volumes:
   discourse_shared:
-    driver: rexray/dobs
-    driver_opts:
-      size: 20
 networks:
   ingress_community:
     external: true

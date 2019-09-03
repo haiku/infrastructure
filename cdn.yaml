@@ -104,21 +104,9 @@ services:
       - "traefik.basic.port=80"
 volumes:
   ports_mirror:
-    driver: rexray/dobs
-    driver_opts:
-      size: 60
   minio_config:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   s3_secrets:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   s3_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 250
 networks:
   ci_private:
     external: true

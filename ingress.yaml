@@ -61,9 +61,6 @@ services:
       - traefik_acme:/acme:z
 volumes:
   traefik_acme:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
 networks:
   support_default:
     external: true

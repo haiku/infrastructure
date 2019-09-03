@@ -99,29 +99,14 @@ services:
       - "traefik.basic.port=80"
 volumes:
   buildbot_config:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   teleport:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   sources:
-    driver: rexray/dobs
-    driver_opts:
-      size: 5
   packages:
     driver: rexray/dobs
     driver_opts:
       size: 200
   data_master_x86_gcc2:
-    driver: rexray/dobs
-    driver_opts:
-      size: 15
   data_master_x86_64:
-    driver: rexray/dobs
-    driver_opts:
-      size: 15
 networks:
   private:
     driver: overlay

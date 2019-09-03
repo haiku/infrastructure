@@ -20,6 +20,7 @@ systemctl restart sshd
 cd /root && git clone https://github.com/haiku/infrastructure.git
 curl -fsSL https://get.docker.com/ | sh
 curl -sSL https://rexray.io/install | sh
+systemctl enable iptables
 systemctl restart iptables
 systemctl enable docker
 systemctl start docker

@@ -189,25 +189,10 @@ services:
       - "traefik.basic.port=8080"
 volumes:
   gerrit_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 10
   pootle_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 5
   userguide_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   trac_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 15
   hds_secrets:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
 networks:
   support_default:
     external: true
