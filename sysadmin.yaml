@@ -81,17 +81,8 @@ services:
       SKEP_APP_URL: http://dashboard:8080
 volumes:
   fathom_secrets:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
   prometheus_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 5
   grafana_data:
-    driver: rexray/dobs
-    driver_opts:
-      size: 1
 networks:
   private:
     driver: overlay
