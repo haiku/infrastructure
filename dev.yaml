@@ -21,6 +21,7 @@ services:
         constraints: [node.labels.git == true ]
     networks:
       - ingress_dev
+      - support_default
     depends_on:
       - smtp
       - irker
