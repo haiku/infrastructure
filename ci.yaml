@@ -37,6 +37,7 @@ services:
       - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
     networks:
       - ingress_ci
+      - support_default
     ports:
       - 9989:9989
     labels:
@@ -110,5 +111,7 @@ volumes:
 networks:
   private:
     driver: overlay
+  support_default:
+    external: true
   ingress_ci:
     external: true
