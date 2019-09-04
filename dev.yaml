@@ -137,6 +137,7 @@ services:
           memory: 64M
     networks:
       - ingress_dev
+      - support_default
     volumes:
       - userguide_data:/var/userguide:z
     labels:
@@ -176,6 +177,7 @@ services:
           memory: 1G
     networks:
       - ingress_dev
+      - support_default
     # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
     links:
       - traefik:eu.hpkg.haiku-os.org
