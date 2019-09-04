@@ -20,6 +20,7 @@ services:
       - ./data/static-html/build:/var/www/http:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
   buildbot:
@@ -42,6 +43,7 @@ services:
       - 9989:9989
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildbot/"
       - "traefik.basic.port=80"
   buildmaster_master_x86_64:
@@ -96,6 +98,7 @@ services:
       - packages:/var/instances/haikuports:ro
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
       - "traefik.basic.port=80"
 volumes:
