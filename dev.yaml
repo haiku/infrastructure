@@ -43,6 +43,7 @@ services:
       SMTP_CONNECT_TIMEOUT: 30
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:review.${DOMAIN}"
       - "traefik.basic.port=8080"
   cgit:
@@ -70,6 +71,7 @@ services:
       CGIT_SECTION_FROM_STARTPATH: 1
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:cgit.${DOMAIN},git.${DOMAIN}"
       - "traefik.basic.frontend.redirect.regex=cgit.${DOMAIN}/(.*)"
       - "traefik.basic.frontend.redirect.replacement=git.${DOMAIN}/$$1"
@@ -94,6 +96,7 @@ services:
       - smtp
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:dev.${DOMAIN}"
       - "traefik.basic.port=80"
       - "traefik.frontend.rateLimit.extractorFunc=client.ip"
@@ -121,6 +124,7 @@ services:
       - smtp
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/pootle/"
       - "traefik.basic.port=80"
   userguide:
@@ -143,6 +147,7 @@ services:
       - userguide_data:/var/userguide:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN};PathPrefixStrip:/userguide/"
       - "traefik.basic.port=80"
   www-i18n:
@@ -161,6 +166,7 @@ services:
       - ./data/static-html/i18n:/var/www/http:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:i18n.${DOMAIN}"
       # redirect /pootle & /userguide to forward to proper containers
       - "traefik.basic.frontend.redirect.regex=i18n.${DOMAIN}/(pootle|userguide)$$"
@@ -188,6 +194,7 @@ services:
       - postgres
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
       - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
       - "traefik.basic.port=8080"
 volumes:
