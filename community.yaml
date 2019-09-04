@@ -40,6 +40,7 @@ services:
       - discourse_shared:/shared:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_community"
       - "traefik.basic.frontend.rule=Host:discuss.${DOMAIN}"
 volumes:
   discourse_shared:
