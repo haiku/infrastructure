@@ -28,6 +28,7 @@ services:
       - s3_data:/data:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:cdn.${DOMAIN}"
       - "traefik.basic.port=9000"
   download:
@@ -46,6 +47,7 @@ services:
       - s3_data:/data:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:download.${DOMAIN}"
       - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
@@ -65,6 +67,7 @@ services:
       - ./data/static-html/repo:/usr/share/nginx/html:z
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:eu.hpkg.${DOMAIN}"
       - "traefik.basic.port=80"
   repo-mirror:
@@ -99,6 +102,7 @@ services:
       - ports_mirror:/ports-mirror
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
       - "traefik.basic.port=80"
 volumes:
