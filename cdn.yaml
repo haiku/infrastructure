@@ -26,7 +26,6 @@ services:
     command: server /data
     volumes:
       - s3_data:/data:z
-      - minio_config:/root/.minio/:z
     labels:
       - "traefik.enable=true"
       - "traefik.basic.frontend.rule=Host:cdn.${DOMAIN}"
@@ -104,7 +103,6 @@ services:
       - "traefik.basic.port=80"
 volumes:
   ports_mirror:
-  minio_config:
   s3_secrets:
   s3_data:
 networks:
