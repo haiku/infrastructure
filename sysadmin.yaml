@@ -34,6 +34,7 @@ services:
       - grafana_data:/var/lib/grafana
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_sysadmin"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN};PathPrefixStrip:/grafana/"
       - "traefik.basic.port=3000"
   fathom:
@@ -48,6 +49,7 @@ services:
     command: /app/fathom --config=/var/lib/fathom/config.env server
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_sysadmin"
       - "traefik.basic.frontend.rule=Host:metrics.${DOMAIN}"
       - "traefik.basic.port=8080"
   skep:
@@ -65,6 +67,7 @@ services:
           - node.role == manager
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=ingress_sysadmin"
       - "traefik.basic.frontend.rule=Host:skep.${DOMAIN}"
       - "traefik.basic.port=8080"
   skepstat:
