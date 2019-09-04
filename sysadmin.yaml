@@ -42,6 +42,7 @@ services:
       - postgres
     networks:
       - ingress_sysadmin
+      - support_default
     volumes:
       - fathom_secrets:/var/lib/fathom
     command: /app/fathom --config=/var/lib/fathom/config.env server
@@ -86,5 +87,7 @@ volumes:
 networks:
   private:
     driver: overlay
+  support_default:
+    external: true
   ingress_sysadmin:
     external: true
