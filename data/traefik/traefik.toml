@@ -1,6 +1,6 @@
 debug = true
 
-logLevel = "ERROR"
+logLevel = "INFO"
 defaultEntryPoints = ["https"]
 
 [accessLog]
@@ -8,14 +8,17 @@ filePath = "/logs/access.log"
 
 [entryPoints]
   [entryPoints.http]
-  address = ":80"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
+    address = ":80"
+      [entryPoints.http.redirect]
+        entryPoint = "https"
   [entryPoints.https]
-  address = ":443"
+    address = ":443"
+    [entryPoints.http.forwardedHeaders]
+      # Allows Traefik to pass internal X-Forwarded-* headers
+      trustedIPs = ["127.0.0.1/32", "10.0.0.0/8"]
   [entryPoints.https.tls]
   [entryPoints.api]
-  address = ":9191"
+    address = ":9191"
 
 [api]
 entryPoint = "api"
