@@ -52,8 +52,14 @@ services:
       - dev
       - sysadmin
     ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
+      # workaround for https://github.com/moby/moby/issues/25526
+      # Warning: host prevents multiple traefik instances on same node!
+      - target: 80
+        publisher: 80
+        mode: host
+      - target: 443
+        publisher: 443
+        mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:z
       - /var/log/traefik:/logs:z
