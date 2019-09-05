@@ -9,11 +9,14 @@ filePath = "/logs/access.log"
 [entryPoints]
   [entryPoints.http]
     address = ":80"
-      [entryPoints.http.redirect]
-        entryPoint = "https"
+    [entryPoints.http.redirect]
+      entryPoint = "https"
+    [entryPoints.http.forwardedHeaders]
+      # Allows Traefik to pass internal X-Forwarded-* headers
+      trustedIPs = ["127.0.0.1/32", "10.0.0.0/8"]
   [entryPoints.https]
     address = ":443"
-    [entryPoints.http.forwardedHeaders]
+    [entryPoints.https.forwardedHeaders]
       # Allows Traefik to pass internal X-Forwarded-* headers
       trustedIPs = ["127.0.0.1/32", "10.0.0.0/8"]
   [entryPoints.https.tls]
