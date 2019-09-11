@@ -45,7 +45,9 @@ services:
     environment:
       - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com
     ports:
-      - "0.0.0.0:25:25"
+      - target: 25
+        published: 25
+        mode: host
   postgres:
     image: postgres:9.6
     deploy:
