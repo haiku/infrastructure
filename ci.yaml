@@ -101,6 +101,31 @@ services:
       - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
       - "traefik.basic.port=80"
+  concourse:
+    image: haiku/concourse-web
+    command: web
+    environment:
+      CONCOURSE_EXTERNAL_URL: https://ci.haiku-os.org
+      #CONCOURSE_EXTERNAL_URL: https://build.haiku-os.org/concourse/
+      CONCOURSE_TSA_BIND_PORT: 8022
+      CONCOURSE_SESSION_SIGNING_KEY: /keys/session_signing_key
+      CONCOURSE_TSA_HOST_KEY: /keys/tsa_host_key
+      CONCOURSE_TSA_AUTHORIZED_KEYS: /keys/authorized_worker_keys
+    networks:
+      - ingress_ci
+      - support_default
+    ports:
+      - target: 8022
+        published: 8022
+    volumes:
+      - concourse_keys:/keys
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ingress_ci"
+      # Ideally this should be at build.haiku-os.org/concourse, but the app
+      # doesn't like prefix paths.
+      - "traefik.basic.frontend.rule=Host:ci.${DOMAIN}"
+      - "traefik.basic.port=8080"
 volumes:
   buildbot_config:
   teleport:
