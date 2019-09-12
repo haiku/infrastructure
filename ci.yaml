@@ -108,6 +108,8 @@ services:
       CONCOURSE_EXTERNAL_URL: https://ci.haiku-os.org
       #CONCOURSE_EXTERNAL_URL: https://build.haiku-os.org/concourse/
       CONCOURSE_TSA_BIND_PORT: 8022
+      CONCOURSE_CONTAINER_PLACEMENT_STRATEGY: limit-active-tasks
+      CONCOURSE_MAX_ACTIVE_TASKS_PER_WORKER: 2
       CONCOURSE_SESSION_SIGNING_KEY: /keys/session_signing_key
       CONCOURSE_TSA_HOST_KEY: /keys/tsa_host_key
       CONCOURSE_TSA_AUTHORIZED_KEYS: /keys/authorized_worker_keys
