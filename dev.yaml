@@ -173,7 +173,7 @@ services:
       - "traefik.basic.frontend.redirect.replacement=i18n.${DOMAIN}/$$1/"
       - "traefik.basic.port=80"
   haikudepotserver:
-    image: haiku/haikudepotserver:1.0.112
+    image: haiku/haikudepotserver:1.0.113
     deploy:
       resources:
         limits:
