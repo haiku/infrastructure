@@ -85,7 +85,9 @@ services:
       - s3_data:/repo-data:ro,z
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
-      - 12000:12000
+      - target: 12000
+        published: 12000
+        mode: host
   portsmirror:
     image: haiku/ports-mirror
     deploy:
