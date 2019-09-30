@@ -36,24 +36,24 @@ if [ "$TEAM" != "continuous" ]; then
 	$FLY_CLI -t $TEAM expose-pipeline -p toolchain-$BRANCH
 fi
 
-# Anyboot is the "ideal image type"
+# Anyboot is the "ideal image media type"
 echo "Flight ready for boarding..."
 for ARCH in $ARCHES; do
 	PROFILE=$BRANCH_PROFILE
-	TYPE="anyboot"
+	MEDIA="anyboot"
 
 	# Some architectures are special
 	if [ "$ARCH" == "arm" ]; then
 		PROFILE="minimum"
-		TYPE="mmc"
+		MEDIA="mmc"
 	fi
 
 	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$TYPE"
 
 	if [ "$TEAM" == "continuous" ]; then
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v type=$TYPE -c pipelines/haiku-continuous.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
 	else
-		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v type=$TYPE -y days=\[$DAYS\] -c pipelines/haiku-release.yml
+		$FLY_CLI -t $TEAM set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t $TEAM expose-pipeline -p $BRANCH-$ARCH
 done

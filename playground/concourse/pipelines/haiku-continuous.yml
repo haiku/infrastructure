@@ -49,7 +49,7 @@ task-build-image: &task-build-image
                 ;;
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-        jam -q @((profile))-((type))
+        jam -q @((profile))-((media))
 
 # Jobs
 jobs:
@@ -58,6 +58,6 @@ jobs:
     plan:
       - get: haiku-git
         trigger: true
-      - task: build ((branch)) @((profile))-((type))
+      - task: build ((branch)) @((profile))-((media))
         config:
           << : *task-build-image

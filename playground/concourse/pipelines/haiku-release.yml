@@ -47,7 +47,7 @@ jobs:
         trigger: true
       - get: haiku-git
         trigger: false
-      - task: build ((branch)) anyboot
+      - task: build ((branch)) ((media))
         config:
           platform: linux
           image_resource:
@@ -85,8 +85,8 @@ jobs:
                         ;;
                 esac
                 ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-                jam -j2 -q @((profile))-anyboot
-      - task: package ((branch)) anyboot
+                jam -j2 -q @((profile))-((media))
+      - task: package ((branch)) ((media))
         config:
           platform: linux
           image_resource:
@@ -103,13 +103,16 @@ jobs:
               - -c
               - |
                 RELEASE=$(git -C haiku-git tag -l --points-at HEAD)
-                cp generated.((arch))/haiku-((profile))-anyboot.iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-anyboot.iso
+                if [[ "((media))" == "anyboot" ]]; then
+                  cp generated.((arch))/haiku-((profile))-((media)).iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
+                elif [[ "((media))" == "mmc" ]]; then
+                  cp generated.((arch))/haiku-((media)).image artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
+                fi
                 cp haiku-git/ReadMe.md artifacts.((arch))/ReadMe.md
                 cd artifacts.((arch))
-                zip -9 haiku-((branch))-$RELEASE-((arch))-anyboot.zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-anyboot.iso
-                rm *.md
-                rm *.iso
-                sha256sum --tag haiku-((branch))-$RELEASE-((arch))-anyboot.zip > haiku-((branch))-$RELEASE-((arch))-anyboot.zip.sha256
+                zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-*.*
+                rm -f *.md *.image *.iso
+                sha256sum --tag haiku-((branch))-$RELEASE-((arch))-((media)).zip > haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256
       - put: upload-image
         params:
           file: artifacts.((arch))/haiku-((branch))-*.zip
