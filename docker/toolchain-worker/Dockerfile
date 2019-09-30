@@ -26,6 +26,6 @@ RUN for i in ${ARCHITECTURES}; do /tmp/src/haiku/configure --build-cross-tools $
 	find /toolchains -type f -and -executable -and -regex ".*\/bin\/.*" -exec strip {} \;
  
 # Add each toolchain to PATH and cleanup
-RUN echo "export ARCHITECTURES=\"${ARCHITECTURES}\"" >> ~/.bashrc && \
-	echo "export PATH=$(for i in ${ARCHITECTURES}; do echo -n /toolchains/cross-tools-$i/bin:; done | sed 's/:$//g'):$PATH" >> ~/.bashrc && \
+RUN echo "export ARCHITECTURES=\"${ARCHITECTURES}\"" >> ~/.profile && \
+	echo "export PATH=$(for i in ${ARCHITECTURES}; do echo -n /toolchains/cross-tools-$i/bin:; done | sed 's/:$//g'):$PATH" >> ~/.profile && \
 	rm -rf /tmp/src && rm -rf /toolchains/build && rm -f /toolchains/Jamfile

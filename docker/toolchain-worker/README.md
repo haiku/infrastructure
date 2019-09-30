@@ -12,7 +12,7 @@ compile Haiku (or whatever) from source *without* needing to build the toolchain
 > host and use all of them.
 
 **Building the latest sources**
-```docker build -t haiku/toolchain-worker-master:latest .```
+```docker build -t haiku/toolchain-worker:latest .```
 
 **Building a branch**
 ```docker build --build-arg HAIKU_CHECKOUT=r1beta1 --build-arg BUILDTOOLS_CHECKOUT=r1beta1 -t haiku/toolchain-worker:r1beta1 .```
