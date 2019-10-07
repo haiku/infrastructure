@@ -64,6 +64,9 @@ RUN chmod +x /gerrit*.sh
 #So gerrit user can own this directory.
 RUN su-exec ${GERRIT_USER} mkdir -p $GERRIT_SITE
 
+# Check for healthy backend web service
+HEALTHCHECK CMD curl --fail http://`hostname`:8080/ || exit 1
+
 #Gerrit site directory is a volume, so configuration and repositories
 #can be persisted and survive image upgrades.
 VOLUME $GERRIT_SITE
