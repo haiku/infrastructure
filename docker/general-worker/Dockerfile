@@ -1,45 +1,47 @@
-FROM ubuntu
+FROM fedora:latest
 
 USER root
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN dnf install -y \
   autoconf \
   automake \
   bc \
   bison \
-  build-essential \
+  byacc \
   bzip2 \
-  ca-certificates \
   cmake \
   curl \
-  device-tree-compiler \
-  file \
+  curl-devel \
   flex \
-  gcc-multilib \
-  g++ \
-  gawk \
-  genisoimage \
+  gcc \
+  gcc-c++ \
   git \
-  less \
-  libcurl4-openssl-dev \
+  glibc-devel \
+  glibc-devel.i686 \
+  libstdc++ \
+  libstdc++-static \
+  libstdc++-devel \
+  libstdc++-devel.i686 \
   libtool \
-  libssl-dev \
+  libfdt \
   make \
+  minisign \
   mtools \
   nasm \
   ninja-build \
-  python \
   python3 \
+  python3-devel \
+  swig \
   texinfo \
-  u-boot-tools \
-  util-linux \
   vim \
-  zip \
+  uboot-tools \
   unzip \
   wget \
+  zip \
   xorriso \
-  xz-utils \
-  zlib1g-dev
+  xz \
+  zlib \
+  zlib-devel
 
 ADD https://dl.min.io/client/mc/release/linux-amd64/mc /usr/local/bin/mc
 RUN chmod 755 /usr/local/bin/mc
