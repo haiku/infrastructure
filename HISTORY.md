@@ -1,13 +1,13 @@
 # The history of Haiku's infrastructure
 
-## Old Days
+## Pre-2013 Old Days
 
 (TODO) Fill in the *old* days
 
   * We used an awesome *free not for profits* account at Dreamhost.com.
   * They were awesome, however we began to grow rapidly and abuse Dreamhost's generosity.
 
-## Less Old Days
+## Jan 2013 - Nov 2018 Less Old Days
 
   * We got a dedicated server (baron) at Hetzner managed by Olta. It worked *really* well
     and was stable for multiple years. Maintenance was a massive time suck however. Multiple
@@ -17,7 +17,7 @@
   * Several of the OpenSUSE VM's were 32-bit, and we ran-into roadblocks performing basic updates to vm's
   * Everyone was afraid to touch anything, resulting in baron becoming *FAR* behind in OS upgrades.
 
-## Transition (bad) Days  (~$34 USD/mo)
+## Nov 2018 - March 2019 Transition (bad) Days  (~$34 USD/mo)
 
   * waddlesplash replaced the old Drupal 6 for haiku-os.org with Hugo hosted at Netlify.
     * kallisti5 was against it, but he was completely wrong. Netlify saved our bacon.
@@ -35,7 +35,7 @@
   * scaleway.com *sucked*.   Restarting VM's with large block attachments took *HOURS*
     * Spoilers: online.net is part of Scaleway.
 
-## Transition (meh) Days (~$84 USD/mo)
+## March 2019 - Aug 2019 Transition (meh) Days (~$84 USD/mo)
 
   * Purchased a dedicated server at online.net, with a online.net managed iSCSI.
   * Purchased premium support to get a 1Gbps private network.
@@ -50,3 +50,10 @@
   * Huge iSCSI outage from online.net. Service unavailable for 10 hours.
     * Support unhelpful and suprised (pissed?) i was asking for updates every two hours when they haven't given me an update or ETA.
   * online.net restored service. Things came back up as expected.
+
+## Aug 2019+ Digital Ocean (current) days (~$100 USD/mo)
+
+  * Moved to a VM at DigitalOcean in Amsterdam (EU/GDPR)
+  * Successfully moved to Docker Swarm
+  * Using local SSD storage for persistant data, with a few block attachments for big things managed by rexray.
+  * Speeds have been improved, system fairly stable
