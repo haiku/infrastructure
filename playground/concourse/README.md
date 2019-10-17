@@ -22,6 +22,16 @@ Concourse is now running on localhost:8080. The username / password is test/test
 
 Install the fly CLI by downloading it from the web ui and placing it at /usr/local/bin/fly
 
+### Bootstrap
+
+Create the initial required teams as an admin user...
+
+```
+fly -t haiku set-team -n continuous --github-team=haiku:infrastructure --non-interactive
+fly -t haiku set-team -n nightly --github-team=haiku:infrastructure --non-interactive
+fly -t haiku set-team -n r1beta1 --github-team=haiku:infrastructure --non-interactive
+```
+
 ## Terms
 
 * Concourse - A continious integration system which builds code based on YAML pipeline defines
@@ -42,10 +52,6 @@ Install the fly CLI by downloading it from the web ui and placing it at /usr/loc
 
 ## Secrets
 
-### secrets.fly
-
-```secrets.fly``` contains information to automatically log into our concourse server.
-
 ### secrets.yml
 
 ```secrets.yml``` contains secrets *used by* our concourse pipelines to update artifacts.
@@ -61,4 +67,4 @@ Install the fly CLI by downloading it from the web ui and placing it at /usr/loc
 
 ## Deploying
 
-./deploy.sh secrets.fly secrets.yml
+./deploy.sh secrets.yml
