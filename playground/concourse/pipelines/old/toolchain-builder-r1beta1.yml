@@ -1,0 +1,221 @@
+---
+# This was a one-off to "retroactively" get a r1beta1 toolchain-worker.
+#
+# We had to use a fedora:28 general-worker (tagged as r1beta1) for the old
+# autotools-1.15 in Fedora 28
+#
+# I pretty much replaced toolchain-builder.yml with this one temporarly to get a
+# functioning toolchain container for r1beta1, then got a successful build, then
+# applied the normal toolchain.
+#
+roles:
+  - name: owner
+    github:
+      teams: ["haiku:infrastructure"]
+    local:
+      users: ["admin"]
+resource_types:
+  - name: irc-notification
+    type: docker-image
+    source:
+      repository: flavorjones/irc-notification-resource
+resources:
+  - name: buildtools-git
+    type: git
+    icon: git
+    source:
+      uri: https://review.haiku-os.org/buildtools.git
+      branch: ((branch))
+  - name: haiku-git
+    type: git
+    icon: git
+    source:
+      uri: https://review.haiku-os.org/haiku.git
+      branch: ((branch))
+  - name: toolchain-container-((branch))-sha
+    type: docker-image
+    icon: docker
+    source:
+      email: contact@haiku-inc.org
+      username: ((docker-hub-user))
+      password: ((docker-hub-password))
+      repository: haiku/toolchain-worker-((branch))
+  - name: toolchain-container-((branch))-latest
+    type: docker-image
+    icon: docker
+    source:
+      email: contact@haiku-inc.org
+      username: ((docker-hub-user))
+      password: ((docker-hub-password))
+      repository: haiku/toolchain-worker-((branch))
+# Common Tasks
+task-build-jam: &task-build-jam
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/general-worker, tag: r1beta1 }
+  inputs:
+    - name: buildtools-git
+  run:
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        pwd
+        ls -la
+        cd buildtools-git/jam
+        make -j2
+        mv bin.linuxx86/jam ../../jam
+  outputs:
+    - name: jam
+
+task-build-crosstools: &task-build-crosstools
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/general-worker, tag: r1beta1 }
+  inputs:
+    - name: haiku-git
+    - name: buildtools-git
+  run: 
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        ls -la
+        cd crosstools.${TOOLARCH}
+        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j4
+# Jobs
+jobs:
+  - name: buildtools-((branch))
+    public: true
+    plan:
+      - in_parallel:
+        - get: haiku-git
+          trigger: false
+        - get: buildtools-git
+          trigger: true
+      - task: compile jam
+        config:
+          << : *task-build-jam
+#      - task: compile arm crosstools
+#        params:
+#          TOOLARCH: arm
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.arm
+#      - task: compile arm64 crosstools
+#        params:
+#          TOOLARCH: arm64
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.arm64
+      #- task: compile m68k crosstools
+      #  params:
+      #    TOOLARCH: m68k
+      #  config:
+      #    << : *task-build-crosstools
+      #    outputs:
+      #      - name: crosstools.m68k
+#      - task: compile ppc crosstools
+#        params:
+#          TOOLARCH: ppc
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.ppc
+#      - task: compile riscv64 crosstools
+#        params:
+#          TOOLARCH: riscv64
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.riscv64
+#      - task: compile sparc crosstools
+#        params:
+#          TOOLARCH: sparc
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.sparc
+      - task: compile x86 crosstools
+        params:
+          TOOLARCH: x86
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86
+      - task: compile x86_64 crosstools
+        params:
+          TOOLARCH: x86_64
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86_64
+      - task: compile x86_gcc2 crosstools
+        params:
+          TOOLARCH: x86_gcc2
+        config:
+          << : *task-build-crosstools
+          outputs:
+            - name: crosstools.x86_gcc2
+      - task: prepare container context
+        config:
+          platform: linux
+          inputs:
+            - name: buildtools-git
+            - name: haiku-git
+            - name: jam
+#            - name: crosstools.arm
+#            - name: crosstools.arm64
+            #- name: crosstools.m68k
+#            - name: crosstools.ppc
+#            - name: crosstools.riscv64
+#            - name: crosstools.sparc
+            - name: crosstools.x86
+            - name: crosstools.x86_64
+            - name: crosstools.x86_gcc2
+          outputs:
+            - name: container-context
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/general-worker, tag: r1beta1 }
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                BUILDTOOLS_SHA=$(git -C buildtools-git rev-parse HEAD)
+                HAIKU_SHA=$(git -C haiku-git rev-parse HEAD)
+                echo "{" > container-context/labels.json
+                echo "  \"build_date\": \"$(date)\"," >> container-context/labels.json
+                echo "  \"buildtools\": \"$BUILDTOOLS_SHA\"," >> container-context/labels.json
+                echo "  \"haiku\": \"$HAIKU_SHA\"" >> container-context/labels.json
+                echo "}" >> container-context/labels.json
+                echo "$BUILDTOOLS_SHA" > container-context/tag
+                echo "latest" > container-context/latesttag
+                mkdir container-context/jam
+                cp jam/jam container-context/jam
+                mkdir container-context/toolchains
+                cp -R crosstools.*/cross-tools-* container-context/toolchains/
+                echo "FROM haiku/general-worker:r1beta1" > container-context/Dockerfile
+                echo "ADD jam/jam /usr/bin/jam" >> container-context/Dockerfile
+                echo "ADD toolchains /toolchains" >> container-context/Dockerfile
+                # Hack for https://dev.haiku-os.org/ticket/15197. Please fix me!
+                GCC2PATH=$(strings container-context/toolchains/cross-tools-x86_gcc2/bin/i586-pc-haiku-cpp | grep gcc-lib | grep crosstools | cut -d/ -f1,2,3,4,5)
+                echo "RUN mkdir -p $GCC2PATH" >> container-context/Dockerfile
+                echo "RUN ln -s /toolchains/cross-tools-x86_gcc2 $GCC2PATH/cross-tools-x86_gcc2" >> container-context/Dockerfile
+                # Dump the context of the container for reference
+                find container-context
+      - put: toolchain-container-((branch))-sha
+        params:
+          tag_file: container-context/tag
+          labels_file: container-context/labels.json
+          build: container-context
+      - put: toolchain-container-((branch))-latest
+        params:
+          tag_file: container-context/latesttag
+          labels_file: container-context/labels.json
+          build: container-context
