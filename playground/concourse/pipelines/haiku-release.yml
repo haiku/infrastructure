@@ -18,7 +18,7 @@ resources:
     type: s3
     icon: minidisc
     source:
-      bucket: haiku-((profile))-test
+      bucket: ((bucket))
       access_key_id: ((s3key))
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
@@ -27,7 +27,7 @@ resources:
     type: s3
     icon: shield-lock-outline
     source:
-      bucket: haiku-((profile))-test
+      bucket: ((bucket))
       access_key_id: ((s3key))
       secret_access_key: ((s3secret))
       endpoint: ((s3endpoint))
