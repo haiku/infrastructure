@@ -25,6 +25,15 @@ resources:
       regexp: ((arch))/haiku-((branch))-(.*)-((arch))-.*\.zip
   - name: checksum-image
     type: s3
+    icon: shield-check-outline
+    source:
+      bucket: ((bucket))
+      access_key_id: ((s3key))
+      secret_access_key: ((s3secret))
+      endpoint: ((s3endpoint))
+      regexp: ((arch))/haiku-((branch))-(.*)-((arch))-.*\.zip\.*.*
+  - name: sign-image
+    type: s3
     icon: shield-lock-outline
     source:
       bucket: ((bucket))
@@ -113,12 +122,19 @@ jobs:
                 zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-*.*
                 rm -f *.md *.image *.iso
                 sha256sum --tag haiku-((branch))-$RELEASE-((arch))-((media)).zip > haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256
+                echo "untrusted comment: minisign encrypted secret key" > /tmp/minisign.key
+                echo "((minisign-private))" >> /tmp/minisign.key
+                echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm haiku-((branch))-$RELEASE-((arch))-((media)).zip
+                rm -f /tmp/minisign.key
       - put: upload-image
         params:
           file: artifacts.((arch))/haiku-((branch))-*.zip
       - put: checksum-image
         params:
           file: artifacts.((arch))/haiku-((branch))-*.zip.sha256
+      - put: sign-image
+        params:
+          file: artifacts.((arch))/haiku-((branch))-*.zip.minisig
   - name: repo-((branch))-((arch))
     public: true
     plan:
@@ -196,5 +212,9 @@ jobs:
                 TARGET_REPO="repository.((arch))/$PRI_ARCH/$VERSION"
                 mkdir -p $TARGET_REPO
                 cp -R $REPODIR/* $TARGET_REPO
+                echo "untrusted comment: minisign encrypted secret key" > /tmp/minisign.key
+                echo "((minisign-private))" >> /tmp/minisign.key
+                echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm $TARGET_REPO/repo
+                rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
                 mc cp --recursive $TARGET_REPO remote/haiku-repositories-test/((branch))/$PRI_ARCH/
