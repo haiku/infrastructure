@@ -111,7 +111,7 @@ jobs:
             args:
               - -c
               - |
-                RELEASE=$(git -C haiku-git describe --tags --long | cut -d\- -f1,2 | sed 's/\-/\+/g' | sed 's/\+0//g')
+                RELEASE=$(git -C haiku-git describe --tags --long | cut -d\- -f1,2 | sed 's/\-/\_/g' | sed 's/\_0//g')
                 if [[ "((media))" == "anyboot" ]]; then
                   cp generated.((arch))/haiku-((profile))-((media)).iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
                 elif [[ "((media))" == "mmc" ]]; then
