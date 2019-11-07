@@ -21,6 +21,7 @@ RUN apt-get update && \
                         nasm \
                         autoconf \
                         automake \
+                        bash \
                         texinfo \
                         flex \
                         bison \
