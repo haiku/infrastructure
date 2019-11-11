@@ -52,6 +52,22 @@ services:
       - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
+  reposerv:
+    image: quay.io/kallisti5/reposerv:latest
+    deploy:
+      replicas: 3
+    secrets:
+      - s3_endpoint
+      - s3_bucket
+      - s3_key
+      - s3_secret
+    networks:
+      - ingress_cdn
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ingress_cdn"
+      - "traefik.basic.frontend.rule=Host:test.hpkg.${DOMAIN}"
+      - "traefik.basic.port=8000"
   www:
     image: haiku/nginx
     deploy:
@@ -107,6 +123,15 @@ services:
       - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
       - "traefik.basic.port=80"
+secrets:
+  s3_endpoint:
+    external: true
+  s3_bucket:
+    external: true
+  s3_key:
+    external: true
+  s3_secret:
+    external: true
 volumes:
   ports_mirror:
   s3_secrets:
