@@ -23,29 +23,6 @@ services:
       - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
-  buildbot:
-    image: haiku/buildbot-master
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 4G
-    depends_on:
-      - postgres
-    hostname: buildbot
-    volumes:
-      - buildbot_config:/var/lib/buildbot:z
-      - ./data/buildbot/master.cfg:/var/lib/buildbot/master.cfg:z
-    networks:
-      - ingress_ci
-      - support_default
-    ports:
-      - 9989:9989
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ingress_ci"
-      - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildbot/"
-      - "traefik.basic.port=80"
   buildmaster_master_x86_64:
     image: haikuports/buildmaster
     deploy:
@@ -129,7 +106,6 @@ services:
       - "traefik.basic.frontend.rule=Host:ci.${DOMAIN}"
       - "traefik.basic.port=8080"
 volumes:
-  buildbot_config:
   concourse_keys:
   teleport:
   sources:
