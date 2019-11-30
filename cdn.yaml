@@ -55,7 +55,11 @@ services:
   reposerv:
     image: quay.io/kallisti5/reposerv:latest
     deploy:
-      replicas: 3
+      replicas: 1
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 512M
     secrets:
       - s3_endpoint
       - s3_bucket
@@ -66,7 +70,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ingress_cdn"
-      - "traefik.basic.frontend.rule=Host:test.hpkg.${DOMAIN};PathPrefixStrip:/haiku/"
+      - "traefik.basic.frontend.rule=Host:eu.hpkg.${DOMAIN};PathPrefixStrip:/haiku/"
       - "traefik.basic.port=8000"
   www:
     image: haiku/nginx
