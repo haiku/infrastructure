@@ -93,7 +93,7 @@ jobs:
                         TOOLCHAIN_SECONDARY=""
                         ;;
                 esac
-                ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
+                ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 jam -j2 -q @((profile))-((media))
       - task: package ((branch)) ((media))
         config:
@@ -179,7 +179,7 @@ jobs:
                         TOOLCHAIN_SECONDARY=""
                         ;;
                 esac
-                ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
+                ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 jam -q @((profile))-raw build \<repository\>Haiku
       - task: prepare ((branch)) repository
         config:
