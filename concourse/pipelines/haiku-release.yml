@@ -78,7 +78,11 @@ jobs:
             - name: haiku-git
             - name: generated.((arch))
           outputs:
-            - name: artifacts.((arch))
+            - name: images.((arch))
+          params:
+            S3_ENDPOINT: ((s3endpoint))
+            S3_KEY: ((s3key))
+            S3_SECRET: ((s3secret))
           run:
             path: /bin/bash
             args:
@@ -86,12 +90,12 @@ jobs:
               - |
                 RELEASE=$(git -C haiku-git describe --tags --long | cut -d\- -f1,2 | sed 's/\-/\_/g' | sed 's/\_0//g')
                 if [[ "((media))" == "anyboot" ]]; then
-                  cp generated.((arch))/haiku-((profile))-((media)).iso artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
+                  cp generated.((arch))/haiku-((profile))-((media)).iso images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
                 elif [[ "((media))" == "mmc" ]]; then
-                  cp generated.((arch))/haiku-((media)).image artifacts.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
+                  cp generated.((arch))/haiku-((media)).image images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
                 fi
-                cp haiku-git/ReadMe.md artifacts.((arch))/ReadMe.md
-                cd artifacts.((arch))
+                cp haiku-git/ReadMe.md images.((arch))/ReadMe.md
+                cd images.((arch))
                 zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-*.*
                 rm -f *.md *.image *.iso
                 sha256sum --tag haiku-((branch))-$RELEASE-((arch))-((media)).zip > haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256
@@ -100,7 +104,12 @@ jobs:
                 echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm haiku-((branch))-$RELEASE-((arch))-((media)).zip
                 rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp artifacts.((arch))/haiku-((branch))-*.zip* remote/((bucket_image))/((arch))/
+                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip was successfully uploaded!"
+                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 was successfully uploaded!"
+                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig was successfully uploaded!"
   - name: repo-((branch))-((arch))
     public: true
     plan:
@@ -184,3 +193,4 @@ jobs:
                 rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
                 mc cp --recursive $TARGET_REPO remote/((bucket_repo))/((branch))/$PRI_ARCH/
+                echo "Haiku $PRI_ARCH repository $VERSION was successfully uploaded!"
