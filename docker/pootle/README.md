@@ -23,6 +23,11 @@ The volume should contain the following:
 The pootle-entrypoint.sh contains on specialized run command:
  - `pootle` which starts an nginx frontend, cron for the weekly sync, a pootle server and a pootle rqworker
 
+## Configuring the Haiku Repository
+In order to make sure that the catkeys for WebPositive are build, you need to
+manually enable the `webkit` feature. Within the `/var/pootle/repository` dir,
+add a `generated/UserBuildConfig` file with the line `EnableBuildFeatures webkit ;`.
+
 ## Synchronization
 
 Synchronization is a list of actions that need to be taken to roughly:
