@@ -1,4 +1,9 @@
 ---
+resource_types:
+  - name: irc-notification
+    type: docker-image
+    source:
+      repository: flavorjones/irc-notification-resource
 roles:
   - name: owner
     github:
@@ -12,6 +17,17 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+  - name: irc
+    type: irc-notification
+    icon: bullhorn
+    source:
+      server: irc.freenode.net
+      port: 6667
+      channel: "#haiku-dev"
+      join: true
+      user: HaikuCIBot
+      password: thisisastupidfield
+      usetls: false
 task-build-image: &task-build-image
   platform: linux
   image_resource:
@@ -50,11 +66,18 @@ task-build-image: &task-build-image
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
         jam -q @((profile))-((media))
-
 # Jobs
 jobs:
   - name: haiku-((branch))-((arch))
     public: true
+    on_success:
+      put: irc
+      params:
+        message: ((branch)) build of ((arch)) was successful! ${BUILD_URL}
+    on_failure:
+      put: irc
+      params:
+        message: ((branch)) build of ((arch)) failed! ${BUILD_URL}
     plan:
       - get: haiku-git
         trigger: true
