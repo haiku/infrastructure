@@ -52,8 +52,8 @@ services:
       - "traefik.basic.frontend.redirect.regex=download.${DOMAIN}/(haiku-repositories|haikuports-repositories)/(.*)$$"
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
-  reposerv:
-    image: quay.io/kallisti5/reposerv:latest
+  hpkgbouncer:
+    image: haiku/hpkgbouncer:latest
     deploy:
       replicas: 1
     resources:
