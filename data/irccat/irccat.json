@@ -1,0 +1,27 @@
+{
+  "tcp": {
+    "listen": ":12345"
+  },
+  "http": {
+    "listen": ":8045",
+    "tls": false,
+    "tls_key": "",
+    "tls_cert": "",
+    "listeners": {
+      "generic": true,
+      "grafana": "#haiku-dev"
+    }
+  },
+  "irc": {
+    "server": "irc.freenode.net:6697",
+    "tls": false,
+    "tls_skip_verify": false,
+    "nick": "nekobot",
+    "realname": "IRCCat Bot",
+    "server_pass": "",
+    "identify_pass": "",
+    "sasl_login": "",
+    "sasl_pass": "",
+    "channels": ["#haiku-dev"]
+  }
+}

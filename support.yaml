@@ -17,6 +17,17 @@ services:
         reservations:
           cpus: '0.25'
           memory: 8M
+  irccat:
+    image: irccloud/irccat:latest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    configs:
+      - source: irccat
+        target: /etc/irccat.json
+        mode: 0644
   smtp:
     image: mwader/postfix-relay
     deploy:
@@ -75,6 +86,9 @@ services:
           memory: 512M
     volumes:
       - redis_data:/data:z
+configs:
+  irccat:
+    file: data/irccat/irccat.json
 volumes:
   smtp_keys:
   postgres_data:
