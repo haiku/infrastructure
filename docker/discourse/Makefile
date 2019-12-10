@@ -1,5 +1,5 @@
 default:
-	docker build -t docker.io/haiku/discourse:latest .
+	docker build --no-cache -t docker.io/haiku/discourse:latest .
 shell:
 	docker run -it docker.io/haiku/discourse:latest /bin/bash -l
 test:
@@ -8,6 +8,7 @@ test:
 	docker kill postgres || true
 	sleep 5
 	docker rm postgres || true
+	docker network create discourse || true
 	docker run -d --name postgres --network discourse -e POSTGRES_PASSWORD=mysecretpassword postgres:latest
 	docker rm redis || true
 	docker run -d --name redis --network discourse redis:latest
