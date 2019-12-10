@@ -13,7 +13,7 @@
     }
   },
   "irc": {
-    "server": "irc.freenode.net:6697",
+    "server": "irc.freenode.net:6667",
     "tls": false,
     "tls_skip_verify": false,
     "nick": "nekobot",
