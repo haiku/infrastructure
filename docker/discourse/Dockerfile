@@ -7,7 +7,7 @@ MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
 ENV DISCOURSE_VERSION=2.3.7
 
-RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python python-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli && pip install supervisor
+RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python python-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli uglifyjs && pip install supervisor
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Install Discourse
@@ -38,4 +38,4 @@ WORKDIR /apps/discourse
 
 CMD "/init"
 
-HEALTHCHECK CMD curl --fail http://`hostname`:80/ || exit 1
+HEALTHCHECK --start-period=5m CMD curl --fail http://`hostname`:80/ || exit 1
