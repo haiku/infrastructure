@@ -1,9 +1,9 @@
 ---
 resource_types:
-  - name: irc-notification
+  - name: irccat-resource
     type: docker-image
     source:
-      repository: flavorjones/irc-notification-resource
+      repository: haiku/irccat-resource
 roles:
   - name: owner
     github:
@@ -18,16 +18,11 @@ resources:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
   - name: irc
-    type: irc-notification
+    type: irccat-resource
     icon: bullhorn
     source:
-      server: irc.freenode.net
-      port: 6667
-      channel: "#haiku-dev"
-      join: true
-      user: HaikuCIBot
-      password: thisisastupidfield
-      usetls: false
+      uri: https://build.haiku-os.org/irccat/send
+      secret: ((irccat-secret))
 task-build-image: &task-build-image
   platform: linux
   image_resource:
@@ -73,11 +68,11 @@ jobs:
     on_success:
       put: irc
       params:
-        message: ((branch)) build of ((arch)) was successful! ${BUILD_URL}
+        message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
     on_failure:
       put: irc
       params:
-        message: ((branch)) build of ((arch)) failed! ${BUILD_URL}
+        message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
     plan:
       - get: haiku-git
         trigger: true
