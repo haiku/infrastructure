@@ -25,32 +25,41 @@
     ```
     CONCOURSE_WORK_DIR is a path with at least ~50 GB (builds happen here)
 
+  * Write out the systemd service to /usr/lib/systemd/system/concourse.service
+    ```
+    [Unit]
+    Description=Concourse CI worker process
+    After=network.target
+    
+    [Service]
+    EnvironmentFile=/opt/concourse/worker.env
+    ExecStart=/opt/concourse/bin/concourse worker
+    KillMode=process
+    LimitNPROC=infinity
+    LimitNOFILE=infinity
+    MemoryLimit=infinity
+    TasksMax=infinity
+    Restart=on-failure
+    RestartSec=10
+    ExecStop=/bin/kill -USR2 $MAINPID ; /usr/bin/tail --pid $MAINPID -f /dev/null
+    TimeoutStopSec=30
+    User=root
+    Group=root
+    StandardOutput=syslog
+    StandardError=syslog
+    SyslogIdentifier=concourse_worker
+    Delegate=yes
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
 
-* Write out the systemd service to /usr/lib/systemd/system/concourse.service
-[Unit]
-Description=Concourse CI worker process
-After=network.target docker.service
-
-[Service]
-Type=simple
-User=root
-Group=root
-Restart=on-failure
-EnvironmentFile=/opt/concourse/worker.env
-ExecStart=/opt/concourse/bin/concourse worker
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=concourse_worker
-
-[Install]
-WantedBy=multi-user.target
-
-* Generate worker private key:
-  /opt/concourse/bin/concourse generate-key -f /opt/concourse/worker_key
-* Place concourse public key at:
-  /opt/concourse/tsa_host_key.pub
-* Add worker public key to concourse server.
-
-* systemctl daemon-reload
-* systemctl enable concourse
-* systemctl start concourse
+  * Generate worker private key:
+    /opt/concourse/bin/concourse generate-key -f /opt/concourse/worker_key
+  * Place concourse public key at:
+    /opt/concourse/tsa_host_key.pub
+  * Add worker public key to concourse server.
+  
+  * systemctl daemon-reload
+  * systemctl enable concourse
+  * systemctl start concourse
