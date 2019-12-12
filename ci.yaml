@@ -105,6 +105,22 @@ services:
       # doesn't like prefix paths.
       - "traefik.basic.frontend.rule=Host:ci.${DOMAIN}"
       - "traefik.basic.port=8080"
+  irccat:
+    image: irccloud/irccat:latest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - ingress_ci
+    volumes:
+      - ./data/irccat/irccat.json:/etc/irccat.json:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ingress_ci"
+      - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/irccat"
+      - "traefik.basic.port=8045"
 volumes:
   concourse_keys:
   teleport:

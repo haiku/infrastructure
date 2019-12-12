@@ -17,15 +17,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 8M
-  irccat:
-    image: irccloud/irccat:latest
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-    volumes:
-      - ./data/irccat/irccat.json:/etc/irccat.json:z
   smtp:
     image: mwader/postfix-relay
     deploy:

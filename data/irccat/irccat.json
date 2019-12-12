@@ -8,7 +8,9 @@
     "tls_key": "",
     "tls_cert": "",
     "listeners": {
-      "generic": true,
+      "generic": {
+        "secret": "somethingsecret"
+      },
       "grafana": "#haiku-dev"
     }
   },
