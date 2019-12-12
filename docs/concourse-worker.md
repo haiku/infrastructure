@@ -7,7 +7,10 @@
   * Worker running Linux (I used Fedora)
     * Use any Linux you like, but make *sure* it has a *recent* kernel and has containerd / runc
   * 4 GiB or more memory
-  * NVMe Storage is nice for the Concourse work directory.
+  * Basic OS install, seperate partition / filesystem for Concourse work directory.
+    * 16 GiB (or more) for OS
+    * 50 GiB (or more) of disk space on the Concourse work directory.
+    * NVMe Storage is nice for the Concourse work directory.
 
 ### Setup
 
@@ -23,7 +26,9 @@
     CONCOURSE_BIND_PORT=7777
     CONCOURSE_BIND_IP=127.0.0.1
     ```
-    CONCOURSE_WORK_DIR is a path with at least ~50 GB (builds happen here)
+
+  * ```CONCOURSE_WORK_DIR``` is a path with at least ~50 GB (builds happen here).
+  * ```BAGGAGECLAIM_DRIVER=btrfs``` means it's expected that ```CONCOURSE_WORK_DIR``` is btrfs formatted.
 
   * Write out the systemd service to /usr/lib/systemd/system/concourse.service
     ```
@@ -55,11 +60,11 @@
     ```
 
   * Generate worker private key:
-    /opt/concourse/bin/concourse generate-key -f /opt/concourse/worker_key
-  * Place concourse public key at:
-    /opt/concourse/tsa_host_key.pub
-  * Add worker public key to concourse server.
+    ```/opt/concourse/bin/concourse generate-key -f /opt/concourse/worker_key```
+  * Place concourse public key from the concourse server at:
+    ```/opt/concourse/tsa_host_key.pub```
+  * Add worker public key (/opt/concourse/worker_key.pub) to concourse server.
   
-  * systemctl daemon-reload
-  * systemctl enable concourse
-  * systemctl start concourse
+  * ```systemctl daemon-reload```
+  * ```systemctl enable concourse```
+  * ```systemctl start concourse```
