@@ -20,12 +20,19 @@ git checkout refs/users/00/1000000
 
 Look through the user configuration files in current directory.
 
+The account_id (and most of what you'd find in the notedb, anyway) is accessible
+and modifiable using the REST API: https://review.haiku-os.org/accounts/nobody@example.com/detail
+
 ## List external account linkages (in noteDB)
 
 ```
 git fetch origin refs/meta/external-ids:refs/meta/external-ids
 git checkout refs/meta/external-ids
 ```
+
+These are more conveniently accessible theough the REST API:
+
+https://review.haiku-os.org/accounts/noboody@example.com/external.ids
 
 ## Manually add and set a user's email address (noteDB or H2)
 
@@ -35,7 +42,7 @@ ssh USERNAME@review.haiku-os.org gerrit set-account --add-email "nobody@example.
 ```
 This supplants the prior method of accessing the SQL database, which is now deprecated as Gerrit has moved to store user data in "NoteDb", which is really just a flat-file Git repository using Gerrit's branching schemes.
 
-You probably need to flush the caches after running this, though Gerrit does not specifically note either way.
+You can refer to the user by its user ID or by an existing email or its login.
 
 ## Force flush of caches
 Make sure you are in the administrators group and run:
@@ -43,11 +50,3 @@ Make sure you are in the administrators group and run:
 ssh USERNAME@review.haiku-os.org gerrit flush-caches
 ```
 
-## List user accounts (in H2)
-
-> WARNING: The users in H2 aren't supposed to be "used" as of 2.15?
-
-```
-ssh USERNAME@review.haiku-os.org 'gerrit gsql --format PRETTY -c "select * from ACCOUNTS"'
-ssh USERNAME@review.haiku-os.org 'gerrit gsql --format PRETTY -c "select * from ACCOUNT_EXTERNAL_IDS"'
-```
