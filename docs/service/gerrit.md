@@ -23,16 +23,25 @@ Look through the user configuration files in current directory.
 The account_id (and most of what you'd find in the notedb, anyway) is accessible
 and modifiable using the REST API: https://review.haiku-os.org/accounts/nobody@example.com/detail
 
-## List external account linkages (in noteDB)
+## Manage a user's external identities (noteDB or H2)
 
+If a user experiences random forbidden errors logging in, their account is likely
+in a state of limbo due to a [gerrit bug](https://bugs.chromium.org/p/gerrit/issues/detail?id=12125)
+
+Review the logs for the specific error.
+
+* Replace **ACCOUNTID** below with the user's account ID.
+* Ensure your HTTP login (see your account preferences) is specified.
+
+Review the user's identities:
 ```
-git fetch origin refs/meta/external-ids:refs/meta/external-ids
-git checkout refs/meta/external-ids
+curl --user bigshotadmin:password -XGET https://review.haiku-os.org/a/accounts/ACCOUNTID/external.ids
 ```
 
-These are more conveniently accessible theough the REST API:
-
-https://review.haiku-os.org/accounts/noboody@example.com/external.ids
+Delete the identitiy for the user Gerrit is complaining about being a conflict:
+```
+curl --user bigshotadmin:password -XPOST --header "Content-Type: application/json; charset=UTF-8" -d '["mailto:user@badidentity"]' 'https://review.haiku-os.org/a/accounts/ACCOUNTID/external.ids:delete'
+```
 
 ## Manually add and set a user's email address (noteDB or H2)
 
