@@ -56,10 +56,10 @@ services:
     image: haiku/hpkgbouncer:latest
     deploy:
       replicas: 1
-    resources:
-      limits:
-        cpus: '0.5'
-        memory: 512M
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     secrets:
       - s3_endpoint
       - s3_bucket
