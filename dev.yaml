@@ -185,9 +185,6 @@ services:
     networks:
       - ingress_dev
       - support_default
-    # Alias eu.hpkg.haiku-os.org to traefik for "fake hairpin NAT"
-    links:
-      - traefik:eu.hpkg.haiku-os.org
     volumes:
       - hds_secrets:/secrets:z
     depends_on:

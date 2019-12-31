@@ -25,7 +25,7 @@ services:
   traefik:
     # Traefik connects to docker and reads labels to form routes
     # Traefik also handles letsencrypt renewals
-    image: traefik:v1.7.19
+    image: traefik:v1.7.20
     deploy:
       replicas: 1
       placement:
@@ -44,13 +44,15 @@ services:
         condition: any
         delay: 5s
     networks:
-      - default
-      - support_default
-      - ci
-      - community
-      - cdn
-      - dev
-      - sysadmin
+      default:
+      support_default:
+      ci:
+      community:
+      cdn:
+      dev:
+        aliases:
+          - eu.hpkg.haiku-os.org
+      sysadmin:
     ports:
       # workaround for https://github.com/moby/moby/issues/25526
       # Warning: host prevents multiple traefik instances on same node!
