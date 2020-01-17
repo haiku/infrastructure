@@ -99,6 +99,8 @@ jobs:
                   cp generated.((arch))/haiku-((profile))-((media)).iso images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
                 elif [[ "((media))" == "mmc" ]]; then
                   cp generated.((arch))/haiku-((media)).image images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
+                elif [[ "((media))" == "raw" ]]; then
+                  cp generated.((arch))/haiku-((profile)).image images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
                 fi
                 cp haiku-git/ReadMe.md images.((arch))/ReadMe.md
                 cd images.((arch))
