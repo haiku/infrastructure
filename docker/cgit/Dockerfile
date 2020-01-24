@@ -2,7 +2,7 @@ FROM alpine:latest
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 RUN apk add --update \
-    tini gettext curl fcgiwrap spawn-fcgi git cgit highlight perl nginx markdown groff py-pip
+    tini gettext curl fcgiwrap spawn-fcgi git cgit highlight perl nginx discount groff py-pip
 RUN pip install docutils
 
 ENTRYPOINT ["/sbin/tini", "--"]
