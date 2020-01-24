@@ -7,6 +7,7 @@ root-desc=$CGIT_DESC
 source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
 #about-filter=/usr/lib/cgit/filters/about-formatting.sh
 commit-filter=/usr/lib/cgit/filters/commit-link-filter.sh
+render.md=/usr/lib/cgit/filters/markdown-render.sh
 
 ##
 ## Search for these files in the root of the default branch of repositories

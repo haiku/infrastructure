@@ -22,6 +22,7 @@ VOLUME ["/var/git"]
 COPY assets/cgitrc.template /etc/
 COPY assets/syntax-highlighting.sh /usr/lib/cgit/filters/
 COPY assets/commit-link-filter.sh /usr/lib/cgit/filters/
+COPY assets/markdown-render.sh /usr/lib/cgit/filters/
 COPY assets/haiku-cgit.css /usr/share/cgit/haiku-cgit.css
 COPY assets/haiku-logo.png /usr/share/cgit/haiku-logo.png
 
