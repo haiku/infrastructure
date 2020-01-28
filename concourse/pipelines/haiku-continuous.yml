@@ -60,7 +60,7 @@ task-build-image: &task-build-image
                 ;;
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-        jam -q @((profile))-((media))
+        jam -j4 -q @((profile))-((media))
 # Jobs
 jobs:
   - name: haiku-((branch))-((arch))
