@@ -172,34 +172,11 @@ services:
       - "traefik.basic.frontend.redirect.regex=i18n.${DOMAIN}/(pootle|userguide)$$"
       - "traefik.basic.frontend.redirect.replacement=i18n.${DOMAIN}/$$1/"
       - "traefik.basic.port=80"
-  haikudepotserver:
-    image: haiku/haikudepotserver:1.0.114
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 4G
-        reservations:
-          cpus: '0.50'
-          memory: 1G
-    networks:
-      - ingress_dev
-      - support_default
-    volumes:
-      - hds_secrets:/secrets:z
-    depends_on:
-      - postgres
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ingress_dev"
-      - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
-      - "traefik.basic.port=8080"
 volumes:
   gerrit_data:
   pootle_data:
   userguide_data:
   trac_data:
-  hds_secrets:
 networks:
   support_default:
     external: true

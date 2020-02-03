@@ -108,6 +108,28 @@ services:
       - target: 12000
         published: 12000
         mode: host
+  haikudepotserver:
+    image: haiku/haikudepotserver:1.0.114
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 4G
+        reservations:
+          cpus: '0.50'
+          memory: 1G
+    networks:
+      - ingress_cdn
+      - support_default
+    volumes:
+      - hds_secrets:/secrets:z
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ingress_dev"
+      - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
+      - "traefik.basic.port=8080"
   portsmirror:
     image: haiku/ports-mirror
     deploy:
@@ -138,9 +160,12 @@ secrets:
     external: true
 volumes:
   ports_mirror:
+  hds_secrets:
   s3_secrets:
   s3_data:
 networks:
+  support_default:
+    external: true
   ci_private:
     external: true
   ingress_cdn:
