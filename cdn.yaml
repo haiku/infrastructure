@@ -127,7 +127,7 @@ services:
       - postgres
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=ingress_dev"
+      - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:depot.${DOMAIN}"
       - "traefik.basic.port=8080"
   portsmirror:
