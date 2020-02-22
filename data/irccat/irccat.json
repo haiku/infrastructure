@@ -18,7 +18,7 @@
     "server": "irc.freenode.net:6667",
     "tls": false,
     "tls_skip_verify": false,
-    "nick": "nekobot",
+    "nick": "flybot",
     "realname": "IRCCat Bot",
     "server_pass": "",
     "identify_pass": "",
