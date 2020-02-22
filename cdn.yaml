@@ -114,10 +114,10 @@ services:
       resources:
         limits:
           cpus: '1.0'
-          memory: 4G
+          memory: 2G
         reservations:
           cpus: '0.50'
-          memory: 1G
+          memory: 512M
     networks:
       - ingress_cdn
       - support_default
