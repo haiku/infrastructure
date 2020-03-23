@@ -3,6 +3,7 @@ FROM fedora:latest
 USER root
 
 RUN dnf install -y \
+  attr \
   autoconf \
   automake \
   bc \
