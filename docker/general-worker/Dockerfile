@@ -13,6 +13,7 @@ RUN dnf install -y \
   cmake \
   curl \
   curl-devel \
+  diffutils \
   flex \
   gcc \
   gcc-c++ \
@@ -21,7 +22,7 @@ RUN dnf install -y \
   glibc-devel.i686 \
   libstdc++ \
   libstdc++-static \
-  libstdc++-devel \
+  libstdc++-devel.x86_64 \
   libstdc++-devel.i686 \
   libtool \
   libfdt \
