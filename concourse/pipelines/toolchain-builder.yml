@@ -85,9 +85,13 @@ task-build-crosstools: &task-build-crosstools
       - -c
       - |
         ls -la
-        cd crosstools.${TOOLARCH}
-        ../haiku-git/configure --build-cross-tools ${TOOLARCH} ../buildtools-git -j4
-
+        SCRIPT="./haiku-git/build/scripts/build_cross_tools"
+        MACHINE=""
+        if [ ${TOOLARCH} != "x86_gcc2" ]; then
+            SCRIPT="${SCRIPT}_gcc4"
+            MACHINE=$(./haiku-git/build/scripts/find_triplet ${TOOLARCH})
+        fi
+        $SCRIPT $MACHINE ./haiku-git ./buildtools-git crosstools.${TOOLARCH}/cross-tools-${TOOLARCH} -j4
 # Jobs
 jobs:
   - name: buildtools-((branch))
