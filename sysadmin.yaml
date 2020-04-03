@@ -6,6 +6,20 @@
 #
 version: "3.2"
 services:
+  auth:
+    image: quay.io/keycloak/keycloak:9.0.2
+    networks:
+      - ingress_sysadmin
+      - support_default
+    environment:
+      KEYCLOAK_FRONTEND_URL: https://auth.haiku-os.org
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: coolpass
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ingress_sysadmin"
+      - "traefik.basic.frontend.rule=Host:auth.${DOMAIN}"
+      - "traefik.basic.port=8080"
   #node_exporter:
   #  image: haiku/node_exporter
   #  networks:
