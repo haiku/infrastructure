@@ -11,10 +11,14 @@ services:
     networks:
       - ingress_sysadmin
       - support_default
+    volumes:
+      - ./data/keycloak/theme:/opt/jboss/keycloak/themes/haiku:z
     environment:
-      KEYCLOAK_FRONTEND_URL: https://auth.haiku-os.org
+      KEYCLOAK_FRONTEND_URL: https://auth.haiku-os.org/auth
+      KEYCLOAK_DEFAULT_THEME: haiku
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: coolpass
+      DB_VENDOR: h2
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ingress_sysadmin"
