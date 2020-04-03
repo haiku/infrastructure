@@ -1,7 +1,8 @@
 FROM haiku/general-worker:latest
 MAINTAINER Haiku <contact@haiku-os.org>
 
-ENV ARCHITECTURES "x86_gcc2 x86 x86_64 arm arm64 riscv64 ppc sparc"
+ENV ARCHITECTURES "x86 x86_64 arm arm64 riscv64 ppc sparc"
+ENV ARCHITECTURES_LEGACY "x86_gcc2"
 ARG HAIKU_CHECKOUT
 ARG BUILDTOOLS_CHECKOUT
 ENV HAIKU_CHECKOUT ${HAIKU_CHECKOUT:-HEAD}
@@ -22,10 +23,18 @@ RUN mkdir /tmp/src && \
 
 # Build each of our toolchains (get some coffee)
 WORKDIR /toolchains
-RUN for i in ${ARCHITECTURES}; do /tmp/src/haiku/configure --build-cross-tools $i /tmp/src/buildtools -j$(cat /proc/cpuinfo | egrep '^processor' | wc -l); done && \
-	find /toolchains -type f -and -executable -and -regex ".*\/bin\/.*" -exec strip {} \;
- 
+RUN for i in ${ARCHITECTURES}; do \
+	MACHINE=$(/tmp/src/haiku/build/scripts/find_triplet $i); \
+	/tmp/src/haiku/build/scripts/build_cross_tools_gcc4 $MACHINE /tmp/src/haiku /tmp/src/buildtools /toolchains/cross-tools-$i -j$THREADS ; \
+	find /toolchains/cross-tools-$i -type f -and -executable -and -regex ".*\/bin\/.*" -exec strip {} \; ; \
+	done;
+
+RUN for i in ${ARCHITECTURES_LEGACY}; do \
+	/tmp/src/haiku/build/scripts/build_cross_tools /tmp/src/haiku /tmp/src/buildtools /toolchains/cross-tools-$i -j$THREADS ; \
+	find /toolchains/cross-tools-$i -type f -and -executable -and -regex ".*\/bin\/.*" -exec strip {} \; ; \
+	done;
+
 # Add each toolchain to PATH and cleanup
-RUN echo "export ARCHITECTURES=\"${ARCHITECTURES}\"" >> ~/.profile && \
+RUN echo "export ARCHITECTURES=\"${ARCHITECTURES} ${ARCHITECTURES_LEGACY}\"" >> ~/.profile && \
 	echo "export PATH=$(for i in ${ARCHITECTURES}; do echo -n /toolchains/cross-tools-$i/bin:; done | sed 's/:$//g'):$PATH" >> ~/.profile && \
 	rm -rf /tmp/src && rm -rf /toolchains/build && rm -f /toolchains/Jamfile
