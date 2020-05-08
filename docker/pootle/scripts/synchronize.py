@@ -81,7 +81,7 @@ step_list = [
     Step("make_backup", "Make a backup of the current catalogs",
          ["cp", "-r", SYNC_SETTINGS["pootle_catalogs_dir"], SYNC_SETTINGS["pootle_catalogs_dir"] + "-bak"]),
     Step("sync_stores", "Save translations in database to disk",
-         ["pootle", "sync_stores", "--overwrite", "--force"]),
+         ["pootle", "sync_stores"]),
     Step("repository_pull", "Pull latest changes from repository", ["git", "pull"],
          work_dir=SYNC_SETTINGS["repository_dir"]),
     Step("build_catkeys", "Build Catkeys", ["jam", "-q", "catkeys"], work_dir=SYNC_SETTINGS["repository_dir"]),

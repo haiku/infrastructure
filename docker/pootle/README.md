@@ -43,3 +43,20 @@ These steps are executed by the `/app/synchronize.py` script. The steps are conf
 
 The image is set up in such a way that every Saturday at 08:00 AM, the script will run. The script will output all the
 console output online (`https://i18n.haiku-os.org/pootle/sync-status.html`), as well as send an email. 
+
+## Recalculating loop
+
+Sometimes Pootle gets stuck on recalculating the latest stats. In that case, it is easiest to run `pootle shell` and
+enter the following python lines:
+
+```python
+from django_rq.queues import get_connection
+POOTLE_DIRTY_TREEITEMS = 'pootle:dirty:treeitems'
+c = get_connection()
+keys = c.zrangebyscore(POOTLE_DIRTY_TREEITEMS, 1, 1000000)
+updates = {k: 0.0 for k in keys}
+c.zadd(POOTLE_DIRTY_TREEITEMS, **updates)
+```
+
+After that, you may want to run `pootle refresh_stats`.
+(Source: https://github.com/translate/pootle/issues/3409#issuecomment-160128127)

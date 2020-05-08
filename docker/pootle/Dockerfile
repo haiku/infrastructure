@@ -41,6 +41,7 @@ RUN apt-get update && \
                         python-pip \
                         libxml2-dev \
                         libxslt1-dev \
+                        nano \
                         cron \
                         nginx \
                         supervisor
