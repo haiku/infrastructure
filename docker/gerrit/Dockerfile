@@ -32,28 +32,13 @@ RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VE
 ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
 
-# Download "stable" plugins
-ENV PLUGINS="avatars-gravatar delete-project events-log admin-console webhooks gitiles"
+# Download plugins
+ENV PLUGINS="avatars-gravatar delete-project events-log admin-console webhooks gitiles oauth"
 ENV PLUGIN_VERSION=bazel-stable-2.16
 RUN for i in ${PLUGINS}; do \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
 		-o ${GERRIT_HOME}/$i.jar; \
 	done;
-
-# Download "master-stable" plugins
-#ENV MASTER_PLUGINS="avatars-gravatar"
-#ENV MASTER_PLUGIN_VERSION=bazel-master-stable-2.16
-#
-#RUN for i in ${MASTER_PLUGINS}; do \
-#	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${MASTER_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
-#		-o ${GERRIT_HOME}/$i.jar; \
-#	done;
-
-#oauth2 plugin
-ENV GERRIT_OAUTH_VERSION 2.16.1
-RUN curl -fSsL \
-    https://github.com/davido/gerrit-oauth-provider/releases/download/v${GERRIT_OAUTH_VERSION}/gerrit-oauth-provider.jar \
-    -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
 
 # Ensure the entrypoint scripts are in a fixed location
 COPY gerrit-entrypoint.sh /
