@@ -101,8 +101,8 @@ services:
       - "traefik.basic.port=80"
       - "traefik.frontend.rateLimit.extractorFunc=client.ip"
       - "traefik.frontend.rateLimit.rateSet.r1.period=10s"
-      - "traefik.frontend.rateLimit.rateSet.r1.average=75"
-      - "traefik.frontend.rateLimit.rateSet.r1.burst=150"
+      - "traefik.frontend.rateLimit.rateSet.r1.average=25"
+      - "traefik.frontend.rateLimit.rateSet.r1.burst=50"
   pootle:
     image: haiku/pootle
     deploy:
