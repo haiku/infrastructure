@@ -104,7 +104,7 @@ services:
     environment:
       - VOLUMES=/haikuports-data /s3-data
     volumes:
-      - ci_packages:/haikuports-data:ro,z
+      - ci-packages:/haikuports-data:ro,z
       - s3_data:/s3-data:ro,z
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
@@ -166,6 +166,8 @@ volumes:
   hds_secrets:
   s3_secrets:
   s3_data:
+  ci-packages:
+    external: true
 networks:
   support_default:
     external: true

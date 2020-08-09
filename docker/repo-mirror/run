@@ -6,21 +6,20 @@ echo "use chroot = yes" >> /etc/rsyncd.conf
 echo "max connections = 10" >> /etc/rsyncd.conf
 
 for V in ${VOLUMES}; do
-	for D in ${V}/*; do
+	SUBPATH=${V}
+	if [ -f "${V}/.subpath" ]; then
+		SUBPATH=$V/$(cat ${V}/.subpath)
+	fi
+	for D in ${SUBPATH}/*; do
 		if [ -d "${D}" ]; then
-			SHAREPATH=${D}
-			if [ -f "${D}/.subpath" ]; then
-				SHAREPATH=$D/$(cat ${D}/.subpath)
+			SHARENAME=$(basename "${D}")
+			if [ -f "${D}/.sharename" ]; then
+				SHARENAME=$(cat ${D}/.sharename)
 			fi
-
-			SHARENAME=$(basename "${SHAREPATH}")
-			if [ -f "${SHAREPATH}/.sharename" ]; then
-				SHARENAME=$(cat ${SHAREPATH}/.sharename)
-			fi
-			echo "Injecting ${SHAREPATH} as ${SHARENAME}..."
+			echo "Injecting ${D} as ${SHARENAME}..."
 
 			echo "[$SHARENAME]" >> /etc/rsyncd.conf
-			echo "path = ${SHAREPATH}" >> /etc/rsyncd.conf
+			echo "path = ${D}" >> /etc/rsyncd.conf
 			echo "comment = ${SHARENAME}" >> /etc/rsyncd.conf
 			echo "read only = true" >> /etc/rsyncd.conf
 			echo "timeout = 300" >> /etc/rsyncd.conf
