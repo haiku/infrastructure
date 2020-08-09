@@ -101,8 +101,11 @@ services:
         constraints: [node.labels.cdn == true ]
     networks:
       - default
+    environment:
+      - VOLUMES=/haikuports-data /s3-data
     volumes:
-      - s3_data:/repo-data:ro,z
+      - ci_packages:/haikuports-data:ro,z
+      - s3_data:/s3-data:ro,z
       - ./data/repo-mirror:/repo-whitelist:ro,z
     ports:
       - target: 12000

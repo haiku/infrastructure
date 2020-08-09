@@ -5,26 +5,36 @@ echo "port = 12000" >> /etc/rsyncd.conf
 echo "use chroot = yes" >> /etc/rsyncd.conf
 echo "max connections = 10" >> /etc/rsyncd.conf
 
-for D in /repo-data/*; do
-	if [ -d "${D}" ]; then
-		SHARENAME=$(basename "${D}")
-		echo "Injecting ${D} as ${SHARENAME}..."
+for V in ${VOLUMES}; do
+	for D in ${V}/*; do
+		if [ -d "${D}" ]; then
+			SHAREPATH=${D}
+			if [ -f "${D}/.subpath" ]; then
+				SHAREPATH=$D/$(cat ${D}/.subpath)
+			fi
 
-		echo "[$SHARENAME]" >> /etc/rsyncd.conf
-		echo "path = ${D}" >> /etc/rsyncd.conf
-		echo "comment = ${SHARENAME}" >> /etc/rsyncd.conf
-		echo "read only = true" >> /etc/rsyncd.conf
-		echo "timeout = 300" >> /etc/rsyncd.conf
+			SHARENAME=$(basename "${SHAREPATH}")
+			if [ -f "${SHAREPATH}/.sharename" ]; then
+				SHARENAME=$(cat ${SHAREPATH}/.sharename)
+			fi
+			echo "Injecting ${SHAREPATH} as ${SHARENAME}..."
 
-		echo "hosts deny = *" >> /etc/rsyncd.conf
-		ALLOW=""
-		if [ -f /repo-whitelist/${SHARENAME}/rsync-whitelist ]; then
-			for i in $(sed -e '/^#/d' /repo-whitelist/${SHARENAME}/rsync-whitelist); do
-				ALLOW="${ALLOW} $i"
-			done
+			echo "[$SHARENAME]" >> /etc/rsyncd.conf
+			echo "path = ${SHAREPATH}" >> /etc/rsyncd.conf
+			echo "comment = ${SHARENAME}" >> /etc/rsyncd.conf
+			echo "read only = true" >> /etc/rsyncd.conf
+			echo "timeout = 300" >> /etc/rsyncd.conf
+
+			echo "hosts deny = *" >> /etc/rsyncd.conf
+			ALLOW=""
+			if [ -f /repo-whitelist/${SHARENAME}/rsync-whitelist ]; then
+				for i in $(sed -e '/^#/d' /repo-whitelist/${SHARENAME}/rsync-whitelist); do
+					ALLOW="${ALLOW} $i"
+				done
+			fi
+			echo "hosts allow = ${ALLOW}" >> /etc/rsyncd.conf
 		fi
-		echo "hosts allow = ${ALLOW}" >> /etc/rsyncd.conf
-	fi
+	done
 done
 
 exec /usr/bin/rsync --no-detach --daemon --config /etc/rsyncd.conf "$@"
