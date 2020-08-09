@@ -1,8 +1,10 @@
-FROM alpine:3.9
+FROM alpine
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
-RUN apk add --update python2 python2-dev py-pip git libgcc
-RUN pip install mako boto supervisor toml
+ADD requirements.txt /
+
+RUN apk add --update python3 python3-dev py-pip git libgcc
+RUN pip install -r /requirements.txt
 RUN git clone https://github.com/haiku/generate-download-pages.git /generate-download-pages
 RUN mkdir /generate-download-pages/output
 
