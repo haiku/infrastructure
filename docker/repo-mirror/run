@@ -17,8 +17,8 @@ for V in ${VOLUMES}; do
 				SHARENAME=$(cat ${D}/.sharename)
 			fi
 
-			if grep -q "[$SHARENAME]" "/etc/rsyncd.conf"; then
-				echo "Skipping duplicate share ref."
+			if grep -q "\[$SHARENAME\]" "/etc/rsyncd.conf"; then
+				echo "Skipping duplicate share ref. $SHARENAME at ${D}"
 				continue
 			fi
 			echo "Injecting ${D} as ${SHARENAME}..."
