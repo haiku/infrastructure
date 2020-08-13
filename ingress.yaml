@@ -27,7 +27,7 @@ services:
     # Traefik also handles letsencrypt renewals
     #
     # EDIT: DO NOT UPGRADE TO 2.x! It requires a bunch of updates to *ALL* yaml!
-    image: traefik:v1.7.24
+    image: traefik:v1.7.26
     deploy:
       replicas: 1
       placement:
