@@ -9,6 +9,6 @@ cd /generate-download-pages
 
 while true; do
 	echo "generate-download-pages.py running..."
-	/usr/bin/python /generate-download-pages/generate-download-pages.py --config /secrets/s3-nightlies.toml
+	/usr/bin/python3 /generate-download-pages/generate-download-pages.py --config /secrets/s3-nightlies.toml
 	sleep 1800
 done
