@@ -70,7 +70,7 @@ for ARCH in $ARCHES; do
 		MEDIA="raw"
 	elif [ "$ARCH" == "riscv64" ]; then
 		PROFILE="minimum"
-		MEDIA="raw"
+		MEDIA="mmc"
 	elif [ "$ARCH" == "ppc" ]; then
 		# TODO: PPC needs a "unified" bootable target. At the moment you build
 		# haiku-boot-cd and minimum-raw to get a bootable iso + Haiku OS image.
