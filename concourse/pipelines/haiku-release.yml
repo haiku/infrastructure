@@ -112,11 +112,11 @@ jobs:
                 echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm haiku-((branch))-$RELEASE-((arch))-((media)).zip
                 rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip remote/((bucket_image))/((arch))/
+                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip remote/((bucket_image))/((arch))/
                 echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip was successfully uploaded!"
-                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 remote/((bucket_image))/((arch))/
+                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 remote/((bucket_image))/((arch))/
                 echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 was successfully uploaded!"
-                mc cp haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig remote/((bucket_image))/((arch))/
+                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig remote/((bucket_image))/((arch))/
                 echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig was successfully uploaded!"
   - name: repo-((branch))-((arch))
     public: true
@@ -200,5 +200,5 @@ jobs:
                 echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm $TARGET_REPO/repo
                 rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp --recursive $TARGET_REPO remote/((bucket_repo))/((branch))/$PRI_ARCH/
+                mc cp -q --recursive $TARGET_REPO remote/((bucket_repo))/((branch))/$PRI_ARCH/
                 echo "Haiku $PRI_ARCH repository $VERSION was successfully uploaded!"
