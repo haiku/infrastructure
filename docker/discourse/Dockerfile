@@ -23,7 +23,7 @@ COPY server/discourse-nginx.conf /etc/nginx/conf.d/
 
 # Link Persistant things
 RUN ln -s /shared/uploads /apps/discourse/public/uploads && \
-	ln -s /shared/log/rails /apps/discourse/logs &&
+	ln -s /shared/log/rails /apps/discourse/logs && \
 	ln -s /shared/backups /apps/discourse/public/backups
 
 # Add Artifacts
