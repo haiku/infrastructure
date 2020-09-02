@@ -5,7 +5,7 @@ FROM ruby:latest
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
-ENV DISCOURSE_VERSION=2.5.0
+ENV DISCOURSE_VERSION=2.5.1
 
 RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli uglifyjs npm && pip3 install supervisor
 RUN npm install -g svgo
@@ -23,7 +23,8 @@ COPY server/discourse-nginx.conf /etc/nginx/conf.d/
 
 # Link Persistant things
 RUN ln -s /shared/uploads /apps/discourse/public/uploads && \
-	ln -s /shared/log/rails /apps/discourse/logs
+	ln -s /shared/log/rails /apps/discourse/logs &&
+	ln -s /shared/backups /apps/discourse/public/backups
 
 # Add Artifacts
 COPY assets/images/* /apps/discourse/public/images/
