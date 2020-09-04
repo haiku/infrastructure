@@ -8,7 +8,7 @@
 version: "3.2"
 services:
   gerrit:
-    image: haiku/gerrit:2.16
+    image: haiku/gerrit:3.0
     deploy:
       resources:
         limits:
