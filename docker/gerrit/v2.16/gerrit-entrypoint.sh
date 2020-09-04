@@ -38,6 +38,11 @@ if [ "$1" = "/gerrit-start.sh" ]; then
     [ ${#DATABASE_TYPE} -gt 0 ] && rm -rf "${GERRIT_SITE}/git"
   fi
 
+  # Install external plugins
+  su-exec ${GERRIT_USER} cp -f ${GERRIT_HOME}/delete-project.jar ${GERRIT_SITE}/plugins/delete-project.jar
+  su-exec ${GERRIT_USER} cp -f ${GERRIT_HOME}/events-log.jar ${GERRIT_SITE}/plugins/events-log.jar
+  #su-exec ${GERRIT_USER} cp -f ${GERRIT_HOME}/importer.jar ${GERRIT_SITE}/plugins/importer.jar
+
   # Provide a way to customise this image
   echo
   for f in /docker-entrypoint-init.d/*; do
@@ -203,8 +208,7 @@ if [ "$1" = "/gerrit-start.sh" ]; then
 
   #Section gitweb
   case "$GITWEB_TYPE" in
-     "gitiles")
-     ;;
+     "gitiles") su-exec $GERRIT_USER cp -f $GERRIT_HOME/gitiles.jar $GERRIT_SITE/plugins/gitiles.jar ;;
      "") # Gitweb by default
         set_gerrit_config gitweb.cgi "/usr/share/gitweb/gitweb.cgi"
         export GITWEB_TYPE=gitweb

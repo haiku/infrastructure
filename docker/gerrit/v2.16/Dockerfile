@@ -6,7 +6,7 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 ENV GERRIT_HOME /var/gerrit
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_WAR ${GERRIT_HOME}/gerrit.war
-ENV GERRIT_VERSION 3.0.12
+ENV GERRIT_VERSION 2.16.22
 ENV GERRIT_USER gerrit2
 ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
 
@@ -33,10 +33,9 @@ ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
 
 # Download plugins
-ENV PLUGINS="avatars-gravatar events-log admin-console oauth"
-ENV PLUGIN_VERSION=bazel-stable-3.0
+ENV PLUGINS="avatars-gravatar delete-project events-log admin-console webhooks gitiles oauth"
+ENV PLUGIN_VERSION=bazel-stable-2.16
 RUN for i in ${PLUGINS}; do \
-	echo "Install $i..." \
 	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
 		-o ${GERRIT_HOME}/$i.jar; \
 	done;
