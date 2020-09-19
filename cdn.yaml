@@ -112,7 +112,7 @@ services:
         published: 12000
         mode: host
   haikudepotserver:
-    image: haiku/haikudepotserver:1.0.121
+    image: haiku/haikudepotserver:1.0.122
     deploy:
       resources:
         limits:
