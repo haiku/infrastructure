@@ -7,31 +7,23 @@
 version: "3.2"
 services:
   auth:
-    image: quay.io/keycloak/keycloak:11.0.2
+    image: quay.io/keycloak/keycloak:11.0.3
     networks:
       - ingress_sysadmin
       - support_default
     volumes:
+      - keycloak_data:/opt/jboss/keycloak/standalone/data:z
       - ./data/keycloak/theme:/opt/jboss/keycloak/themes/haiku:z
     environment:
       KEYCLOAK_FRONTEND_URL: https://auth.haiku-os.org/auth
       KEYCLOAK_DEFAULT_THEME: haiku
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: coolpass
       DB_VENDOR: h2
+    command: -Dkeycloak.migration.strategy=IGNORE_EXISTING
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ingress_sysadmin"
       - "traefik.basic.frontend.rule=Host:auth.${DOMAIN}"
       - "traefik.basic.port=8080"
-  #node_exporter:
-  #  image: haiku/node_exporter
-  #  networks:
-  #    - ingress_sysadmin
-  #  volumes:
-  #    - /sys:/host/sys:ro,rslave
-  #    - /proc:/host/proc:ro,rslave
-  #  command: --path.procfs /host/proc --path.sysfs /host/sys
   prometheus:
     image: prom/prometheus
     networks:
@@ -74,6 +66,7 @@ volumes:
   fathom_secrets:
   prometheus_data:
   grafana_data:
+  keycloak_data:
 networks:
   private:
     driver: overlay
