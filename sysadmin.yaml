@@ -6,24 +6,17 @@
 #
 version: "3.2"
 services:
-  auth:
-    image: quay.io/keycloak/keycloak:11.0.3
+  ldap:
+    image: docker.io/bitnami/openldap:2-debian-10
     networks:
       - ingress_sysadmin
       - support_default
-    volumes:
-      - keycloak_data:/opt/jboss/keycloak/standalone/data:z
-      - ./data/keycloak/theme:/opt/jboss/keycloak/themes/haiku:z
     environment:
-      KEYCLOAK_FRONTEND_URL: https://auth.haiku-os.org/auth
-      KEYCLOAK_DEFAULT_THEME: haiku
-      DB_VENDOR: h2
-    command: -Dkeycloak.migration.strategy=IGNORE_EXISTING
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ingress_sysadmin"
-      - "traefik.basic.frontend.rule=Host:auth.${DOMAIN}"
-      - "traefik.basic.port=8080"
+      LDAP_ROOT: dc=haiku-os,dc=org
+      LDAP_ADMIN_USERNAME: kallisti5
+      LDAP_ADMIN_PASSWORD: definitelynotapassword
+    volumes:
+      - ldap_data:/bitnami/openldap
   prometheus:
     image: prom/prometheus
     networks:
@@ -66,7 +59,7 @@ volumes:
   fathom_secrets:
   prometheus_data:
   grafana_data:
-  keycloak_data:
+  ldap_data:
 networks:
   private:
     driver: overlay
