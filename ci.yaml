@@ -79,7 +79,7 @@ services:
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/buildmaster/"
       - "traefik.basic.port=80"
   concourse:
-    image: haiku/concourse-web
+    image: haiku/concourse-web:6.7
     command: web
     environment:
       CONCOURSE_EXTERNAL_URL: https://ci.haiku-os.org
