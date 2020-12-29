@@ -66,13 +66,15 @@ jobs:
   - name: haiku-((branch))-((arch))
     public: true
     on_success:
-      put: irc
-      params:
-        message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
+      try:
+        put: irc
+        params:
+          message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
     on_failure:
-      put: irc
-      params:
-        message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
+      try:
+        put: irc
+        params:
+          message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
     plan:
       - get: haiku-git
         trigger: true
