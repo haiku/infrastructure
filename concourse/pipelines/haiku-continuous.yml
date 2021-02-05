@@ -78,6 +78,6 @@ jobs:
     plan:
       - get: haiku-git
         trigger: true
-      - task: build ((branch)) @((profile))-((media))
+      - task: build-((branch))-((profile))-((media))
         config:
           << : *task-build-image

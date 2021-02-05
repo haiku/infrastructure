@@ -102,73 +102,73 @@ jobs:
           trigger: false
         - get: buildtools-git
           trigger: true
-      - task: compile jam
+      - task: compile-jam
         config:
           << : *task-build-jam
-      - task: compile arm crosstools
+      - task: compile-arm-crosstools
         params:
           TOOLARCH: arm
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.arm
-      - task: compile arm64 crosstools
+      - task: compile-arm64-crosstools
         params:
           TOOLARCH: arm64
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.arm64
-      - task: compile m68k crosstools
+      - task: compile-m68k-crosstools
         params:
           TOOLARCH: m68k
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.m68k
-      - task: compile ppc crosstools
+      - task: compile-ppc-crosstools
         params:
           TOOLARCH: ppc
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.ppc
-      - task: compile riscv64 crosstools
+      - task: compile-riscv64-crosstools
         params:
           TOOLARCH: riscv64
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.riscv64
-      - task: compile sparc crosstools
+      - task: compile-sparc-crosstools
         params:
           TOOLARCH: sparc
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.sparc
-      - task: compile x86 crosstools
+      - task: compile-x86-crosstools
         params:
           TOOLARCH: x86
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.x86
-      - task: compile x86_64 crosstools
+      - task: compile-x86_64-crosstools
         params:
           TOOLARCH: x86_64
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.x86_64
-      - task: compile x86_gcc2 crosstools
+      - task: compile-x86_gcc2-crosstools
         params:
           TOOLARCH: x86_gcc2
         config:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.x86_gcc2
-      - task: prepare container context
+      - task: prepare-container-context
         config:
           platform: linux
           inputs:

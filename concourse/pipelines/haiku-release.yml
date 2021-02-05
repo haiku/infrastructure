@@ -29,7 +29,7 @@ jobs:
         trigger: true
       - get: haiku-git
         trigger: false
-      - task: build ((branch)) ((media))
+      - task: build-((branch))-((media))
         config:
           platform: linux
           image_resource:
@@ -74,7 +74,7 @@ jobs:
                 echo "#define DEFAULT_GEOCODING_SERVICE_KEY \"$DEFAULT_GEOCODING_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
                 ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 jam -j2 -q @((profile))-((media))
-      - task: package ((branch)) ((media))
+      - task: package-((branch))-((media))
         config:
           platform: linux
           image_resource:
@@ -125,7 +125,7 @@ jobs:
         trigger: true
       - get: haiku-git
         trigger: false
-      - task: build ((branch)) repository
+      - task: build-((branch))-repository
         config:
           platform: linux
           image_resource:
@@ -164,7 +164,7 @@ jobs:
                 esac
                 ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 jam -q @((profile))-raw build \<repository\>Haiku
-      - task: prepare ((branch)) repository
+      - task: prepare-((branch))-repository
         config:
           platform: linux
           image_resource:

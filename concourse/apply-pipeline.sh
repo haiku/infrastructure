@@ -78,7 +78,7 @@ for ARCH in $ARCHES; do
 		MEDIA="raw"
 	fi
 
-	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$TYPE"
+	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$MEDIA"
 
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
