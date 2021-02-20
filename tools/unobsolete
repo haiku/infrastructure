@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# see https://github.com/haikuports/haikuporter/issues/213
+
+if [[ $# -ne 2 ]]; then
+	echo "A dirty hack to unobsolete packages"
+	echo "usage: $0 <branch> <package-version-revision>"
+	exit 1
+fi
+
+BRANCH=$1
+PACKAGE=$2
+
+BASE=/var/lib/docker/plugins/0b25ebdee8b48451b1459c6c1965570c948ef97028d78e96057a0962b482ce84/propagated-mount/volumes/ci-packages/data
+REPO=$BASE/repository/$BRANCH
+BUILDER=$BASE/instances/$BRANCH
+
+# sanity checks
+if [[ ! -d $BASE ]]; then
+	echo "Invalid base haikuporter buildmaster directory!"
+	exit 1;
+fi
+
+PACKAGE_NAME=$(echo $PACKAGE | cut -d'-' -f1)
+PACKAGE_VERSION=$(echo $PACKAGE | cut -d'-' -f2)
+PACKAGE_REVISION=$(echo $PACKAGE | cut -d'-' -f3)
+
+CURRENT=$(find $REPO -name "$PACKAGE_NAME-*.hpkg")
+if [[ $CURRENT != "" ]]; then
+	echo "WARNING: found the following packages which may conflict..."
+	for i in $CURRENT; do
+		echo $i
+	done
+	exit 1
+fi
+
+OBSOLETES=$(find $BUILDER -name "$PACKAGE-*.hpkg" | grep .obsolete)
+if [ -z "$OBSOLETES" ]; then
+	echo "WARNING: Didn't find any obsolete packages matching '$PACKAGE'"
+	exit 1;
+fi
+
+echo "Found the following obsolete packages..."
+for i in $OBSOLETES; do
+	echo -n "..."
+	echo $i | sed "s%$BUILDER%%g";
+done
+
+echo "To resurrect them, press enter.  Press <ctl+c> to cancel."
+read
+
+for i in $OBSOLETES; do
+	DIR=$(dirname $i)
+	ARCH=$(basename $i | cut -d- -f4 | cut -d. -f1)
+	echo "resurrecting $PACKAGE for $ARCH..."
+	cp $i $BUILDER/$ARCH/
+	cp $DIR/${PACKAGE_NAME}_source-$PACKAGE_VERSION-$PACKAGE_REVISION-*.hpkg $BUILDER/$ARCH/
+	cp $DIR/${PACKAGE_NAME}_debuginfo-$PACKAGE_VERSION-$PACKAGE_REVISION-*.hpkg $BUILDER/$ARCH/
+
+	# TODO: Should we be removing them from .obsolete?
+done
+
+echo "The next haikuporter buildmaster run should add $PACKAGE to the repos via hardlinks."
