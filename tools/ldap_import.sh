@@ -15,13 +15,18 @@ LDAPADD="ldapadd -x -D cn=$ADMIN_USER,$BASE_DN -H ldap://ldap:1389 -w $ADMIN_PAS
 while read p; do
 	ACTIVE=$(echo $p | awk -F "\"*,\"*" '{print $15}')
 	USERNAME=$(echo $p | awk -F "\"*,\"*" '{print $3}' | tr '[:upper:]' '[:lower:]')
+	LASTSEEN=$(echo $p | cut -d, -f7)
+	if $(echo "$LASTSEEN" | egrep -v -q "2022|2021|2020|2019|2018|2017|2016|2015|2014|2013|2012"); then
+		echo "Skipping: $USERNAME account last seen: $LASTSEEN"
+		continue
+	fi
 	if [[ "$ACTIVE" == "false" ]]; then
-		echo "Failed: Ignoring $USERNAME due to inactive status"
+		echo "Skipping: Ignoring $USERNAME due to inactive status"
 		continue
 	fi
 	TRUST=$(echo $p | awk -F "\"*,\"*" '{print $10}')
 	if [[ "$TRUST" == "0" ]]; then
-		echo "Failed: Ignoring $USERNAME due to trust 0!"
+		echo "Skipping: Ignoring $USERNAME due to trust 0!"
 		continue
 	fi
 	NAME=$(echo $p | awk -F "\"*,\"*" '{print $2}')
