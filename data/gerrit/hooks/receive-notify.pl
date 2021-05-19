@@ -44,7 +44,7 @@ sub get_repos_name();
 # some parameters you may want to change
 
 # JSON-fragment to use for Irker
-my $irker_json = '{"to":["irc://chat.freenode.net/haiku-dev", "irc://chat.freenode.net/haiku", "irc://chat.freenode.net/haiku-commits"],"privmsg":"%MESSAGE%"}';
+my $irker_json = '{"to":["irc://irc.oftc.net/haiku-dev", "irc://irc.oftc.net/haiku", "irc://irc.oftc.net/haiku-commits"],"privmsg":"%MESSAGE%"}';
 
 # debug mode
 my $debug = 0;
