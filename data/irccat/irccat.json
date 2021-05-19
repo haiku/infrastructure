@@ -15,11 +15,11 @@
     }
   },
   "irc": {
-    "server": "irc.freenode.net:6667",
+    "server": "irc.oftc.net:6667",
     "tls": false,
     "tls_skip_verify": false,
-    "nick": "flybot",
-    "realname": "IRCCat Bot",
+    "nick": "nekobot",
+    "realname": "Neko Bot, meow!",
     "server_pass": "",
     "identify_pass": "",
     "sasl_login": "",
