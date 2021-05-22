@@ -1,5 +1,5 @@
 #FROM openjdk:8-jre-alpine
-FROM adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
+FROM docker.io/adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
 
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
@@ -7,7 +7,7 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 ENV GERRIT_HOME /var/gerrit
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_WAR ${GERRIT_HOME}/gerrit.war
-ENV GERRIT_VERSION 3.2.5.1
+ENV GERRIT_VERSION 3.2.10
 ENV GERRIT_USER gerrit2
 ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
 
@@ -15,7 +15,7 @@ ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
 RUN adduser -D -h "${GERRIT_HOME}" -g "Gerrit User" -s /sbin/nologin "${GERRIT_USER}"
 
 RUN set -x \
-    && apk add --update --no-cache git openssh openssl bash perl perl-cgi git-gitweb curl su-exec
+    && apk add --update --no-cache git openssh openssl bash perl perl-cgi perl-libwww perl-lwp-protocol-https git-gitweb curl su-exec
 
 RUN mkdir /docker-entrypoint-init.d
 

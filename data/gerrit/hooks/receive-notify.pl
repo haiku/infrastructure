@@ -33,7 +33,7 @@ use open ':utf8';
 use Cwd 'realpath';
 use Encode qw(decode);
 
-use IO::Socket::INET;
+use LWP::UserAgent;
 
 binmode STDIN, ':utf8';
 binmode STDOUT, ':utf8';
@@ -42,9 +42,6 @@ sub git_config($);
 sub get_repos_name();
 
 # some parameters you may want to change
-
-# JSON-fragment to use for Irker
-my $irker_json = '{"to":["irc://irc.oftc.net/haiku-dev", "irc://irc.oftc.net/haiku", "irc://irc.oftc.net/haiku-commits"],"privmsg":"%MESSAGE%"}';
 
 # debug mode
 my $debug = 0;
@@ -172,8 +169,8 @@ sub parse_options()
     @exclude_list = map { "^$_"; } @exclude_list;
 }
 
-# send IRC notification via local Irker
-sub irker_notification
+# send IRC notification via irccat
+sub irc_notification
 {
     my ($message) = @_;
 
@@ -182,18 +179,23 @@ sub irker_notification
     $message =~ s{\n}{\\n}g;
     $message =~ s{"}{\\"}g;
 
-    my $json = $irker_json;
-    $json =~ s{%MESSAGE%}{$message};
-
     if ($debug)
     {
-        print "Irker:\n$json\n";
+        print "IrcCat: \n$json\n";
         return;
     }
 
-    my $irker = IO::Socket::INET->new('irker:6659') or die "unable to connect to irker: $@";
-    $irker->print($json);
-    $irker->close();
+    open my $fh, '<', "/etc/irc/password"
+      or die "Could not open /etc/irc/password for reading: $!";
+    my $password = do { local $/; <$fh> };
+    my $ua = LWP::UserAgent->new;
+    my $req = HTTP::Request->new(POST => "https://build.haiku-os.org/irccat/send");
+    $req->header('Authorization' => "Bearer $password");
+    $req->header('Content-Type' => 'application/x-www-form-urlencoded');
+    $req->content($message);
+    my $resp = $ua->request($req);
+    print $resp->code;
+    print $resp->status_line;
 }
 
 # send an email notification
@@ -558,32 +560,30 @@ sub send_commit_notice($$$)
 }
 
 # create and return a commit notice for Irker
-sub prepare_irker_notice($$)
+sub prepare_irc_notice($$)
 {
     my ($refInfo, $commits) = @_;
-
-    return if !$irker_json;
 
     my $revision = $refInfo->{revision};
     my $shortFrom = substr($refInfo->{oldSha1}, 0, $shortGitObjLength);
     my $shortTo = substr($refInfo->{newSha1}, 0, $shortGitObjLength);
     my $commitCount = @$commits;
     my $commitCountString = $commitCount == 1 ? '1 commit' : "$commitCount commits";
-    my @irker_text = ( "$repos_name.$refInfo->{branch}: $ENV{USER} * $revision [$commitCountString] $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
+    my @irc_text = ( "%BLUE$repos_name.$refInfo->{branch}%NORMAL: %GREEN$ENV{USER}%NORMAL * $revision [$commitCountString] $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
 
     foreach my $commit (@$commits) {
         my $info = $objectInfoMap{$commit};
         my $shortObj = substr($commit, 0, $shortGitObjLength);
 
-        push @irker_text, "    $shortObj: " . $info->{"log"}->[0];
+        push @irc_text, "    $shortObj: " . $info->{"log"}->[0];
 
-    if (@irker_text == 10) {
-            push @irker_text, '    ...';
+        if (@irc_text == 10) {
+            push @irc_text, '    ...';
             last;
         }
     }
 
-    return join "\n", @irker_text;
+    return join "\n", @irc_text;
 }
 
 # send a global commit notice when there are too many commits for individual mails
@@ -659,8 +659,8 @@ sub send_global_notice($$)
     my $subject = qq{$repos_name$branchSpec: $refInfo->{revision} - $changedDirsString};
     mail_notification($commitlist_address, $subject, "text/plain; charset=UTF-8", @allNotices);
 
-    my $irkerNotice = prepare_irker_notice( $refInfo, $commits);
-    irker_notification($irkerNotice);
+    my $ircNotice = prepare_irc_notice( $refInfo, $commits);
+    irc_notification($ircNotice);
 }
 
 sub find_branch_for_ref($)

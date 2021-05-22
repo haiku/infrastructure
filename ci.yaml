@@ -117,6 +117,7 @@ services:
       - ingress_ci
     volumes:
       - ./data/irccat/irccat.json:/etc/irccat.json:z
+      - irc_secrets:/etc/irc:z,ro
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ingress_ci"
@@ -132,6 +133,7 @@ volumes:
       size: 200
   data_master_x86_gcc2:
   data_master_x86_64:
+  irc_secrets:
 networks:
   private:
     driver: overlay

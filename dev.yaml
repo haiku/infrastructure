@@ -8,7 +8,7 @@
 version: "3.2"
 services:
   gerrit:
-    image: haiku/gerrit:3.0
+    image: docker.io/haiku/gerrit:3.2.10
     deploy:
       resources:
         limits:
@@ -30,7 +30,8 @@ services:
       - "0.0.0.0:22:29418"
     volumes:
       - gerrit_data:/var/gerrit/review_site:z
-      - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z
+      - irc_secrets:/etc/irc:z,ro
+      - ./data/gerrit/hooks:/var/gerrit/review_site/hooks:z,ro
     environment:
       AUTH_TYPE: OAUTH
       GITWEB_TYPE: cgit
@@ -177,6 +178,7 @@ volumes:
   pootle_data:
   userguide_data:
   trac_data:
+  irc_secrets:
 networks:
   support_default:
     external: true
