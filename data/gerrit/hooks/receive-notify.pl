@@ -176,7 +176,7 @@ sub irc_notification
 
     return unless $message;
 
-    $message =~ s{\n}{\\n}g;
+    #$message =~ s{\n}{\\n}g;
     $message =~ s{"}{\\"}g;
 
     if ($debug)
@@ -188,14 +188,16 @@ sub irc_notification
     open my $fh, '<', "/etc/irc/password"
       or die "Could not open /etc/irc/password for reading: $!";
     my $password = do { local $/; <$fh> };
-    my $ua = LWP::UserAgent->new;
-    my $req = HTTP::Request->new(POST => "https://build.haiku-os.org/irccat/send");
-    $req->header('Authorization' => "Bearer $password");
-    $req->header('Content-Type' => 'application/x-www-form-urlencoded');
-    $req->content($message);
-    my $resp = $ua->request($req);
-    print $resp->code;
-    print $resp->status_line;
+
+    #my @lines = split /\n/, $message, 15
+    foreach ( split /\n/, $message, 15 ) {
+      my $ua = LWP::UserAgent->new;
+      my $req = HTTP::Request->new(POST => "https://build.haiku-os.org/irccat/send");
+      $req->header('Authorization' => "Bearer $password");
+      $req->header('Content-Type' => 'application/x-www-form-urlencoded');
+      $req->content($_);
+      $ua->request($req);
+    }
 }
 
 # send an email notification
@@ -569,7 +571,7 @@ sub prepare_irc_notice($$)
     my $shortTo = substr($refInfo->{newSha1}, 0, $shortGitObjLength);
     my $commitCount = @$commits;
     my $commitCountString = $commitCount == 1 ? '1 commit' : "$commitCount commits";
-    my @irc_text = ( "%BLUE$repos_name.$refInfo->{branch}%NORMAL: %GREEN$ENV{USER}%NORMAL * $revision [$commitCountString] $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
+    my @irc_text = ( "[%BLUEhaiku/$repos_name%NORMAL] %ORANGE$ENV{USER}%NORMAL pushed $commitCountString to %GREEN$refInfo->{branch}%NORMAL $revision - $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
 
     foreach my $commit (@$commits) {
         my $info = $objectInfoMap{$commit};
