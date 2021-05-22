@@ -27,12 +27,21 @@ RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VE
 ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
 
-# Download plugins
-ENV PLUGINS="avatars-gravatar events-log admin-console oauth"
+# Download plugins bazel-stable-3.2
+ENV PLUGINS="admin-console oauth"
 ENV PLUGIN_VERSION=bazel-stable-3.2
 RUN for i in ${PLUGINS}; do \
 	echo "Install $i..." \
-	curl -fSsL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
+	curl -fL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
+		-o ${GERRIT_HOME}/$i.jar; \
+	done;
+
+# Download plugins bazel-master-stable-3.2
+ENV PLUGINS="avatars-gravatar events-log"
+ENV PLUGIN_VERSION=bazel-master-stable-3.2
+RUN for i in ${PLUGINS}; do \
+	echo "Install $i..." \
+	curl -fL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
 		-o ${GERRIT_HOME}/$i.jar; \
 	done;
 

@@ -181,7 +181,7 @@ sub irc_notification
 
     if ($debug)
     {
-        print "IrcCat: \n$json\n";
+        print "IrcCat: \n$message\n";
         return;
     }
 
