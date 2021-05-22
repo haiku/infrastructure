@@ -54,6 +54,7 @@ services:
       dev:
         aliases:
           - eu.hpkg.haiku-os.org
+          - build.haiku-os.org
       sysadmin:
     ports:
       # workaround for https://github.com/moby/moby/issues/25526
