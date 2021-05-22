@@ -176,9 +176,6 @@ sub irc_notification
 
     return unless $message;
 
-    #$message =~ s{\n}{\\n}g;
-    $message =~ s{"}{\\"}g;
-
     if ($debug)
     {
         print "IrcCat: \n$message\n";
@@ -570,14 +567,14 @@ sub prepare_irc_notice($$)
     my $shortFrom = substr($refInfo->{oldSha1}, 0, $shortGitObjLength);
     my $shortTo = substr($refInfo->{newSha1}, 0, $shortGitObjLength);
     my $commitCount = @$commits;
-    my $commitCountString = $commitCount == 1 ? '1 commit' : "$commitCount commits";
-    my @irc_text = ( "[%BLUEhaiku/$repos_name%NORMAL] %ORANGE$ENV{USER}%NORMAL pushed $commitCountString to %GREEN$refInfo->{branch}%NORMAL $revision - $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
+    my $commitCountString = $commitCount == 1 ? '%GREEN1%NORMAL commit' : "%GREEN$commitCount%NORMAL commits";
+    my @irc_text = ( "[%BLUEhaiku/$repos_name%NORMAL] %ORANGE$ENV{USER}%NORMAL pushed $commitCountString to %GREEN$refInfo->{branch}%NORMAL [$revision] - $cgit_url/log/?qt=range&q=$shortTo+%5E$shortFrom" );
 
     foreach my $commit (@$commits) {
         my $info = $objectInfoMap{$commit};
         my $shortObj = substr($commit, 0, $shortGitObjLength);
 
-        push @irc_text, "    $shortObj: " . $info->{"log"}->[0];
+        push @irc_text, "[%BLUEhaiku/$repos_name%NORMAL]    %GREEN$shortObj%NORMAL - " . $info->{"log"}->[0];
 
         if (@irc_text == 10) {
             push @irc_text, '    ...';
