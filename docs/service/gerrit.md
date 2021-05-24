@@ -59,3 +59,15 @@ Make sure you are in the administrators group and run:
 ssh USERNAME@review.haiku-os.org gerrit flush-caches
 ```
 
+## Installing missing core plugins
+
+Gerrit core plugins annoyingly can be only installed from the Gerrit container while Gerrit is not running.
+
+* Stop gerrit ```docker service scale dev_gerrit=0```
+* Manually enter a new gerrit container ```docker run -it -v dev_gerrit_data:/var/gerrit/review_site docker.io/haiku/gerrit:3.2.10 /bin/bash -l```
+* Install the "core plugin" ```/opt/java/openjdk/bin/java -jar /var/gerrit/gerrit.war init --site-path /var/gerrit/review_site -b --install-plugin hooks```
+  * -b (batch mode) prevents you from messing up our gerrit.config
+* Exit container
+* Start gerrit ```docker service scale dev_gerrit=1```
+
+A mechanism exists via ```ssh (server) gerrit plugins install XXX``` to install plugins, however that only works on externally developed plugins.
