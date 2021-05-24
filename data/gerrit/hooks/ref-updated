@@ -70,7 +70,8 @@ lockfile=$GIT_DIR/receive.lock
 # grab lockfile to protect against concurrent post-receive
 # hooks getting confused with the order of hrevs
 (
-  flock -w 30 --verbose 9 || exit 1
+  #flock -w 30 --verbose 9 || exit 1
+  flock 9 || exit 1
   export GIT_DIR
   cd "$GIT_DIR"
   echo "-------------receive-notify--------------"
