@@ -1,0 +1,25 @@
+#!/bin/bash
+# Publish latest MFS under haiku-repo IPNS key
+# Expectations:
+#  * ipfs in path
+#  * private key called "haiku-repo"
+#  * local API server
+
+LOG="/tmp/mfs-publish.log"
+exec 1>$LOG
+exec 2>&1
+
+echo "=== $(date) Starting publish..."
+
+export IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"
+HASH=$(ipfs --api /ip4/127.0.0.1/tcp/5001 files flush | jq -r .Cid)
+
+$IPFS name publish --key=haiku-repo $HASH
+
+# Try to make sure we cache our latest content in a few places
+# to aid discovery of the latest CID
+sleep 30
+curl https://us.hpkg.haiku-os.org || true
+curl https://de.hpkg.haiku-os.org || true
+curl https://ipfs.io/ipns/hpkg.haiku-os.org || true
+curl https://cloudflare-ipfs.com/ipns/hpkg.haiku-os.org || true

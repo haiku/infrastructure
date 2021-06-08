@@ -1,0 +1,50 @@
+#!/bin/bash
+  
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <branch>"
+fi
+
+export IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"
+
+# Virtual "MFS" directory for Haiku repos
+MFSBASE=/haiku
+
+# Local location of repo files
+PREFIX=/s3/haiku-repositories-us
+
+BRANCH=$1
+ARCHES="x86_64 x86_gcc2"
+
+if [ "$BRANCH" == "master" ]; then
+	ARCHES="$ARCHES arm sparc"
+fi
+
+LOG="/tmp/haiku-sync-$BRANCH.log"
+exec 1>$LOG
+exec 2>&1
+
+for ARCH in $ARCHES; do
+        date
+        echo "Processing $ARCH..."
+        $IPFS files mkdir -p $MFSBASE/$BRANCH/$ARCH
+
+        for i in $(find $PREFIX/$BRANCH/$ARCH/* -maxdepth 0); do
+                echo $i...
+                REPO=$(basename $i)
+                MFSHASH=$($IPFS files stat --hash $MFSBASE/$BRANCH/$ARCH/$REPO 2>&1)
+                if [[ $? -eq 0 ]]; then
+                        echo "[HAVE] Already have $ARCH/$REPO as $MFSHASH"
+                        continue
+                fi
+                HASH=$($IPFS add -r -Q $i)
+                echo "[NEED] Added $ARCH/$REPO as $HASH"
+                $IPFS files cp /ipfs/$HASH $MFSBASE/$BRANCH/$ARCH/$REPO
+        done
+
+        LATEST=$($IPFS files ls $MFSBASE/$BRANCH/$ARCH | sort --version-sort | tail -1)
+        echo "Setting $LATEST to current for $ARCH..."
+        $IPFS files rm -r $MFSBASE/$BRANCH/$ARCH/current
+        $IPFS files cp $MFSBASE/$BRANCH/$ARCH/$LATEST $MFSBASE/$BRANCH/$ARCH/current
+done
+
+$IPFS files flush

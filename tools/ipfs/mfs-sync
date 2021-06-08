@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# TIP: Run this one as root if you're using s3 + fuse
+#      for the source files
+
+export PATH=$PATH:/usr/local/bin
+
+echo "Syncing Haiku Repository master..."
+mfs-sync-haiku master
+echo "Syncing Haiku Repository r1beta1..."
+mfs-sync-haiku r1beta1
+echo "Syncing Haiku Repository r1beta2..."
+mfs-sync-haiku r1beta2
+
+mfs-publish
