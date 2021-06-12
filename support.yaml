@@ -7,16 +7,16 @@
 #
 version: "3.2"
 services:
-  irker:
-    image: haiku/irker
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 16M
-        reservations:
-          cpus: '0.25'
-          memory: 8M
+  #irker:
+  #  image: haiku/irker
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        cpus: '0.5'
+  #        memory: 16M
+  #      reservations:
+  #        cpus: '0.25'
+  #        memory: 8M
   smtp:
     image: mwader/postfix-relay
     deploy:
