@@ -43,7 +43,7 @@ services:
           cpus: '0.15'
           memory: 128M
     environment:
-      - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com
+      - SMF_CONFIG=contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com;haikustore@haiku-os.org:haiku.inc@gmail.com
     ports:
       - target: 25
         published: 25
