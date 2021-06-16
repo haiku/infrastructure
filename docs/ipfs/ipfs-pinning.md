@@ -2,9 +2,11 @@
 
 This guide serves as a quickstart to mirroring [Haiku's releases and repositories](https://gateway.ipfs.io/ipns/hpkg.haiku-os.org) on [IPFS](https://ipfs.io).
 
+> Essentially, you will be "seeding" Haiku packages / artifacts in Bittorrent speak. (IPFS is *not* Bittorrent, just the same concept)
+
 ## Requirements
 
-* A computer with at least 2GiB of RAM running Linux, MacOS, Windows
+* A computer with at least 4 GiB of RAM running Linux, MacOS, Windows
   * A Raspberry Pi 4 works just fine as well :-)
 * An internet connection (dynamic or static ip)
 * Ability to accept incoming connections on tcp port 4001
