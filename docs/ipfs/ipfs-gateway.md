@@ -1,6 +1,7 @@
 # Setting up a public IPFS Gateway
 
-A quick run down of the steps needed to setup a gateway
+A quick run down of the steps needed to setup a public IPFS gateway which only
+serves Haiku software / repositories.
 
 ## Requirements
 
@@ -67,11 +68,16 @@ ipfs config show
 * Make sure the StorageMax is set to a reasonable size (90% of available free space?)
   * This is the "cache", when full it will be garbage collected
 
+```
+systemctl start ipfs
+journalctl -u ipfs
+```
+
 **Setup IPFS Reverse Proxy**
 
 > This enables https, and allows you to host hpkg.haiku-os.org on other domains
-> without needing to setup special DNS records.
-> Requests are reformed from rendering the native domain to rendering hpkg.haiku-os.org
+> without needing to setup special DNS records. This configuration also prevents
+> usage of your node for any content except data for ```/ipns/hpkg.haiku-os.org```.
 
 * Install nginx
 * Configure nginx
