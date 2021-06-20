@@ -29,13 +29,13 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-if [ $BRANCH == "r1beta1" ]; then
+if [ $BRANCH == "r1beta2" ]; then
 	BUCKET_IMAGE="haiku-release-candidates"
 	BUCKET_REPO="haiku-repositories-us"
 	BRANCH_PROFILE="release"
 	ARCHES="x86_64 x86_gcc2h"
 	DAYS="Sunday"
-elif [ $BRANCH == "r1beta2" ]; then
+elif [ $BRANCH == "r1beta3" ]; then
 	BUCKET_IMAGE="haiku-release-candidates"
 	BUCKET_REPO="haiku-repositories-us"
 	BRANCH_PROFILE="release"
