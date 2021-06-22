@@ -49,6 +49,9 @@ services:
       default:
       support_default:
       ci:
+        aliases:
+          - eu.hpkg.haiku-os.org
+          - build.haiku-os.org
       community:
       cdn:
       dev:
