@@ -105,10 +105,10 @@ jobs:
                   ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).image"
                   cp generated.((arch))/haiku-((profile)).image images.((arch))/${ARTIFACT}
                 fi
+                cd images.((arch))
                 # If nightly; compress build as tightly as possible
-                if [ "((branch))" == "master" ]]; then
-                  cp haiku-git/ReadMe.md images.((arch))/ReadMe.md
-                  cd images.((arch))
+                if [[ "((branch))" == "master" ]]; then
+                  cp ../haiku-git/ReadMe.md ReadMe.md
                   zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md ${ARTIFACT}
                   rm -f *.md *.image *.iso
                   ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).zip"
