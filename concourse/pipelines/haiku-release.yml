@@ -96,28 +96,35 @@ jobs:
               - |
                 RELEASE=$(git -C haiku-git describe --tags --long | cut -d\- -f1,2 | sed 's/\-/\_/g' | sed 's/\_0//g')
                 if [[ "((media))" == "anyboot" ]]; then
-                  cp generated.((arch))/haiku-((profile))-((media)).iso images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).iso
+                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).iso"
+                  cp generated.((arch))/haiku-((profile))-((media)).iso images.((arch))/${ARTIFACT}
                 elif [[ "((media))" == "mmc" ]]; then
-                  cp generated.((arch))/haiku-((media)).image images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
+                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).image"
+                  cp generated.((arch))/haiku-((media)).image images.((arch))/${ARTIFACT}
                 elif [[ "((media))" == "raw" ]]; then
-                  cp generated.((arch))/haiku-((profile)).image images.((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).image
+                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).image"
+                  cp generated.((arch))/haiku-((profile)).image images.((arch))/${ARTIFACT}
                 fi
-                cp haiku-git/ReadMe.md images.((arch))/ReadMe.md
-                cd images.((arch))
-                zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md haiku-((branch))-$RELEASE-((arch))-*.*
-                rm -f *.md *.image *.iso
-                sha256sum --tag haiku-((branch))-$RELEASE-((arch))-((media)).zip > haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256
+                # If nightly; compress build as tightly as possible
+                if [ "((branch))" == "master" ]]; then
+                  cp haiku-git/ReadMe.md images.((arch))/ReadMe.md
+                  cd images.((arch))
+                  zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md ${ARTIFACT}
+                  rm -f *.md *.image *.iso
+                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).zip"
+                fi
+                sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
                 echo "untrusted comment: minisign encrypted secret key" > /tmp/minisign.key
                 echo "((minisign-private))" >> /tmp/minisign.key
-                echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm haiku-((branch))-$RELEASE-((arch))-((media)).zip
+                echo "((minisign-key))" | minisign -s /tmp/minisign.key -Sm ${ARTIFACT}
                 rm -f /tmp/minisign.key
                 mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip was successfully uploaded!"
-                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.sha256 was successfully uploaded!"
-                mc cp -q haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/haiku-((branch))-$RELEASE-((arch))-((media)).zip.minisig was successfully uploaded!"
+                mc cp -q ${ARTIFACT} remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT} was successfully uploaded!"
+                mc cp -q ${ARTIFACT}.sha256 remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.sha256 was successfully uploaded!"
+                mc cp -q ${ARTIFACT}.minisig remote/((bucket_image))/((arch))/
+                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.minisig was successfully uploaded!"
   - name: repo-((branch))-((arch))
     public: true
     plan:
