@@ -24,7 +24,7 @@ services:
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
   buildmaster_master_x86_64:
-    image: haikuports/buildmaster
+    image: docker.io/haikuports/buildmaster:1.2.5
     deploy:
       placement:
         constraints: [node.labels.build == true ]
@@ -38,7 +38,7 @@ services:
     environment:
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
   buildmaster_master_x86_gcc2:
-    image: haikuports/buildmaster
+    image: docker.io/haikuports/buildmaster:1.2.5
     deploy:
       placement:
         constraints: [node.labels.build == true ]
