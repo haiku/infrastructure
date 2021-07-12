@@ -20,6 +20,7 @@ filePath = "/logs/access.log"
       # Allows Traefik to pass internal X-Forwarded-* headers
       trustedIPs = ["127.0.0.1/32", "10.0.0.0/8"]
   [entryPoints.https.tls]
+    minVersion = "VersionTLS12"
   [entryPoints.api]
     address = ":9191"
 
