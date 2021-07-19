@@ -1,6 +1,6 @@
 # inspired by https://hub.docker.com/r/maestroalubia/trac/~/dockerfile/
 
-FROM python:2.7-alpine
+FROM docker.io/python:2.7-alpine
 
 # Set the working directory to /app
 WORKDIR /app
