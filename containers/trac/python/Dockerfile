@@ -5,6 +5,8 @@ FROM docker.io/python:2.7-alpine
 # Set the working directory to /app
 WORKDIR /app
 
+RUN ls
+
 # Copy the necessary files to the container
 ADD requirements.txt /app
 
