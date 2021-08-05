@@ -74,14 +74,11 @@ spec:
         - name: traefik
           image: docker.io/traefik:v2.4
           args:
-            - --entrypoints.http.address=:80
-            - --entrypoints.https.address=:443
-            - --entrypoints.https.http.tls
-            - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-            - --certificatesresolvers.le.acme.email=haiku-inc@gmail.com
-            - --certificatesresolvers.le.acme.keytype=RSA4096
-            - --certificatesresolvers.le.acme.httpchallenge=true
-            - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
+            - --entrypoints.web.address=:80
+            #- --entryPoints.web.http.redirections.entryPoint.to=webs
+            #- --entryPoints.web.http.redirections.entryPoint.scheme=https
+            - --entrypoints.webs.address=:443
+            - --entrypoints.webs.http.tls
             - --providers.kubernetesingress
           ports:
             - name: http
@@ -106,3 +103,10 @@ spec:
       port: 443
       name: https
       targetPort: 443
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned
+spec:
+  selfSigned: {}
