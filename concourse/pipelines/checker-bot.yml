@@ -1,0 +1,71 @@
+---
+roles:
+  - name: owner
+    github:
+      teams: ["haiku:infrastructure"]
+    local:
+      users: ["admin"]
+resource_types:
+- name: gerrit
+  type: registry-image
+  source:
+    repository: docker.io/bluedocks/gerrit-resource
+resources:
+- name: haiku-gerrit
+  type: gerrit
+  source:
+    url: "https://review.haiku-os.org"
+    query: "status:open project:haiku"
+
+# Jobs
+jobs:
+- name: checker-bot
+  public: true
+  plan:
+    - get: haiku-gerrit 
+      trigger: true 
+    - task: check-coding-style
+      config:
+        inputs:
+        - name: haiku-gerrit
+        platform: linux
+        image_resource:
+          type: registry-image
+          source:
+            repository: docker.io/bluedocks/general-worker
+        run:
+          path: /bin/sh
+          args:
+            - -c
+            - |
+              cd ./haiku-gerrit
+              git config color.diff false
+              git clang-format --diff --style=haiku -q HEAD~1 > diff.txt
+              cat diff.txt
+
+              # check if diff.txt is empty or not and set verified
+              if [ -s diff.txt ]
+              then
+                verified=-1
+              else
+                verified=1
+              fi
+              echo "verified: $verified"
+
+              BASE_URL=https://review.haiku-os.org
+              CHANGE_ID=$(jq -r '.change_id' ./.gerrit_version.json)
+              REVISION_ID=$(jq -r '.revision' ./.gerrit_version.json)
+              TOKEN=Y2hlY2tlcmJvdDpnUlBONXdQQ0tVOTIxTUNzNitBc1dXclNSYzd4Mm9wWlNXNzNtYTRUOFE=
+
+              jq --null-input -M --rawfile message diff.txt --arg verified $verified \
+              '{
+                  "message": "```\n\($message)\n```",
+                  "labels": {
+                      "Verified": $verified
+                  }
+              }' > data.json
+
+              curl --location --request POST "${BASE_URL}/a/changes/${CHANGE_ID}/revisions/${REVISION_ID}/review" \
+              --header "Authorization: Basic ${TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data-binary '@data.json'
