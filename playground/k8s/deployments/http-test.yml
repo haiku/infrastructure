@@ -33,8 +33,14 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: git
+  name: hello
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
+  tls:
+  - hosts:
+    - hello.haiku-os.org
+    secretName: tls-cert-hello
   rules:
   - host: hello.haiku-os.org
     http:

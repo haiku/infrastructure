@@ -12,3 +12,4 @@ spec:
     solvers:
     - http01:
         ingress:
+          class: default
