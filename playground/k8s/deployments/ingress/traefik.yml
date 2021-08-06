@@ -80,6 +80,7 @@ spec:
             - --entrypoints.webs.address=:443
             - --entrypoints.webs.http.tls
             - --providers.kubernetesingress
+            - --providers.kubernetesingress.ingressclass=default
           ports:
             - name: http
               containerPort: 80
@@ -103,6 +104,15 @@ spec:
       port: 443
       name: https
       targetPort: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: default
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: traefik.io/ingress-controller
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

@@ -49,6 +49,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: helloworld
+            name: helloworld-service
             port:
               name: web
