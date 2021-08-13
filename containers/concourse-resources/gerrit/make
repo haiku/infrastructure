@@ -1,0 +1,9 @@
+#!/bin/bash
+
+export GOOS=linux
+export GOANCH=amd64
+
+# You need this repo to be under .../src/github.com/google/concourse-resources
+export GOPATH=$(cd ../../../../.. && pwd)
+
+exec make ${1+"$@"}
