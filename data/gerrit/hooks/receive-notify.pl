@@ -54,6 +54,9 @@ my $shortGitObjLength = 12;
 # base URL of the cgit repository browser (can be set with the -u option)
 my $cgit_url = git_config( "notify.baseurl" );
 
+# irc channels to notify
+my $irc_channels = git_config( "notify.irc" ) || "#haiku-dev";
+
 # default repository name (can be changed with the -r option)
 my $repos_name = git_config( "notify.repository" ) || get_repos_name();
 
@@ -192,7 +195,7 @@ sub irc_notification
       my $req = HTTP::Request->new(POST => "https://build.haiku-os.org/irccat/send");
       $req->header('Authorization' => "Bearer $password");
       $req->header('Content-Type' => 'application/x-www-form-urlencoded');
-      $req->content($_);
+      $req->content("$irc_channels $_");
       $ua->request($req);
     }
 }
