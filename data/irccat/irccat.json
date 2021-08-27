@@ -10,8 +10,7 @@
     "listeners": {
       "generic": {
         "secret": "somethingsecret"
-      },
-      "grafana": "#haiku-dev"
+      }
     }
   },
   "irc": {
@@ -24,6 +23,6 @@
     "identify_pass": "",
     "sasl_login": "",
     "sasl_pass": "",
-    "channels": ["#haiku-dev"]
+    "channels": ["#haiku-dev", "#haiku"]
   }
 }
