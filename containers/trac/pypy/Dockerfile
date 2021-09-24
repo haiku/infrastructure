@@ -10,7 +10,7 @@ ADD requirements.txt /app
 
 # Install the requirements
 RUN apt update && \
-    apt install -y build-essential gcc libjpeg-dev libpq-dev curl git zlib1g-dev
+    apt install -y build-essential gcc libjpeg-dev libfreetype-dev libpq-dev curl git zlib1g-dev
 
 RUN pypy -m ensurepip && \
     pypy -mpip install -r requirements.txt

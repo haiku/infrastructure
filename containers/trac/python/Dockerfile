@@ -12,7 +12,8 @@ ADD requirements.txt /app
 
 # Install the requirements
 RUN apk update && \
-    apk add --virtual build-deps gcc jpeg-dev python-dev musl-dev zlib-dev && \
+    apk add freetype libjpeg-turbo libpng && \
+    apk add --virtual build-deps gcc freetype-dev jpeg-dev python-dev musl-dev zlib-dev && \
     apk add git postgresql-dev curl
 
 RUN pip install -r requirements.txt
