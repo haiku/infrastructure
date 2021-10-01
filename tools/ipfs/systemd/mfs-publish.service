@@ -1,0 +1,11 @@
+[Unit]
+Description=Publush latest artifacts to MFS
+Wants=mfs-publish.timer
+
+[Service]
+User=ipfs
+Type=oneshot
+ExecStart=/usr/local/bin/mfs-publish
+
+[Install]
+WantedBy=multi-user.target

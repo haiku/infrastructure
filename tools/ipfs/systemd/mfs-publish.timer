@@ -1,0 +1,10 @@
+[Unit]
+Description=Publishes Haiku MFS artifacts to IPFS
+Requires=mfs-publish.service
+
+[Timer]
+Unit=mfs-publish.service
+OnCalendar=*-*-* 06:00:00
+
+[Install]
+WantedBy=timers.target

@@ -5,10 +5,6 @@
 #  * private key called "haiku-repo"
 #  * local API server
 
-LOG="/tmp/mfs-publish.log"
-exec 1>$LOG
-exec 2>&1
-
 echo "=== $(date) Starting publish..."
 
 export IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"

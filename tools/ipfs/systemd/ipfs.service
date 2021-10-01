@@ -1,0 +1,26 @@
+# ipfs service
+[Unit]
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+User=ipfs
+RestartSec=1
+Restart=always
+PermissionsStartOnly=true
+Nice=18
+StateDirectory=/home/ipfs
+Environment=IPFS_PATH=/home/ipfs/.ipfs
+Environment=HOME=/home/ipfs
+LimitNOFILE=8192
+Environment=IPFS_FD_MAX=8192
+EnvironmentFile=-/etc/default/ipfs
+StandardOutput=journal
+WorkingDirectory=/home/ipfs
+ExecStartPre=-/bin/chown ipfs:users /home/ipfs
+ExecStartPre=-/bin/chmod ug+rwx /home/ipfs
+ExecStart=/usr/local/bin/ipfs daemon --enable-namesys-pubsub --enable-pubsub-experiment
+
+[Install]
+WantedBy=multi-user.target

@@ -19,10 +19,6 @@ if [ "$BRANCH" == "master" ]; then
 	ARCHES="$ARCHES arm sparc"
 fi
 
-LOG="/tmp/haiku-sync-$BRANCH.log"
-exec 1>$LOG
-exec 2>&1
-
 for ARCH in $ARCHES; do
         date
         echo "Processing $ARCH..."

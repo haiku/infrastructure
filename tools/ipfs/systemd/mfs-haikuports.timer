@@ -1,0 +1,10 @@
+[Unit]
+Description=Syncs Haikuports artifacts to IPFS
+Requires=mfs-haikuports.service
+
+[Timer]
+Unit=mfs-haikuports.service
+OnCalendar=*-*-* 22:00:00
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,12 @@
+# This one runs as root because of the poor permissions with s3 fuse
+[Unit]
+Description=Sync Haiku to MFS
+Wants=mfs-haiku.timer
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/usr/local/bin/mfs-sync
+
+[Install]
+WantedBy=multi-user.target

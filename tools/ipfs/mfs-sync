@@ -7,9 +7,7 @@ export PATH=$PATH:/usr/local/bin
 
 echo "Syncing Haiku Repository master..."
 mfs-sync-haiku master
-echo "Syncing Haiku Repository r1beta1..."
-mfs-sync-haiku r1beta1
 echo "Syncing Haiku Repository r1beta2..."
 mfs-sync-haiku r1beta2
-
-mfs-publish
+echo "Syncing Haiku Repository r1beta3..."
+mfs-sync-haiku r1beta3

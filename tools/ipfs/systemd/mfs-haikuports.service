@@ -1,0 +1,11 @@
+[Unit]
+Description=Sync Haikuports to MFS
+Wants=mfs-haikuports.timer
+
+[Service]
+User=ipfs
+Type=oneshot
+ExecStart=/usr/local/bin/mfs-sync-haikuports
+
+[Install]
+WantedBy=multi-user.target
