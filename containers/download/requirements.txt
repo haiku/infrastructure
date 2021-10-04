@@ -1,7 +1,7 @@
 # packages required for the download generator script
-boto==2.49.0
-Mako==1.1.3
-toml==0.10.1
+boto
+Mako
+toml
 
 # tools for the image
 supervisor
