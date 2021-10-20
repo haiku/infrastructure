@@ -159,7 +159,7 @@ services:
     environment:
       - GERRIT_UIDS=1000000 1000001 1000172 1000021
     volumes:
-      - dev_gerrit_data:/git:z,ro
+      - dev_gerrit_data:/gerrit:z,ro
       - incoming_hpkg:/sftp:z
     ports:
       - target: 22
