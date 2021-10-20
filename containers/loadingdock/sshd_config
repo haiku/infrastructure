@@ -1,0 +1,44 @@
+Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+Protocol 2
+
+LoginGraceTime 2m
+PermitRootLogin no
+MaxAuthTries 1
+#StrictModes yes
+MaxSessions 2
+AuthorizedKeysFile	/etc/authorized_keys/%u
+
+PasswordAuthentication no
+PermitEmptyPasswords no
+
+AllowAgentForwarding no
+AllowTcpForwarding no
+GatewayPorts no
+X11Forwarding no
+PermitTTY no
+PrintMotd no
+TCPKeepAlive yes
+
+#UseLogin no
+#UsePrivilegeSeparation sandbox
+PermitUserEnvironment no
+Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+UseDNS no
+PermitTunnel no
+#ChrootDirectory none
+#VersionAddendum none
+
+# no default banner path
+#Banner none
+
+# override default of no subsystems
+#Subsystem	sftp	/usr/lib/ssh/sftp-server
+Subsystem	sftp	internal-sftp
+ForceCommand	internal-sftp
+ChrootDirectory	/sftp

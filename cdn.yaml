@@ -152,6 +152,19 @@ services:
       - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
       - "traefik.basic.port=80"
+  loadingdock:
+    image: docker.io/haiku/loadingdock
+    networks:
+      - ingress_cdn
+    environment:
+      - GERRIT_UIDS=1000000 1000001 1000172
+    volumes:
+      - dev_gerrit_data:/git:z,ro
+      - incoming_hpkg:/sftp:z
+    ports:
+      - target: 22
+        published: 1099
+        mode: host
 secrets:
   s3_endpoint:
     external: true
@@ -166,6 +179,9 @@ volumes:
   hds_secrets:
   s3_secrets:
   s3_data:
+  incoming_hpkg:
+  dev_gerrit_data:
+    external: true
   ci-packages:
     external: true
 networks:
