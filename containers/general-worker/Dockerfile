@@ -43,6 +43,9 @@ RUN dnf install -y \
   zip \
   xorriso \
   xz \
+  libzstd \
+  libzstd-devel \
+  libzstd-static \
   zlib \
   zlib-devel
 
