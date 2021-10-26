@@ -20,12 +20,5 @@ users from Gerrit.
 These public keys are allowed access to the service.  Users can submit haiku package files
 for their desired architecture.
 
-## TODO
-
-Packages are picked up by forklift which will:
-  * Pull the latest HaikuPorts repository file
-  * Append the new packages if needed
-  * Upgrade any packages it can
-  * generate a new hardlink repository
-  * Produce a new HaikuPorts repository file
-  * Commit the new HaikuPorts reposirory file
+After uploaded packages have been modified > 15 minutes ago, they are picked up by forklift
+which moves them to the build-packages packages repository.

@@ -152,6 +152,7 @@ services:
       - "traefik.docker.network=ingress_cdn"
       - "traefik.basic.frontend.rule=Host:ports-mirror.${DOMAIN}"
       - "traefik.basic.port=80"
+  # Accepts new packages for build-packages repos
   loadingdock:
     image: docker.io/haiku/loadingdock
     networks:
@@ -165,6 +166,12 @@ services:
       - target: 22
         published: 1099
         mode: host
+  # Copies data from loadingdock to build-packages repo
+  forklift:
+    image: docker.io/haiku/forklift:latest
+    volumes:
+      - incoming_hpkg:/incoming:z
+      - ci-packages:/haikuports-data:z
 secrets:
   s3_endpoint:
     external: true
