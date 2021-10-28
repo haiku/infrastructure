@@ -20,8 +20,9 @@ while true; do
 			ls -la ${INCOMING}/build-packages/${i}
 			# clobber architecture packages
 			find ${INCOMING}/build-packages/${i} -name "*${i}.hpkg" -mmin +30 -exec mv -v -f {} ${OUTGOING}/ \;
-			# don't clobber source packages since it could break other architecture repos?
+			# don't clobber source or any packages since it could break other architecture repos?
 			find ${INCOMING}/build-packages/${i} -name "*source.hpkg" -mmin +30 -exec mv -v -n {} ${OUTGOING}/ \;
+			find ${INCOMING}/build-packages/${i} -name "*any.hpkg" -mmin +30 -exec mv -v -n {} ${OUTGOING}/ \;
 			# cleanup
 			find ${INCOMING}/build-packages/${i} -name "*" -mmin +60 -exec rm -vf {} \;
 		fi
