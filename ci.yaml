@@ -90,7 +90,8 @@ services:
       CONCOURSE_SESSION_SIGNING_KEY: /keys/session_signing_key
       CONCOURSE_TSA_HOST_KEY: /keys/tsa_host_key
       CONCOURSE_TSA_AUTHORIZED_KEYS: /keys/authorized_worker_keys
-      CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN: 200
+      CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN: 50
+      CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN: 100
     networks:
       - ingress_ci
       - support_default
