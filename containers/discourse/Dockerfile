@@ -5,7 +5,7 @@ FROM ruby:latest
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
-ENV DISCOURSE_VERSION=2.7.6
+ENV DISCOURSE_VERSION=2.7.9
 
 RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli uglifyjs npm && pip3 install supervisor
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
