@@ -5,9 +5,9 @@ root-title=$CGIT_TITLE
 root-desc=$CGIT_DESC
 
 source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
-#about-filter=/usr/lib/cgit/filters/about-formatting.sh
+about-filter=/usr/lib/cgit/filters/markdown-render.py
 commit-filter=/usr/lib/cgit/filters/commit-link-filter.sh
-render.md=/usr/lib/cgit/filters/markdown-render.sh
+render.md=/usr/lib/cgit/filters/markdown-render.py
 
 ##
 ## Search for these files in the root of the default branch of repositories
