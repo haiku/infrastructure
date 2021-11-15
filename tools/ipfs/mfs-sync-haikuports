@@ -16,7 +16,7 @@ export PATH=$PATH:/usr/local/bin
 # TODO: this is pretty inefficent. There are various ipfs mirroring / sync tools
 # in development, but none are really viable when this was written.
 
-rsync -aP rsync://rsync.haiku-os.org:12000/haikuports-master haikuports/master
+rsync -aP --delete rsync://rsync.haiku-os.org:12000/haikuports-master haikuports/master
 HASH=$(ipfs add -r -Q haikuports)
 
 echo "Setting haikuports to $HASH..."

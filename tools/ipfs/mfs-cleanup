@@ -1,0 +1,27 @@
+#!/bin/bash
+# Remove repos from IPFS and s3 at the same time
+# to conserve space
+
+IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"
+
+if [ $# -ne 3 ]; then
+        echo "usage: $0 <repo> <branch> <hrev>"
+        exit 1
+fi
+
+ARCHES="arm sparc x86_64 x86_gcc2"
+
+if [ "$1" == "haiku" ]; then
+        S3_BASE="/s3/haiku-repositories-us"
+        MFS_BASE="/haiku"
+        for i in $ARCHES; do
+                if [[ -d $S3_BASE/$2/$i/$3 ]]; then
+                        echo "Removing $2/$i/$3 from s3..."
+                        rm -rf "$S3_BASE/$2/$i/$3"
+                else
+                        echo "Non-existant $2/$i/$3 on s3"
+                fi
+                echo "Removing $2/$i/$3 from IPFS..."
+                $IPFS files rm -r "$MFS_BASE/$2/$i/$3"
+        done
+fi
