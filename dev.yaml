@@ -78,7 +78,7 @@ services:
       - "traefik.basic.frontend.redirect.replacement=git.${DOMAIN}/$$1"
       - "traefik.basic.port=80"
   trac:
-    image: haiku/trac
+    image: docker.io/haiku/trac:1.4.3-pypy
     deploy:
       resources:
         limits:
