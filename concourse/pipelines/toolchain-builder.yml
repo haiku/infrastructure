@@ -119,20 +119,20 @@ jobs:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.arm64
-#      - task: compile-m68k-crosstools
-#        params:
-#          TOOLARCH: m68k
-#        config:
-#          << : *task-build-crosstools
-#          outputs:
-#            - name: crosstools.m68k
-      - task: compile-ppc-crosstools
+      - task: compile-m68k-crosstools
         params:
-          TOOLARCH: ppc
+          TOOLARCH: m68k
         config:
           << : *task-build-crosstools
           outputs:
-            - name: crosstools.ppc
+            - name: crosstools.m68k
+#      - task: compile-ppc-crosstools
+#        params:
+#          TOOLARCH: ppc
+#        config:
+#          << : *task-build-crosstools
+#          outputs:
+#            - name: crosstools.ppc
       - task: compile-riscv64-crosstools
         params:
           TOOLARCH: riscv64

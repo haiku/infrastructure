@@ -46,7 +46,7 @@ else
 	BUCKET_REPO="haiku-repositories-us"
 	BRANCH_PROFILE="nightly"
 	#ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
-	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc"
+	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 m68k"
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 fi
 
