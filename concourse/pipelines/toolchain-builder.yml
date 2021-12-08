@@ -177,8 +177,8 @@ jobs:
             - name: jam
             - name: crosstools.arm
             - name: crosstools.arm64
-#            - name: crosstools.m68k
-            - name: crosstools.ppc
+            - name: crosstools.m68k
+#            - name: crosstools.ppc
             - name: crosstools.riscv64
             - name: crosstools.sparc
             - name: crosstools.x86
