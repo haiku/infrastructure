@@ -8,7 +8,7 @@
 version: "3.2"
 services:
   gerrit:
-    image: docker.io/haiku/gerrit:3.2.14
+    image: docker.io/haiku/gerrit:3.3.8
     deploy:
       resources:
         limits:
