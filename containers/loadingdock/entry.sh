@@ -48,6 +48,6 @@ done
 
 chown root:root /sftp /sftp/README
 chmod 611 /sftp/README
-chmod 550 /sftp
+chmod 755 /sftp
 
 exec "$@"
