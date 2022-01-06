@@ -5,7 +5,7 @@ FROM ruby:latest
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
-ENV DISCOURSE_VERSION=2.7.9
+ENV DISCOURSE_VERSION=2.7.12
 
 RUN apt-get update && apt-get install -y git bash build-essential postgresql-client python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli uglifyjs npm && pip3 install supervisor
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
@@ -13,6 +13,7 @@ RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data
 # Install Discourse
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
 RUN mkdir -p /apps && cd /apps && tar xvf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
+RUN gem install bundler:2.2.16
 RUN cd /apps/discourse && bundle install
 
 COPY supervisord.conf /etc/supervisord.conf
