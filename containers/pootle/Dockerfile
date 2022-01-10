@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 # Set the working directory to /app
 WORKDIR /app
@@ -37,10 +37,11 @@ RUN apt-get update && \
                         libtool \
                         mtools \
                         clang \
-                        postgresql-server-dev-9.6 \
+                        postgresql-server-dev-11 \
                         python-pip \
                         libxml2-dev \
                         libxslt1-dev \
+                        libzstd-dev \
                         nano \
                         cron \
                         nginx \
