@@ -114,7 +114,7 @@ services:
       - "traefik.basic.frontend.rule=Host:ci.${DOMAIN}"
       - "traefik.basic.port=8080"
   irccat:
-    image: irccloud/irccat:latest
+    image: ghcr.io/irccloud/irccat:0.4.7
     deploy:
       resources:
         limits:
