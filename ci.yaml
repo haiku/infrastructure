@@ -24,13 +24,16 @@ services:
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
   buildmaster_master_x86_64:
-    image: docker.io/haikuporter/buildmaster:1.2.5
+    image: docker.io/haikuporter/buildmaster:1.2.5a
     deploy:
       placement:
         constraints: [node.labels.build == true ]
     command: loop
     networks:
       - private
+    secrets:
+      - sig_repo_privatekey
+      - sig_repo_privatekeypass
     volumes:
       - sources:/var/sources:z
       - data_master_x86_64:/var/buildmaster:z
@@ -38,13 +41,16 @@ services:
     environment:
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
   buildmaster_master_x86_gcc2:
-    image: docker.io/haikuporter/buildmaster:1.2.5
+    image: docker.io/haikuporter/buildmaster:1.2.5a
     deploy:
       placement:
         constraints: [node.labels.build == true ]
     command: loop
     networks:
       - private
+    secrets:
+      - sig_repo_privatekey
+      - sig_repo_privatekeypass
     volumes:
       - sources:/var/sources:z
       - data_master_x86_gcc2:/var/buildmaster:z
@@ -124,6 +130,11 @@ services:
       - "traefik.docker.network=ingress_ci"
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN};PathPrefixStrip:/irccat"
       - "traefik.basic.port=8045"
+secrets:
+  sig_repo_privatekey:
+    external: true
+  sig_repo_privatekeypass:
+    external: true
 volumes:
   concourse_keys:
   teleport:
