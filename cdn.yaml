@@ -83,6 +83,7 @@ services:
       - ingress_cdn
       - ci_private
     volumes:
+      - ci-packages:/var/haikuports:ro,z
       - ./data/www-repo:/etc/nginx/conf.d:z
       - ./data/static-html/repo:/usr/share/nginx/html:z
     labels:
