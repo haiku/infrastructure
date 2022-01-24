@@ -24,7 +24,7 @@ services:
       - "traefik.basic.frontend.rule=Host:build.${DOMAIN}"
       - "traefik.basic.port=80"
   buildmaster_master_x86_64:
-    image: docker.io/haikuporter/buildmaster:1.2.5a
+    image: docker.io/haikuporter/buildmaster:1.2.6-1
     deploy:
       placement:
         constraints: [node.labels.build == true ]
@@ -39,9 +39,10 @@ services:
       - data_master_x86_64:/var/buildmaster:z
       - packages:/var/packages:z
     environment:
+      BUILD_TARGET_ARCH: x86_64
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
   buildmaster_master_x86_gcc2:
-    image: docker.io/haikuporter/buildmaster:1.2.5a
+    image: docker.io/haikuporter/buildmaster:1.2.6-1
     deploy:
       placement:
         constraints: [node.labels.build == true ]
@@ -56,6 +57,7 @@ services:
       - data_master_x86_gcc2:/var/buildmaster:z
       - packages:/var/packages:z
     environment:
+      BUILD_TARGET_ARCH: x86_gcc2
       REPOSITORY_TRIGGER_URL: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
   buildmaster_teleport:
     image: mmlr/teleport
@@ -67,7 +69,7 @@ services:
     volumes:
       - teleport:/var/teleport
   buildmaster_frontend:
-    image: haikuports/buildmaster-frontend
+    image: docker.io/haikuporter/buildmaster-frontend:1.2.6-1
     deploy:
       placement:
         constraints: [node.labels.build == true ]
@@ -75,7 +77,6 @@ services:
       - ingress_ci
       - private
     volumes:
-      - sources:/var/sources:ro
       - data_master_x86_gcc2:/var/instances/master/x86_gcc2:ro
       - data_master_x86_64:/var/instances/master/x86_64:ro
       - packages:/var/instances/haikuports:ro
