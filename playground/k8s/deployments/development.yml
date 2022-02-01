@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: gerrit
-        image: docker.io/haiku/gerrit:3.2.10
+        image: docker.io/haiku/gerrit:3.3.8
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/gerrit/review_site
@@ -64,7 +64,7 @@ spec:
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: gerrit-backup-daily
@@ -118,7 +118,7 @@ spec:
     requests:
       storage: 10Gi
   #storageClassName: do-block-storage
-  storageClassName: vultr-block-storage
+  storageClassName: vultr-block-storage-retain
 ---
 apiVersion: v1
 kind: Service
