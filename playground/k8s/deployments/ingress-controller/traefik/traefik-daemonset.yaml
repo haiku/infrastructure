@@ -1,3 +1,5 @@
+# A simple Traefik v2.6 ingress controller
+# CRD's are for the birds
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -5,15 +7,14 @@ metadata:
   name: traefik-ingress-controller
   namespace: kube-system
 ---
-kind: Deployment
-apiVersion: extensions/v1beta1
+kind: DaemonSet
+apiVersion: apps/v1
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
   labels:
     k8s-app: traefik-ingress-lb
 spec:
-  replicas: 1
   selector:
     matchLabels:
       k8s-app: traefik-ingress-lb
@@ -26,17 +27,23 @@ spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
       containers:
-      - image: traefik
+      - image: docker.io/traefik:v2.6
         name: traefik-ingress-lb
         ports:
         - name: http
           containerPort: 80
+        - name: https
+          containerPort: 443
         - name: admin
           containerPort: 8080
         args:
+        - --providers.kubernetesingress=true
+        - --providers.kubernetesingress.ingressclass=default
+        - --entrypoints.web.address=:80
+        - --entrypoints.webs.address=:443
+        - --entrypoints.webs.http.tls
         - --api
-        - --kubernetes
-        - --logLevel=INFO
+#       - --api.insecure=true
 ---
 apiVersion: v1
 kind: Service
@@ -53,5 +60,24 @@ spec:
       port: 80
       name: http
     - protocol: TCP
+      port: 443
+      name: https
+    - protocol: TCP
       port: 8080
       name: admin
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: default
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: traefik.io/ingress-controller
+#---
+#apiVersion: cert-manager.io/v1
+#kind: ClusterIssuer
+#metadata:
+#  name: selfsigned
+#spec:
+#  selfSigned: {}
