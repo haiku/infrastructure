@@ -125,6 +125,39 @@ jobs:
                 echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.sha256 was successfully uploaded!"
                 mc cp -q ${ARTIFACT}.minisig remote/((bucket_image))/((arch))/
                 echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.minisig was successfully uploaded!"
+      - task: catkeys-((branch))-((arch))
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/toolchain-worker-((branch)) }
+          inputs:
+            - name: haiku-git
+            - name: generated.((arch))
+          outputs:
+            - name: catkeys.((arch))
+          params:
+            S3_ENDPOINT: ((s3endpoint))
+            S3_KEY: ((s3key))
+            S3_SECRET: ((s3secret))
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                cd generated.((arch))
+                jam -q catkeys
+                cd objects
+                find catalogs/ -name 'en.catkeys' -exec cp --parents -r {} ../../catkeys.x86_64/ \;
+                cd ../../catkeys.((arch))
+                ARTIFACT="haiku-((branch))-((arch))-catkeys.zip"
+                zip -9 -r ${ARTIFACT} catalogs/
+                sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
+                mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
+                mc cp -q ${ARTIFACT} remote/haiku-translations/
+                echo "$S3_ENDPOINT/haiku-translations/${ARTIFACT} was successfully uploaded!"
+                mc cp -q ${ARTIFACT}.sha256 remote/haiku-translations/
+                echo "$S3_ENDPOINT/haiku-translations/${ARTIFACT}.sha256 was successfully uploaded!"
   - name: repo-((branch))-((arch))
     public: true
     plan:
