@@ -16,7 +16,7 @@ server = "smtp"
 
 [sync.haiku]
 repository_dir = "/var/pootle/repository"
-templates_dir = "/var/pootle/repository/generated/objects/catalogs"
+templates_url = "https://s3.wasabisys.com/haiku-translations/haiku-master-x86_64-catkeys.zip"
 pootle_catalogs_dir = "/var/pootle/catalogs/haiku"
 repository_catalogs_dir = "/var/pootle/repository/data/catalogs"
 languages = ['be', 'ca', 'de', 'el', 'en_GB', 'es', 'fi', 'fr', 'fur', 'hu', 'id',

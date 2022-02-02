@@ -70,7 +70,7 @@ EMAIL_SERVER = settings["email"]["server"]
 
 # This should support multiple sync dicts in the future
 SYNC_SETTINGS = settings["sync"]["haiku"]
-for key in ["repository_dir", "templates_dir", "pootle_catalogs_dir", "repository_catalogs_dir", "languages"]:
+for key in ["repository_dir", "templates_url", "pootle_catalogs_dir", "repository_catalogs_dir", "languages"]:
     if key not in SYNC_SETTINGS.keys():
         print("Missing key %s in [sync.haiku], please fix the configuration" % key)
         sys.exit(-1)
@@ -82,11 +82,8 @@ step_list = [
          ["cp", "-r", SYNC_SETTINGS["pootle_catalogs_dir"], SYNC_SETTINGS["pootle_catalogs_dir"] + "-bak"]),
     Step("sync_stores", "Save translations in database to disk",
          ["pootle", "sync_stores"]),
-    Step("repository_pull", "Pull latest changes from repository", ["git", "pull"],
-         work_dir=SYNC_SETTINGS["repository_dir"]),
-    Step("build_catkeys", "Build Catkeys", ["jam", "-q", "catkeys"], work_dir=SYNC_SETTINGS["repository_dir"]),
-    Step("import_templates", "Import templates from build",
-            ["python", "/app/import_templates_from_repository.py", SYNC_SETTINGS["templates_dir"],
+    Step("import_templates", "Import templates from remote",
+            ["python", "/app/import_templates_from_remote.py", SYNC_SETTINGS["templates_url"],
              SYNC_SETTINGS["pootle_catalogs_dir"]]),
     Step("update_stores", "Import updated translations in the database", ["pootle", "update_stores"]),
     Step("finish_output", "Post-process translations to be imported into the repository",

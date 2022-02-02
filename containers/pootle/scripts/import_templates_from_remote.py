@@ -1,11 +1,15 @@
-import os.path
-import subprocess
-
 import argparse
+import hashlib
+import os.path
+import StringIO
+import subprocess
+import urllib2
+import sys
+import zipfile
 
 parser = argparse.ArgumentParser(description='Import the newest catalogs from Haiku files and copy to Pootle')
-parser.add_argument('haiku_template_dir', metavar='template_dir', type=str,
-                    help='the location of the templates')
+parser.add_argument('remote_template_url', metavar='template_url', type=str,
+                    help='the location of the zip archive containing the templates')
 parser.add_argument('pootle_catalogs_dir', metavar='output_dir', type=str,
                     help='the location of Pootle\'s catalogs dir for Haiku')
 parser.add_argument('--pot2po', metavar='path_to_pot2po', type=str, default='pot2po',
@@ -46,27 +50,63 @@ def compare_template_to_disk(path, input_data):
     return current_fingerprint == new_fingerprint
 
 
+# Utility to download a file at URL or terminate execution if it fails
+def download_from_url_or_terminate(url):
+    try:
+        download = urllib2.urlopen(url)
+    except urllib2.URLError as e:
+        print("Error downloading the archive at %s: %s" % (url, e.message()))
+        sys.exit(-1)
+
+    if download.getcode() != 200:
+        print("Error downloading the archive at %s: HTTP Error %i" % (url, download.getcode()))
+        sys.exit(-1)
+    return download
+
+
 ####
 # Procedure
 ####
 
 if __name__ == "__main__":
+    # Download the catalog template archive and the SHA256 check
+    templates_data = StringIO.StringIO()
+    templates_data.write(download_from_url_or_terminate(args.remote_template_url).read())
+    templates_data.seek(0)
+    templates_sha256 = download_from_url_or_terminate(args.remote_template_url + ".sha256")
+
+    # Check the SHA256 checksum
+    sha256_remote = templates_sha256.read()
+    sha256_remote = sha256_remote.split()[-1] # keep the rightmost 64 character hash
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(templates_data.getvalue())
+    if sha256_hash.hexdigest() != sha256_remote:
+        print("Invalid template archive: actual SHA256 %s does not match expected %s"
+              % (sha256_hash.hexdigest(), sha256_remote))
+        sys.exit(-1)
+
+    # Open the templates archive as zipfile
+    templates_zip = zipfile.ZipFile(templates_data, 'r')
+
     # Compare list of templates with data on disk by comparing fingerprints. If the fingerprint changed, write the
     # updated file to disk
     updated_list = []
-    for root, dirs, files in os.walk(args.haiku_template_dir):
-        if "en.catkeys" in files:
-            data = open(os.path.join(root, "en.catkeys"))
-            relative_template_path = os.path.join(os.path.relpath(root, args.haiku_template_dir), "en.catkeys")
-            if not compare_template_to_disk(relative_template_path, data):
-                strip_and_save(relative_template_path, data)
-                updated_list.append(relative_template_path)
-                print("Updated template %s" % relative_template_path)
+    for name in templates_zip.namelist():
+        if "en.catkeys" in name:
+            template = StringIO.StringIO()
+            template.write(templates_zip.open(name, 'r').read())
+            template.seek(0) # rewind
+            # remove the 'catalogs/' prefix from the path in the archive
+            template_path = os.path.join(args.pootle_catalogs_dir, name[9:])
+            if not compare_template_to_disk(template_path, template):
+                strip_and_save(template_path, template)
+                updated_list.append(template_path)
+                print("Updated template %s" % template_path)
 
     # Now instruct merging with the translated files
     commands = []
     for template in updated_list:
-        base_path = os.path.join(args.pootle_catalogs_dir, os.path.dirname(template))
+        base_path = os.path.dirname(template)
         entries = os.listdir(base_path)
         for entry in entries:
             if not "catkeys" in entry or entry == "en.catkeys":
@@ -76,4 +116,3 @@ if __name__ == "__main__":
             subprocess.check_call([args.pot2po, "-i", os.path.join(base_path, "en.catkeys"),
                                    "-t", os.path.join(base_path, entry),
                                    "-o", os.path.join(base_path, entry)])
-
