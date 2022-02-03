@@ -148,7 +148,7 @@ jobs:
                 cd generated.((arch))
                 jam -q catkeys
                 cd objects
-                find catalogs/ -name 'en.catkeys' -exec cp --parents -r {} ../../catkeys.x86_64/ \;
+                find catalogs/ -name 'en.catkeys' -exec cp --parents -r {} ../../catkeys.((arch))/ \;
                 cd ../../catkeys.((arch))
                 ARTIFACT="haiku-((branch))-((arch))-catkeys.zip"
                 zip -9 -r ${ARTIFACT} catalogs/
