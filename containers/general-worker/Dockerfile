@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM docker.io/fedora:34
 
 USER root
 
@@ -13,6 +13,7 @@ RUN dnf install -y \
   cmake \
   curl \
   curl-devel \
+  cpio \
   diffutils \
   flex \
   gcc \
@@ -34,6 +35,7 @@ RUN dnf install -y \
   ninja-build \
   python3 \
   python3-devel \
+  sbsigntools \
   swig \
   texinfo \
   vim \
@@ -52,8 +54,6 @@ RUN dnf install -y \
 ADD https://dl.min.io/client/mc/release/linux-amd64/mc /usr/local/bin/mc
 RUN chmod 755 /usr/local/bin/mc
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
 RUN git clone --depth 1 https://github.com/viveris/llvm-project.git &&\
     cd llvm-project &&\
     mkdir build &&\
@@ -63,4 +63,9 @@ RUN git clone --depth 1 https://github.com/viveris/llvm-project.git &&\
     cp ./bin/clang-format /usr/bin &&\
     cp ../clang/tools/clang-format/git-clang-format /usr/bin &&\
     cd ../../ &&\
-    rm -rf llvm-project/
+    rm -rf llvm-project/ &&\
+    cd /tmp &&\
+    wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2020.09.tar.gz -O /tmp/v2020.09.tar.gz &&\
+    tar xvf /tmp/v2020.09.tar.gz git-tools-2020.09/git-restore-mtime &&\
+    mv git-tools-2020.09/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime &&\
+    rm -rf /tmp/*
