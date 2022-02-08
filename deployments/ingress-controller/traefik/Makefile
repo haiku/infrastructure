@@ -7,6 +7,9 @@ deploy:
 	kubectl apply -f traefik-rbac.yaml
 	kubectl apply -f traefik-daemonset.yaml
 
+deploy-traefik:
+	kubectl apply -f traefik-daemonset.yaml
+
 delete:
 	kubectl delete -f traefik-daemonset.yaml
 	kubectl delete -f traefik-rbac.yaml

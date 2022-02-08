@@ -34,16 +34,22 @@ spec:
           containerPort: 80
         - name: https
           containerPort: 443
-        - name: admin
-          containerPort: 8080
+        - name: gitssh
+          containerPort: 2200
+        - name: rsync
+          containerPort: 12000
+        - name: sftp
+          containerPort: 1099
         args:
         - --providers.kubernetesingress=true
         - --providers.kubernetesingress.ingressclass=default
         - --entrypoints.web.address=:80
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
+        - --entrypoints.gitssh.address=:2200
+        - --entrypoints.rsync.address=:12000
+        - --entrypoints.sftp.address=:1099
         - --api
-#       - --api.insecure=true
 ---
 apiVersion: v1
 kind: Service
@@ -63,8 +69,14 @@ spec:
       port: 443
       name: https
     - protocol: TCP
-      port: 8080
-      name: admin
+      port: 22
+      name: gitssh
+    - protocol: TCP
+      port: 12000
+      name: rsync
+    - protocol: TCP
+      port: 1099
+      name: sftp
 ---
 apiVersion: networking.k8s.io/v1
 kind: IngressClass
