@@ -1,0 +1,76 @@
+### Haiku SMTP services
+#
+## Outbound mail from services
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp-relay
+  labels:
+    app: smtp-relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp-relay
+  template:
+    metadata:
+      labels:
+        app: smtp-relay
+    spec:
+      containers:
+      - name: smtp
+        image: docker.io/mwader/postfix-relay:latest
+        env:
+        - name: POSTFIX_myhostname
+          value: ingress.ams3.haiku-os.org
+        - name: OPENDKIM_DOMAINS
+          value: ingress.ams3.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp-relay
+spec:
+  selector:
+    app: smtp-relay
+  ports:
+  - name: smtp
+    port: 25
+    targetPort: 25
+
+## Inbound mail from users
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp-forwarder
+  labels:
+    app: smtp-forwarder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp-forwarder
+  template:
+    metadata:
+      labels:
+        app: smtp-forwarder
+    spec:
+      containers:
+      - name: smtp
+        image: docker.io/zixia/simple-mail-forwarder:latest
+        env:
+        - name: SMF_CONFIG
+          value: contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com;haikustore@haiku-os.org:haiku.inc@gmail.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp-forwarder
+spec:
+  selector:
+    app: smtp-forwarder
+  ports:
+  - name: smtp
+    port: 25
+    targetPort: 25
