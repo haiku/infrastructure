@@ -30,6 +30,8 @@ spec:
       - image: docker.io/traefik:v2.6
         name: traefik-ingress-lb
         ports:
+        - name: smtp
+          containerPort: 25
         - name: http
           containerPort: 80
         - name: https
@@ -49,6 +51,7 @@ spec:
         - --entrypoints.gitssh.address=:2200
         - --entrypoints.rsync.address=:12000
         - --entrypoints.sftp.address=:1099
+        - --entrypoints.smtp.address=:25
         - --api
 ---
 apiVersion: v1
@@ -62,6 +65,9 @@ spec:
   selector:
     k8s-app: traefik-ingress-lb
   ports:
+    - protocol: TCP
+      port: 25
+      name: smtp
     - protocol: TCP
       port: 80
       name: http
