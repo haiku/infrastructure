@@ -1,0 +1,101 @@
+#
+# Haiku's forums
+#
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: discourse
+spec:
+  containers:
+  - name: discourse
+    image: docker.io/haiku/discourse
+    env:
+    - name: LANG
+      value: "en_US.UTF-8"
+    - name: RAILS_ENV
+      value: "production"
+    - name: UNICORN_WORKERS
+      value: "6"
+    - name: UNICORN_SIDEKIQS
+      value: "1"
+    - name: DOCKER_USE_HOSTNAME
+      value: "true"
+    - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
+      value: "131072"
+    - name: DISCOURSE_DEVELOPER_EMAILS
+      value: "contact@haiku-os.org"
+    - name: DISCOURSE_HOSTNAME
+      value: "discuss.haiku-os.org"
+    - name: DISCOURSE_SMTP_PORT
+      value: "25"
+    - name: DISCOURSE_SMTP_ADDRESS
+      value: "smtp"
+    - name: DISCOURSE_SMTP_ENABLE_START_TLS
+      value: "false"
+    - name: DISCOURSE_SMTP_AUTHENTICATION
+      value: "none"
+    - name: DISCOURSE_REDIS_HOST
+      value: "redis"
+    - name: DISCOURSE_DB_HOST
+      value: "postgres"
+    - name: DISCOURSE_DB_PORT
+      value: 5432
+    - name: DISCOURSE_DB_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: discourse-pgdb
+          value: username
+    - name: DISCOURSE_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: discourse-pgdb
+          value: password
+    volumeMounts:
+    - name: discourse-data
+      mountPath: /shared
+  volumes:
+  - name: discourse-data
+    persistentVolumeClaim:
+      claimName: redis-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: discourse-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: do-block-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discourse
+spec:
+  selector:
+    k8s-app: discourse-ingress-lb
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: discourse
+spec:
+  rules:
+  - host: "discuss.haiku-os.org"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: discourse
+            port:
+              name: www
