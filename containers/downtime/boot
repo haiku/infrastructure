@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "Launching downtime handler..."
+
+if [ -z "$NOTICE_TEXT" ]; then
+	echo "Warning: No NOTICE_TEXT was defined! Setting default..."
+	export NOTICE_TEXT="Undergoing maintenance, we'll be back soon!"
+fi
+
+sed -i "s/%%NOTICE%%/$NOTICE_TEXT/g" /var/www/downtime/index.html
+
+echo "Launching nginx..."
+
+exec nginx
+echo "Nginx exited ($?)"

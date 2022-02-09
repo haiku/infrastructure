@@ -26,7 +26,7 @@ spec:
   selector:
     app: helloworld
   ports:
-  - name: web
+  - name: www
     port: 80
     targetPort: 80
 ---
@@ -50,5 +50,6 @@ spec:
         backend:
           service:
             name: helloworld-service
+#           name: downtime
             port:
-              name: web
+              name: www

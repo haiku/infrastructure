@@ -1,0 +1,69 @@
+### Haiku Downtime handler
+#
+# A small apologetic webserver
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: downtime
+  labels:
+    app: downtime
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: downtime
+  template:
+    metadata:
+      labels:
+        app: downtime
+    spec:
+      containers:
+      - name: downtime
+        image: docker.io/haiku/downtime:latest
+        env:
+        - name: NOTICE_TEXT
+          value: "This service is undergoing maintenance, we'll be back soon!"
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 1
+        livenessProbe:
+          httpGet:
+            port: 80
+            path: /
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: downtime-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: downtime
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: downtime
+spec:
+  selector:
+    app: downtime
+  ports:
+  - name: www
+    port: 80
+    targetPort: 80
