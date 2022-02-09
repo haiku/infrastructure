@@ -5,9 +5,11 @@ deploy:
 	sleep 90 # Gotta give cert-manager time to deploy for the webhooks to fire
 	kubectl apply -f cert-manager-acme.yaml
 	kubectl apply -f traefik-rbac.yaml
+	kubectl apply -f traefik-crd.yaml
 	kubectl apply -f traefik-daemonset.yaml
 
 deploy-traefik:
+	kubectl apply -f traefik-crd.yaml
 	kubectl apply -f traefik-daemonset.yaml
 
 delete:

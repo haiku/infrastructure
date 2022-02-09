@@ -72,5 +72,22 @@ spec:
     app: smtp-forwarder
   ports:
   - name: smtp
+    protocol: TCP
     port: 25
-    targetPort: 25
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: smtp-ingresstcp
+spec:
+  entryPoints:
+    - smtp
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: smtp-forwarder
+      port: 25
+      weight: 10
+      terminationDelay: 400
+      proxyProtocol:
+        version: 1

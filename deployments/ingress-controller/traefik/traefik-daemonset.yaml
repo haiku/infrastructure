@@ -43,6 +43,7 @@ spec:
         - name: sftp
           containerPort: 1099
         args:
+        - --providers.kubernetescrd=true
         - --providers.kubernetesingress=true
         - --providers.kubernetesingress.ingressclass=default
         - --entrypoints.web.address=:80
