@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This gets data from limerick and updates k8s with it.
+# Ideally we'll run this continiously to keep infrastructure
+# in sync.
+#
+# When we switch over the entry needs disabled.
+#
+
+# redis.yml
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_redis_data/_data/. redis-data-pvc
+
+# mail.yml
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_smtp_keys/_data/. smtp-keys-pvc
