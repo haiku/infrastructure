@@ -25,6 +25,25 @@ spec:
           value: ingress.ams3.haiku-os.org
         - name: OPENDKIM_DOMAINS
           value: ingress.ams3.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+        volumeMounts:
+        - name: smtp-keys
+          mountPath: /etc/opendkim/keys
+      volumes:
+      - name: smtp-keys
+        persistentVolumeClaim:
+          claimName: smtp-keys-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smtp-keys-pvc
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 256Mi
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
