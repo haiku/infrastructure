@@ -12,3 +12,7 @@
 
 # mail.yml
 ./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_smtp_keys/_data/. smtp-keys-pvc
+
+# development.yml
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_gerrit_data/_data/. gerrit-data-pvc
+

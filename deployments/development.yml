@@ -63,49 +63,49 @@ spec:
       - name: gerrit-data
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: gerrit-backup-daily
-spec:
-  schedule: "0 1 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: persistsync
-              image: haiku/persistsync
-              args:
-              - backup
-              - gerrit-data
-              env:
-              - name: S3_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_key
-              - name: S3_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_secret
-              - name: S3_BUCKET
-                value: persistent-snapshots
-              - name: TWOSECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: twosecret
-              volumeMounts:
-              - name: gerrit-data
-                mountPath: /pvs/gerrit-data
-          volumes:
-          - name: gerrit-data
-            persistentVolumeClaim:
-              claimName: gerrit-data-pvc
-          restartPolicy: Never
+#---
+#apiVersion: batch/v1
+#kind: CronJob
+#metadata:
+#  name: gerrit-backup-daily
+#spec:
+#  schedule: "0 1 * * *"
+#  jobTemplate:
+#    spec:
+#      template:
+#        spec:
+#          containers:
+#            - name: persistsync
+#              image: haiku/persistsync
+#              args:
+#              - backup
+#              - gerrit-data
+#              env:
+#              - name: S3_KEY
+#                valueFrom:
+#                  secretKeyRef:
+#                    name: s3-backup
+#                    key: s3_key
+#              - name: S3_SECRET
+#                valueFrom:
+#                  secretKeyRef:
+#                    name: s3-backup
+#                    key: s3_secret
+#              - name: S3_BUCKET
+#                value: persistent-snapshots
+#              - name: TWOSECRET
+#                valueFrom:
+#                  secretKeyRef:
+#                    name: s3-backup
+#                    key: twosecret
+#              volumeMounts:
+#              - name: gerrit-data
+#                mountPath: /pvs/gerrit-data
+#          volumes:
+#          - name: gerrit-data
+#            persistentVolumeClaim:
+#              claimName: gerrit-data-pvc
+#          restartPolicy: Never
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -113,12 +113,11 @@ metadata:
   name: gerrit-data-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   resources:
     requests:
       storage: 10Gi
-  #storageClassName: do-block-storage
-  storageClassName: vultr-block-storage-retain
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
@@ -149,12 +148,11 @@ kind: Service
 metadata:
   name: gitssh
 spec:
-  type: LoadBalancer
   selector:
     app: git
   ports:
   - name: git
-    port: 22
+    port: 29418
     targetPort: 29418
 ---
 apiVersion: networking.k8s.io/v1
@@ -163,7 +161,7 @@ metadata:
   name: git
 spec:
   rules:
-  - host: cgit.haiku-os.org
+  - host: git.haiku-os.org
     http:
       paths:
       - path: /
@@ -183,3 +181,20 @@ spec:
             name: review
             port:
               name: web
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: git-ingresstcp
+spec:
+  entryPoints:
+    - gitssh
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: gitssh
+      port: 22
+      weight: 10
+      terminationDelay: 400
+      proxyProtocol:
+        version: 1
