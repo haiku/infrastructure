@@ -26,11 +26,11 @@ spec:
           value: "This service is undergoing maintenance, we'll be back soon!"
         resources:
           limits:
-            cpu: "1.0"
-            memory: "1Gi"
-          requests:
-            cpu: "0.25"
+            cpu: "0.50"
             memory: "256Mi"
+          requests:
+            cpu: "0.15"
+            memory: "128Mi"
         startupProbe:
           httpGet:
             path: /

@@ -25,6 +25,13 @@ spec:
           value: ingress.ams3.haiku-os.org
         - name: OPENDKIM_DOMAINS
           value: ingress.ams3.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "64Mi"
+          requests:
+            cpu: "0.15"
+            memory: "32Mi"
         volumeMounts:
         - name: smtp-keys
           mountPath: /etc/opendkim/keys
@@ -78,6 +85,13 @@ spec:
       containers:
       - name: smtp
         image: docker.io/zixia/simple-mail-forwarder:latest
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "256Mi"
+          requests:
+            cpu: "0.15"
+            memory: "128Mi"
         env:
         - name: SMF_CONFIG
           value: contact@haiku-inc.org:haiku.inc@gmail.com;donations@haiku-os.org:haiku.inc@gmail.com;contact@haiku-os.org:waddlesplash@gmail.com|kallisti5@unixzen.com;haikustore@haiku-os.org:haiku.inc@gmail.com
