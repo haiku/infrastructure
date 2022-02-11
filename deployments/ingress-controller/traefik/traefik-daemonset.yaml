@@ -29,6 +29,31 @@ spec:
       containers:
       - image: docker.io/traefik:v2.6
         name: traefik-ingress-lb
+        resources:
+          limits:
+            cpu: "2.0"
+            memory: "768Mi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 80
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 80
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
         ports:
         - name: smtp
           containerPort: 25
@@ -53,6 +78,7 @@ spec:
         - --entrypoints.rsync.address=:12000
         - --entrypoints.sftp.address=:1099
         - --entrypoints.smtp.address=:25
+        - --ping.entryPoint=web
         - --api
 ---
 apiVersion: v1
