@@ -20,7 +20,7 @@ VOLUME=$2
 
 echo "Beginning rsync of $SOURCE..."
 mkdir -p /tmp/$VOLUME
-rsync -avz -e "ssh -p 2222" $1 /tmp/$VOLUME
+rsync --exclude 'tmp' -avz --delete -e "ssh -p 2222" $1 /tmp/$VOLUME
 
 echo "Rsync complete"
 
@@ -62,7 +62,7 @@ echo "Installing rsync..."
 kubectl exec pod/pvc-$VOLUME -- apk add rsync
 
 echo "Beginning rsync to pod..."
-rsync -za0v --blocking-io --rsync-path="/pvcs/${VOLUME}" --rsh="kubectl exec pvc-${VOLUME} -i -- " /tmp/$VOLUME/. rsync:/pvcs/${VOLUME}
+rsync -za0v --delete --blocking-io --rsync-path="/pvcs/${VOLUME}" --rsh="kubectl exec pvc-${VOLUME} -i -- " /tmp/$VOLUME/. rsync:/pvcs/${VOLUME}
 
 echo "Cleaning up migration pod..."
 kubectl delete pod/pvc-$VOLUME
