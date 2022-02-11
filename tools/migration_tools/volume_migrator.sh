@@ -56,7 +56,7 @@ kubectl run --restart=Never --image=${IMAGE} pvc-$VOLUME --overrides "
 " -- ${COMMAND}
 
 echo "Waiting on migration pod..."
-kubectl wait --for=condition=Ready pod/pvc-$VOLUME
+kubectl wait --timeout=60s --for=condition=Ready pod/pvc-$VOLUME
 
 echo "Installing rsync..."
 kubectl exec pod/pvc-$VOLUME -- apk add rsync
