@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: git-deployment
+  name: git
   labels:
     app: git
 spec:
@@ -35,16 +35,18 @@ spec:
             value: "Gerrit <review@review.haiku-os.org>"
           - name: SMTP_CONNECT_TIMEOUT
             value: "30"
-        readinessProbe:
+        startupProbe:
           tcpSocket:
             port: 29418
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60
         livenessProbe:
           tcpSocket:
             port: 29418
-          initialDelaySeconds: 30
+          initialDelaySeconds: 10
           periodSeconds: 5
+          failureThreshold: 5
       - name: cgit
         image: haiku/cgit
         env:
@@ -63,49 +65,16 @@ spec:
       - name: gerrit-data
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
-#---
-#apiVersion: batch/v1
-#kind: CronJob
-#metadata:
-#  name: gerrit-backup-daily
-#spec:
-#  schedule: "0 1 * * *"
-#  jobTemplate:
-#    spec:
-#      template:
-#        spec:
-#          containers:
-#            - name: persistsync
-#              image: haiku/persistsync
-#              args:
-#              - backup
-#              - gerrit-data
-#              env:
-#              - name: S3_KEY
-#                valueFrom:
-#                  secretKeyRef:
-#                    name: s3-backup
-#                    key: s3_key
-#              - name: S3_SECRET
-#                valueFrom:
-#                  secretKeyRef:
-#                    name: s3-backup
-#                    key: s3_secret
-#              - name: S3_BUCKET
-#                value: persistent-snapshots
-#              - name: TWOSECRET
-#                valueFrom:
-#                  secretKeyRef:
-#                    name: s3-backup
-#                    key: twosecret
-#              volumeMounts:
-#              - name: gerrit-data
-#                mountPath: /pvs/gerrit-data
-#          volumes:
-#          - name: gerrit-data
-#            persistentVolumeClaim:
-#              claimName: gerrit-data-pvc
-#          restartPolicy: Never
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: git-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: git
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -146,7 +115,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gitssh
+  name: git-ssh
 spec:
   selector:
     app: git
@@ -155,13 +124,24 @@ spec:
     port: 29418
     targetPort: 29418
 ---
+# web frontends for cgit and gerrit
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: git
+  name: git-web
 spec:
   rules:
   - host: git.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cgit
+            port:
+              name: web
+  - host: cgit.haiku-os.org
     http:
       paths:
       - path: /
@@ -182,6 +162,8 @@ spec:
             port:
               name: web
 ---
+# port 2200 is routed to 22 in the ingress.  Trying to avoid
+# ssh collisions on kubernetes nodes
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
@@ -192,8 +174,8 @@ spec:
   routes:
   - match: HostSNI(`*`)
     services:
-    - name: gitssh
-      port: 22
+    - name: git-ssh
+      port: 2200
       weight: 10
       terminationDelay: 400
       proxyProtocol:
