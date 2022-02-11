@@ -20,7 +20,7 @@ VOLUME=$2
 
 echo "Beginning rsync of $SOURCE..."
 mkdir -p /tmp/$VOLUME
-rsync --exclude 'tmp' -avz --delete -e "ssh -p 2222" $1 /tmp/$VOLUME
+rsync --exclude 'tmp' --exclude 'backups' --exclude 'backup' -avz --delete -e "ssh -p 2222" $1 /tmp/$VOLUME
 
 echo "Rsync complete"
 
