@@ -2,62 +2,80 @@
 # Haiku's forums
 #
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: discourse
+  labels:
+    app: discourse
 spec:
-  containers:
-  - name: discourse
-    image: docker.io/haiku/discourse
-    env:
-    - name: LANG
-      value: "en_US.UTF-8"
-    - name: RAILS_ENV
-      value: "production"
-    - name: UNICORN_WORKERS
-      value: "6"
-    - name: UNICORN_SIDEKIQS
-      value: "1"
-    - name: DOCKER_USE_HOSTNAME
-      value: "true"
-    - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
-      value: "131072"
-    - name: DISCOURSE_DEVELOPER_EMAILS
-      value: "contact@haiku-os.org"
-    - name: DISCOURSE_HOSTNAME
-      value: "discuss.haiku-os.org"
-    - name: DISCOURSE_SMTP_PORT
-      value: "25"
-    - name: DISCOURSE_SMTP_ADDRESS
-      value: "smtp"
-    - name: DISCOURSE_SMTP_ENABLE_START_TLS
-      value: "false"
-    - name: DISCOURSE_SMTP_AUTHENTICATION
-      value: "none"
-    - name: DISCOURSE_REDIS_HOST
-      value: "redis"
-    - name: DISCOURSE_DB_HOST
-      value: "postgres"
-    - name: DISCOURSE_DB_PORT
-      value: 5432
-    - name: DISCOURSE_DB_USERNAME
-      valueFrom:
-        secretKeyRef:
-          name: discourse-pgdb
-          value: username
-    - name: DISCOURSE_DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: discourse-pgdb
-          value: password
-    volumeMounts:
-    - name: discourse-data
-      mountPath: /shared
-  volumes:
-  - name: discourse-data
-    persistentVolumeClaim:
-      claimName: redis-data-pvc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discourse
+  template:
+    metadata:
+      labels:
+        app: discourse
+    spec:
+      containers:
+      - name: discourse
+        image: docker.io/haiku/discourse:latest
+        resources:
+          limits:
+            cpu: "2.0"
+            memory: 4Gi
+          requests:
+            cpu: "1.0"
+            memory: 2Gi
+        env:
+        - name: LANG
+          value: "en_US.UTF-8"
+        - name: RAILS_ENV
+          value: "production"
+        - name: UNICORN_WORKERS
+          value: "6"
+        - name: UNICORN_SIDEKIQS
+          value: "1"
+        - name: DOCKER_USE_HOSTNAME
+          value: "true"
+        - name: RUBY_GLOBAL_METHOD_CACHE_SIZE
+          value: "131072"
+        - name: DISCOURSE_DEVELOPER_EMAILS
+          value: "contact@haiku-os.org"
+        - name: DISCOURSE_HOSTNAME
+          value: "discuss.haiku-os.org"
+        - name: DISCOURSE_SMTP_PORT
+          value: "25"
+        - name: DISCOURSE_SMTP_ADDRESS
+          value: "smtp"
+        - name: DISCOURSE_SMTP_ENABLE_START_TLS
+          value: "false"
+        - name: DISCOURSE_SMTP_AUTHENTICATION
+          value: "none"
+        - name: DISCOURSE_REDIS_HOST
+          value: "redis"
+        - name: DISCOURSE_DB_HOST
+          value: "postgres"
+        - name: DISCOURSE_DB_PORT
+          value: "5432"
+        - name: DISCOURSE_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: discourse-pgdb
+              key: username
+        - name: DISCOURSE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: discourse-pgdb
+              key: password
+        volumeMounts:
+        - name: discourse-data
+          mountPath: /shared
+      volumes:
+      - name: discourse-data
+        persistentVolumeClaim:
+          claimName: discourse-data-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -65,11 +83,11 @@ metadata:
   name: discourse-data-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   resources:
     requests:
-      storage: 20Gi
-  storageClassName: do-block-storage
+      storage: 16Gi
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service

@@ -16,3 +16,5 @@
 # development.yml
 ./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_gerrit_data/_data/. gerrit-data-pvc
 
+# discourse.yml
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/community_discourse_shared/_data/. discourse-data-pvc
