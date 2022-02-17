@@ -42,7 +42,7 @@ elif [ $BRANCH == "r1beta3" ]; then
 	ARCHES="x86_64 x86_gcc2h"
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 else
-	BUCKET_IMAGE="haiku-nightly"
+	BUCKET_IMAGE="haiku-nightly-us"
 	BUCKET_REPO="haiku-repositories-us"
 	BRANCH_PROFILE="nightly"
 	#ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
