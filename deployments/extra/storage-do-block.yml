@@ -2,13 +2,9 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: do-block-storage-retain
-  labels:
-    c3.doks.digitalocean.com/component: csi-controller-service
-    c3.doks.digitalocean.com/plane: data
-    doks.digitalocean.com/managed: 'true'
   annotations:
     storageclass.kubernetes.io/is-default-class: 'false'
 provisioner: dobs.csi.digitalocean.com
 reclaimPolicy: Retain
 allowVolumeExpansion: true
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
