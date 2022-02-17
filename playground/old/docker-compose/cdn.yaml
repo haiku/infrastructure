@@ -53,7 +53,7 @@ services:
       - "traefik.basic.frontend.redirect.replacement=cdn.${DOMAIN}/$$1/$$2"
       - "traefik.basic.port=80"
   hpkgbouncer:
-    image: haiku/hpkgbouncer:0.2.0
+    image: haiku/hpkgbouncer:0.3.0
     deploy:
       replicas: 2
       resources:
