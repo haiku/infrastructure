@@ -1,0 +1,165 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teleport
+  labels:
+    app: teleport
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teleport
+  template:
+    metadata:
+      labels:
+        app: teleport
+    spec:
+      containers:
+      - name: teleport
+        image: mmlr/teleport
+        command: ["./teleport"]
+        args: ["server", "5825", "/run/secrets/auth.db"]
+        volumeMounts:
+        - name: teleport-db
+          readOnly: true
+          mountPath: /run/secrets
+      volumes:
+        - name: teleport-db
+          secret:
+            secretName: teleport-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-teleport
+spec:
+  selector:
+    app: teleport
+  ports:
+  - name: teleport 
+    port: 5825
+    targetPort: 5825
+  - name: mmlr-x86-64
+    port: 5001
+    targetPort: 5001
+  - name: mmlr-x86-gcc2
+    port: 5000
+    targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haikuporter
+  labels:
+    app: haikuporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haikuporter
+  template:
+    metadata:
+      labels:
+        app: haikuporter
+    spec:
+      containers:
+      - name: buildmaster-frontend
+        image: docker.io/haikuporter/buildmaster-frontend:1.2.6-1
+        volumeMounts:
+        - name: buildmaster-data-x86-gcc2
+          mountPath: /var/instances/master/x86_gcc2
+        - name: buildmaster-data-x86-64
+          mountPath: /var/instances/master/x86_64
+        - name: buildmaster-packages
+          mountPath: /var/instances/haikuports
+      - name: buildmaster-x86-64
+        image: docker.io/haikuporter/buildmaster:1.2.6-2
+        command: ["loop"]
+        volumeMounts:
+        - name: buildmaster-packages
+          mountPath: /var/packages
+        - name: buildmaster-sources
+          mountPath: /var/sources
+        - name: buildmaster-data-x86-64
+          mountPath: /var/buildmaster
+        env:
+          - name: BUILD_TARGET_ARCH
+            value: "x86_64"
+          - name: REPOSITORY_TRIGGER_URL
+            value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
+      - name: buildmaster-x86-gcc2
+        image: docker.io/haikuporter/buildmaster:1.2.6-2
+        command: ["loop"]
+        volumeMounts:
+        - name: buildmaster-sources
+          mountPath: /var/sources
+        - name: buildmaster-packages
+          mountPath: /var/packages
+        - name: buildmaster-data-x86-gcc2
+          mountPath: /var/buildmaster
+        env:
+          - name: BUILD_TARGET_ARCH
+            value: "x86_gcc2"
+          - name: REPOSITORY_TRIGGER_URL
+            value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
+      volumes:
+        - name: buildmaster-data-x86-64
+          persistentVolumeClaim:
+            claimName: buildmaster-data-x86-64-pvc
+        - name: buildmaster-data-x86-gcc2
+          persistentVolumeClaim:
+            claimName: buildmaster-data-x86-gcc2-pvc
+        - name: buildmaster-packages
+          persistentVolumeClaim:
+            claimName: buildmaster-packages-pvc
+        - name: buildmaster-sources
+          persistentVolumeClaim:
+            claimName: buildmaster-sources-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildmaster-data-x86-64-pvc
+spec:
+  storageClassName: do-block-storage-retain
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildmaster-data-x86-gcc2-pvc
+spec:
+  storageClassName: do-block-storage-retain
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildmaster-packages-pvc
+spec:
+  storageClassName: do-block-storage-retain
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildmaster-sources-pvc
+spec:
+  storageClassName: do-block-storage-retain
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
