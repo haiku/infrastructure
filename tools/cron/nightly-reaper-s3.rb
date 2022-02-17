@@ -8,7 +8,7 @@ require 'pathname'
 
 # Thresholds
 # Young - Keep all builds
-@YOUNG_THRESH = 200
+@YOUNG_THRESH = 50
 # Then, only keep odd hrev numbers
 
 if ARGV.count != 2
@@ -99,7 +99,12 @@ to_remove.each do |item|
 			puts "Removing #{item[:name]}.sig..."
 			sigfile.destroy
 		end
-	rescue
-		puts "ERROR REMOVING #{filename[:name]}!"
+		minisigfile = bucket.object("#{item[:name]}.minisig")
+		if minisigfile
+			puts "Removing #{item[:name]}.minisig..."
+			minisigfile.destroy
+		end
+	rescue => e
+		puts "ERROR REMOVING #{item[:name]}: #{e.message}"
 	end
 end
