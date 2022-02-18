@@ -1,0 +1,106 @@
+### Haiku CDN
+#
+# Presentes storj via s3
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cdn
+  labels:
+    app: cdn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cdn
+  template:
+    metadata:
+      labels:
+        app: cdn
+    spec:
+      containers:
+      - name: cdn
+        image: docker.io/storjlabs/gateway
+        args: [ "run", "--website", "--access", "haiku-us1" ]
+        env:
+        - name: MINIO_CACHE
+          value: "on"
+        - name: MINIO_CACHE_DRIVES
+          value: "/cache"
+        - name: MINIO_CACHE_QUOTA
+          value: "80"
+        - name: MINIO_CACHE_AFTER
+          value: "3"
+        - name: MINIO_CACHE_WATERMARK_LOW
+          value: "70"
+        - name: MINIO_CACHE_WATERMARK_HIGH
+          value: "95"
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              name: cdn-admin-user
+              key: username
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cdn-admin-user
+              key: password
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "4Gi"
+          requests:
+            cpu: "0.25"
+            memory: "512Mi"
+        volumeMounts:
+        - name: storj-cache
+          mountPath: /cache
+        - name: storj-secrets
+          mountPath: /root/.local/share/storj/gateway
+      volumes:
+      - name: storj-cache
+        persistentVolumeClaim:
+          claimName: storj-cache-pvc
+      - name: storj-secrets
+        secret:
+          secretName: storj-access
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: storj-cache-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cdn
+spec:
+  selector:
+    app: cdn
+  ports:
+  - name: s3
+    port: 7777
+    targetPort: 7777
+---
+# web frontends for cgit and gerrit
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cdn-ingress
+spec:
+  rules:
+  - host: cdn.ams3.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cdn
+            port:
+              name: s3
