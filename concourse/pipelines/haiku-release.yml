@@ -77,18 +77,17 @@ jobs:
                 echo "#define DEFAULT_GEOCODING_SERVICE_KEY \"$DEFAULT_GEOCODING_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
                 # EFI Signing Key
                 # TODO: risc-v is efi, but sbsign needs code added to support signing
-                # TODO: waiting on https://review.haiku-os.org/c/haiku/+/4936
-                #case "((arch))" in
-                #    "x86_64")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #    "arm")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #    "arm64")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #esac
+                case "((arch))" in
+                    "x86_64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                esac
                 if [[ -f efi.key ]]; then
                     ../haiku-git/configure --efi-signing-key efi.key --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 else
@@ -232,18 +231,17 @@ jobs:
                 echo "#define DEFAULT_GEOCODING_SERVICE_KEY \"$DEFAULT_GEOCODING_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
                 # EFI Signing Key
                 # TODO: risc-v is efi, but sbsign needs code added to support signing
-                # TODO: waiting on https://review.haiku-os.org/c/haiku/+/4936
-                #case "((arch))" in
-                #    "x86_64")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #    "arm")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #    "arm64")
-                #        echo "((efi-db-key))" | base64 -d > efi.key
-                #        ;;
-                #esac
+                case "((arch))" in
+                    "x86_64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                esac
                 if [[ -f efi.key ]]; then
                     ../haiku-git/configure --efi-signing-key efi.key --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 else
