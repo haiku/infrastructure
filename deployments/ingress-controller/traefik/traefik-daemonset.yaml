@@ -61,8 +61,6 @@ spec:
           containerPort: 80
         - name: https
           containerPort: 443
-        - name: gitssh
-          containerPort: 2200
         - name: rsync
           containerPort: 12000
         - name: sftp
@@ -74,7 +72,6 @@ spec:
         - --entrypoints.web.address=:80
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
-        - --entrypoints.gitssh.address=:2200
         - --entrypoints.rsync.address=:12000
         - --entrypoints.sftp.address=:1099
         - --entrypoints.smtp.address=:25
@@ -101,9 +98,6 @@ spec:
     - protocol: TCP
       port: 443
       name: https
-    - protocol: TCP
-      port: 22
-      name: gitssh
     - protocol: TCP
       port: 12000
       name: rsync
