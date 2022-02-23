@@ -22,13 +22,17 @@ ACTION="$1"
 VOLUME="$2"
 
 S3_NAME="s3remote"
-S3_HOST="http://s3.wasabisys.com"
 
-#S3_BUCKET="persistent-snapshots"
+#S3_HOST="http://s3.wasabisys.com"
+#S3_BUCKET=""
 #S3_KEY=""
 #S3_SECRET=""
 #TWOSECRET=""
 
+if [ -z "$S3_HOST" ]; then
+	echo "Please set S3_HOST!"
+	exit 1
+fi
 if [ -z "$S3_BUCKET" ]; then
 	echo "Please set S3_BUCKET!"
 	exit 1
