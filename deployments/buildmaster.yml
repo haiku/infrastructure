@@ -1,50 +1,70 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: teleport
-  labels:
-    app: teleport
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: teleport
-  template:
-    metadata:
-      labels:
-        app: teleport
-    spec:
-      containers:
-      - name: teleport
-        image: mmlr/teleport
-        command: ["./teleport"]
-        args: ["server", "5825", "/run/secrets/auth.db"]
-        volumeMounts:
-        - name: teleport-db
-          readOnly: true
-          mountPath: /run/secrets
-      volumes:
-        - name: teleport-db
-          secret:
-            secretName: teleport-db
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: worker-teleport
-spec:
-  selector:
-    app: teleport
-  ports:
-  - name: teleport 
-    port: 5825
-    targetPort: 5825
-  - name: mmlr-x86-64
-    port: 5001
-    targetPort: 5001
-  - name: mmlr-x86-gcc2
-    port: 5000
-    targetPort: 5000
+#
+# Haiku buildmaster
+#
+# Runs buildmasters which connect to various builders
+# at various remote locations over ssh with verifie
+# host keys.
+#
+# TODO: buildmaster-packages-pvc is a strain on our
+# infrastructure. We really need to get it to
+# S3,Storj,etc "somehow". Given the difficulty of RWX
+# mixed with the size of these volumes, all of these
+# have to run on the same node reducing redundancy.
+#
+# We choose do-block-storage-retain as a storage class
+# to "retain" PV's if this deployment is accidently
+# deleted. In theory we could create a volume snapshot
+# of the unattached volume and restore it to a new
+# PVC via kubernetes.
+
+## Teleport doesn't seem used lol
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: teleport
+#  labels:
+#    app: teleport
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: teleport
+#  template:
+#    metadata:
+#      labels:
+#        app: teleport
+#    spec:
+#      containers:
+#      - name: teleport
+#        image: mmlr/teleport
+#        command: ["./teleport"]
+#        args: ["server", "5825", "/run/secrets/auth.db"]
+#        volumeMounts:
+#        - name: teleport-db
+#          readOnly: true
+#          mountPath: /run/secrets
+#      volumes:
+#        - name: teleport-db
+#          secret:
+#            secretName: teleport-db
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: worker-teleport
+#spec:
+#  selector:
+#    app: teleport
+#  ports:
+#  - name: teleport 
+#    port: 5825
+#    targetPort: 5825
+#  - name: mmlr-x86-64
+#    port: 5001
+#    targetPort: 5001
+#  - name: mmlr-x86-gcc2
+#    port: 5000
+#    targetPort: 5000
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -64,7 +84,7 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: docker.io/haikuporter/buildmaster-frontend:1.2.6-1
+        image: docker.io/haikuporter/buildmaster-frontend:1.2.7-2
         volumeMounts:
         - name: buildmaster-data-x86-gcc2
           mountPath: /var/instances/master/x86_gcc2
@@ -73,7 +93,8 @@ spec:
         - name: buildmaster-packages
           mountPath: /var/instances/haikuports
       - name: buildmaster-x86-64
-        image: docker.io/haikuporter/buildmaster:1.2.6-2
+        image: docker.io/haikuporter/buildmaster:1.2.7-2
+        #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
         - name: buildmaster-packages
@@ -88,7 +109,8 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: docker.io/haikuporter/buildmaster:1.2.6-2
+        image: docker.io/haikuporter/buildmaster:1.2.7-2
+        #command: ["bootstrap", "x86_gcc2", "x86"]
         command: ["loop"]
         volumeMounts:
         - name: buildmaster-sources
@@ -116,6 +138,8 @@ spec:
           persistentVolumeClaim:
             claimName: buildmaster-sources-pvc
 ---
+# state data for builds like logs of buildruns, buildrun id
+# tracking, builder connection information.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -128,6 +152,8 @@ spec:
     requests:
       storage: 20Gi
 ---
+# state data for builds like logs of buildruns, buildrun id
+# tracking, builder connection information.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -140,6 +166,7 @@ spec:
     requests:
       storage: 20Gi
 ---
+# all of the packages for Haikuports
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -152,6 +179,7 @@ spec:
     requests:
       storage: 20Gi
 ---
+# pretty much just Haiku sources at this point
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
