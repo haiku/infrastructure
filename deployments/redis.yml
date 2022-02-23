@@ -41,11 +41,10 @@ metadata:
   name: redis-data-pvc
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 2Gi
-  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
