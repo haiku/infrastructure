@@ -46,11 +46,10 @@ metadata:
   name: smtp-keys-pvc
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
-      storage: 256Mi
-  storageClassName: longhorn
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
