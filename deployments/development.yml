@@ -66,6 +66,49 @@ spec:
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
 ---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gerrit-backup-daily
+spec:
+  schedule: "0 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: persistsync
+              image: haiku/persistsync:0.1
+              args: ["backup", "gerrit-data"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              volumeMounts:
+              - name: gerrit-data
+                mountPath: /pvs/gerrit-data
+          volumes:
+          - name: gerrit-data
+            persistentVolumeClaim:
+              claimName: gerrit-data-pvc
+          restartPolicy: Never
+---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -82,11 +125,10 @@ metadata:
   name: gerrit-data-pvc
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
-  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
@@ -111,18 +153,6 @@ spec:
   - name: web
     port: 80
     targetPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: git-ssh
-spec:
-  selector:
-    app: git
-  ports:
-  - name: git
-    port: 29418
-    targetPort: 29418
 ---
 # web frontends for cgit and gerrit
 apiVersion: networking.k8s.io/v1
@@ -162,21 +192,24 @@ spec:
             port:
               name: web
 ---
-# port 2200 is routed to 22 in the ingress.  Trying to avoid
-# ssh collisions on kubernetes nodes
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRouteTCP
+# Traefik can't proxy ssh traffic via IngressRouteTCP. It modifies the
+# connection in a way which breaks ssh.
+#
+# Mina SSHD (which gerrit uses) seems to have support for the
+# "proxy protocol" to solve this, but Gerrit doesn't seem to expose
+# it currently.
+# https://issues.apache.org/jira/browse/SSHD-656
+apiVersion: v1
+kind: Service
 metadata:
-  name: git-ingresstcp
+  name: git-ingress
 spec:
-  entryPoints:
-    - gitssh
-  routes:
-  - match: HostSNI(`*`)
-    services:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: git
+  ports:
     - name: git-ssh
-      port: 2200
-      weight: 10
-      terminationDelay: 400
-      proxyProtocol:
-        version: 1
+      protocol: TCP
+      port: 22
+      targetPort: 29418
