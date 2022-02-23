@@ -83,11 +83,10 @@ metadata:
   name: discourse-data-pvc
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 16Gi
-  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
