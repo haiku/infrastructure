@@ -1,6 +1,17 @@
 ### Haiku CDN
 #
-# Presentes storj via s3
+# Presents storj via s3
+#
+# This is a backup design incase Wasabi bandwidth usage
+# becomes a problem.
+#
+# We can move data to Storj for a reasonable price,
+# and host an s3 gateway on our infrastructure which
+# pulls from buckets at Storj.
+#
+# eu.hpkg.haiku-os.org -> cdn.ams3.haiku-os.org -> Storj Satellite
+# us.hpkg.haiku-os.org ->  cdn.us1.haiku-os.org (future cluster) -> Storj
+#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -87,7 +98,7 @@ spec:
     port: 7777
     targetPort: 7777
 ---
-# web frontends for cgit and gerrit
+# web frontends for storj cdn
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
