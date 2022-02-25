@@ -15,7 +15,7 @@
   * Network speeds outside of Germany were abysimal (100-200KB/s MAX) due to poor peering @ Hetzner.
   * Olta departed after many years of tireless hours of service.
   * Several of the OpenSUSE VM's were 32-bit, and we ran-into roadblocks performing basic updates to vm's
-  * Everyone was afraid to touch anything, resulting in baron becoming *FAR* behind in OS upgrades.
+  * Everyone was afraid to touch anything given complexity, resulting in baron becoming *FAR* behind in OS upgrades.
 
 ## Nov 2018 - March 2019 Transition (bad) Days  (~$34 USD/mo)
 
@@ -57,3 +57,7 @@
   * Successfully moved to Docker Swarm
   * Using local SSD storage for persistant data, with a few block attachments for big things managed by rexray.
   * Speeds have been improved, system fairly stable
+
+## Feb 2022 Digital Ocean managed Kubernetes
+
+  * Migrating to a managed Kubernetes cluster in Amsterdam (EU/GDPR)
