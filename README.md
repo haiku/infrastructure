@@ -2,7 +2,7 @@
 
 Treating Haiku's infrastructure as cattle instead of kittens since 2017.
 
-![Docker Workflow](docs/workflow.png)
+![Architecture](docs/architecture.png)
 
 ## Directories
 
