@@ -69,22 +69,24 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: gerrit-backup-daily
+  name: gerrit-backup
 spec:
-  schedule: "0 1 * * *"
+  schedule: "0 1 * * 1,4"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-            - name: persistsync
-              image: haiku/persistsync:0.1
+            - name: pvbackup
+              image: docker.io/haiku/pvbackup:0.2
               args: ["backup", "gerrit-data"]
               env:
               - name: S3_HOST
                 value: "https://s3.eu-west-1.wasabisys.com"
               - name: S3_BUCKET
                 value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 60d
               - name: S3_KEY
                 valueFrom:
                   secretKeyRef:

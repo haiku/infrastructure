@@ -85,6 +85,10 @@ case $ACTION in
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
+		if [[ -z "$S3_MAX_AGE" ]]; then
+			echo "Cleaning up old backups for $VOLUME over $S3_MAX_AGE old..."
+			mc find $S3_NAME/$S3_BUCKET/$VOLUME/ --older-than "$S3_MAX_AGE" --exec "mc rm {}"
+		fi
 		echo "Snapshot of ${VOLUME} completed successfully! ($S3_BUCKET/$VOLUME/$SNAPSHOT_NAME.gpg)"
 		;;
 
