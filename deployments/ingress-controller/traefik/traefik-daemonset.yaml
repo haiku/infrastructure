@@ -55,6 +55,8 @@ spec:
           successThreshold: 1
           timeoutSeconds: 2
         ports:
+        - name: ssh
+          containerPort: 22
         - name: smtp
           containerPort: 25
         - name: http
@@ -73,8 +75,13 @@ spec:
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
         - --entrypoints.rsync.address=:12000
+        - --entrypoints.rsync.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.sftp.address=:1099
+        - --entrypoints.sftp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.smtp.address=:25
+        - --entrypoints.smtp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.ssh.address=:22
+        - --entrypoints.ssh.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --ping.entryPoint=web
         - --api
 ---
@@ -89,6 +96,9 @@ spec:
   selector:
     k8s-app: traefik-ingress-lb
   ports:
+    - protocol: TCP
+      port: 22
+      name: ssh
     - protocol: TCP
       port: 25
       name: smtp

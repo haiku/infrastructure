@@ -154,6 +154,46 @@ spec:
     port: 80
     targetPort: 8080
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-ssh
+spec:
+  selector:
+    app: git
+  ports:
+  - name: ssh
+    port: 22
+    targetPort: 29418
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: git-ingressmiddle
+spec:
+  inFlightConn:
+    amount: 10
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: git-ingresstcp
+spec:
+  entryPoints:
+    - ssh
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: git-ssh
+      port: 22
+      weight: 10
+      terminationDelay: 90000
+#     unsupported by Gerrit
+#     proxyProtocol:
+#       version: 1
+    middlewares:
+    - name: git-ingressmiddle
+---
 # web frontends for cgit and gerrit
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -191,25 +231,3 @@ spec:
             name: review
             port:
               name: web
----
-# Traefik can't proxy ssh traffic via IngressRouteTCP. It modifies the
-# connection in a way which breaks ssh.
-#
-# Mina SSHD (which gerrit uses) seems to have support for the
-# "proxy protocol" to solve this, but Gerrit doesn't seem to expose
-# it currently.
-# https://issues.apache.org/jira/browse/SSHD-656
-apiVersion: v1
-kind: Service
-metadata:
-  name: git-ingress
-spec:
-  type: LoadBalancer
-  externalTrafficPolicy: Local
-  selector:
-    app: git
-  ports:
-    - name: git-ssh
-      protocol: TCP
-      port: 22
-      targetPort: 29418
