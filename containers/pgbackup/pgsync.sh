@@ -99,7 +99,7 @@ case $ACTION in
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
-		mc cp /tmp/$SNAPSHOT_NAME.gpg $S3_NAME/$S3_BUCKET/$PG_DBNAME/$SNAPSHOT_NAME.gpg
+		mc cp /tmp/$SNAPSHOT_NAME.gpg $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/$SNAPSHOT_NAME.gpg
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted during upload! (mc)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
@@ -107,9 +107,9 @@ case $ACTION in
 		fi
 		if [[ -z "$S3_MAX_AGE" ]]; then
 			echo "Cleaning up old backups for database $PG_DBNAME over $S3_MAX_AGE old..."
-			mc find $S3_NAME/$S3_BUCKET/$PG_DBNAME/ --older-than "$S3_MAX_AGE" --exec "mc rm {}"
+			mc find $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ --older-than "$S3_MAX_AGE" --exec "mc rm {}"
 		fi
-		echo "Snapshot of ${PG_DBNAME} completed successfully! ($S3_BUCKET/$PG_DBNAME/$SNAPSHOT_NAME.gpg)"
+		echo "Snapshot of ${PG_DBNAME} completed successfully! ($S3_BUCKET/pg-$PG_DBNAME/$SNAPSHOT_NAME.gpg)"
 		;;
 
 	restore)
@@ -121,9 +121,9 @@ case $ACTION in
 		fi
 		# We assume the latest is at the bottom of the mc ls.
 		# It seems to be true in my testing so far... but this feels sketch
-		LATEST=$(mc ls -q $S3_NAME/$S3_BUCKET/$PG_DBNAME/ | tail -1 | awk '{ print $5 }')
+		LATEST=$(mc ls -q $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ | tail -1 | awk '{ print $5 }')
 		echo "Found $LATEST to be the latest snapshot..."
-		mc cp $S3_NAME/$S3_BUCKET/$PG_DBNAME/$LATEST /tmp/$LATEST
+		mc cp $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/$LATEST /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
 			echo "Error: Problem encounted getting snapshot from s3! (mc)"
