@@ -108,6 +108,14 @@ spec:
     port: 25
 ---
 apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: smtp-ingressmiddle
+spec:
+  inFlightConn:
+    amount: 2
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
   name: smtp-ingresstcp
@@ -116,6 +124,8 @@ spec:
     - smtp
   routes:
   - match: HostSNI(`*`)
+    middlewares:
+    - name: smtp-ingressmiddle
     services:
     - name: smtp-forwarder
       port: 25
