@@ -18,7 +18,7 @@ fi
 
 
 ACTION="$1"
-DATABASE="$2"
+PG_DBNAME="$2"
 
 S3_NAME="s3remote"
 
@@ -71,15 +71,15 @@ if [ -z "$PG_PASSWORD" ]; then
 fi
 
 # Write out our secrets
-echo "$PG_HOSTNAME:$PG_PORT:$PG_DBNAME:$PG_USERNAME:$PG_PASSWORD" > ~/.pgpass
+echo "$PG_HOSTNAME:$PG_PORT:*:$PG_USERNAME:$PG_PASSWORD" > ~/.pgpass
 chmod 600 ~/.pgpass
 
 case $ACTION in
 	backup)
-		SNAPSHOT_NAME=${DATABASE}_$(date +"%Y-%m-%d").tar.xz
-		echo "Backup ${DATABASE}..."
+		SNAPSHOT_NAME=${PG_DBNAME}_$(date +"%Y-%m-%d").sql.xz
+		echo "Backup ${PG_DBNAME}..."
 		cd /tmp
-		pg_dump -U $PG_USERNAME $PG_DBNAME | xz > /tmp/$SNAPSHOT_NAME
+		pg_dump -C -d $PG_DBNAME -U $PG_USERNAME | xz > /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
 			echo "Error: Problem encounted performing snapshot!"
@@ -119,9 +119,7 @@ case $ACTION in
 			echo "Error: Problem encounted configuring s3! (mc)"
 			exit 1
 		fi
-		# We assume the latest is at the bottom of the mc ls.
-		# It seems to be true in my testing so far... but this feels sketch
-		LATEST=$(mc ls -q $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ | tail -1 | awk '{ print $5 }')
+		LATEST=$(mc ls --json -q $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ | jq -r -c .key | sort | tail -1)
 		echo "Found $LATEST to be the latest snapshot..."
 		mc cp $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/$LATEST /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
@@ -138,14 +136,14 @@ case $ACTION in
 			exit 1
 		fi
 		rm /tmp/$LATEST
-		xz -cd /tmp/$PG_DBNAME-restore.sql.xz | pg_restore -h $PG_HOSTNAME -U $PG_USERNAME $PG_DBNAME
+		xz -cd /tmp/$PG_DBNAME-restore.sql.xz | psql -h $PG_HOSTNAME -U $PG_USERNAME
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted extracting snapshot! (tar)"
+			echo "Error: Problem encounted extracting snapshot! (sql)"
 			rm -f ~/.pgpass
-			rm /tmp/$PG_DBNAME-restore.tar.xz
+			rm /tmp/$PG_DBNAME-restore.sql.xz
 			exit 1
 		fi
-		rm /tmp/$PG_DBNAME-restore.tar.xz
+		rm /tmp/$PG_DBNAME-restore.sql.xz
 		rm -f ~/.pgpass
 		echo "Restore of ${PG_DBNAME} completed successfully!"
 		;;

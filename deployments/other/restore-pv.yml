@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restore
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pvbackup
+        image: docker.io/haiku/pvbackup:0.2
+        args: ["restore", "gerrit-data"]
+        env:
+        - name: S3_HOST
+          value: "https://s3.eu-west-1.wasabisys.com"
+        - name: S3_BUCKET
+          value: haiku-backups
+        - name: S3_MAX_AGE
+          value: 60d
+        - name: S3_KEY
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: s3_key
+        - name: S3_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: s3_secret
+        - name: TWOSECRET
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: twosecret
+        volumeMounts:
+        - name: gerrit-data
+          mountPath: /pvs/gerrit-data
+      volumes:
+      - name: gerrit-data
+        persistentVolumeClaim:
+          claimName: gerrit-data-pvc
+      restartPolicy: Never

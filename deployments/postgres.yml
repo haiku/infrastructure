@@ -7,19 +7,35 @@ metadata:
   name: postgres
   labels:
     app: postgres
+    version: "14"
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: postgres
+      version: "14"
   template:
     metadata:
       labels:
         app: postgres
+        version: "14"
     spec:
       containers:
       - name: postgres
-        image: docker.io/postgres:9.6
+        image: docker.io/postgres:14.2-alpine
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdb
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-admin
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-admin
+              key: password
         resources:
           limits:
             cpu: "2.0"
@@ -27,9 +43,6 @@ spec:
           requests:
             cpu: "0.25"
             memory: "512Mi"
-        env:
-        - name: POSTGRES_USER
-          value: "baron"
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
@@ -48,7 +61,6 @@ spec:
   resources:
     requests:
       storage: 80Gi
-  storageClassName: do-block-storage
 ---
 apiVersion: v1
 kind: Service
@@ -57,7 +69,58 @@ metadata:
 spec:
   selector:
     app: postgres
+    version: "14"
   ports:
   - name: postgres
     port: 5432
     targetPort: 5432
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trac-pgbackup
+spec:
+  schedule: "0 2 * * 1,4"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pgbackup
+              image: docker.io/haiku/pgbackup:0.2
+              args: ["backup", "gerrit-data"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 60d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              - name: PG_HOSTNAME
+                value: postgres
+              - name: PG_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: username
+              - name: PG_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: password

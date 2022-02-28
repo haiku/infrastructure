@@ -1,0 +1,59 @@
+# INSTRUCTIONS
+# USED TO RESTORE DATA FROM OUR S3 BUCKETS
+# PRE-REQUIREMENTS:
+#   * s3-backup secret in place
+#   * postgres-admin secret in place
+#   * postgresql running in cluster
+#
+# USAGE:
+#   One job should be started per database
+#   Be sure to customize args for each database to be restored
+#   kubectl apply -f restore-pg.yml
+#   kubectl logs jobs/restore
+#
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restore
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pgbackup
+        image: docker.io/haiku/pgbackup:0.9
+        args: ["restore", "trac"]
+        env:
+        - name: S3_HOST
+          value: "https://s3.eu-west-1.wasabisys.com"
+        - name: S3_BUCKET
+          value: haiku-backups
+        - name: S3_MAX_AGE
+          value: 60d
+        - name: S3_KEY
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: s3_key
+        - name: S3_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: s3_secret
+        - name: TWOSECRET
+          valueFrom:
+            secretKeyRef:
+              name: s3-backup
+              key: twosecret
+        - name: PG_HOSTNAME
+          value: postgres
+        - name: PG_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-admin
+              key: username
+        - name: PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-admin
+              key: password

@@ -150,6 +150,14 @@ kubectl port-forward service/(NAME) 8080:web
 
 Pressing ctl+c will terminate the port-forwarding proxy
 
+## Importing data
+
+*Restoring volume / database backups:*
+**See deployments/other/restore*.yml**
+
+*Manual database import:*
+```cat coolstuff.sql | kubectl exec -i deployment/postgres -- psql -U postgres```
+
 # Secrets
 
 For obvious reasons, :key: secrets are omitted from this repository.
