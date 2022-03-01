@@ -189,7 +189,7 @@ spec:
     - name: git-ssh
       port: 22
       weight: 10
-      terminationDelay: 90000
+      terminationDelay: 900000
 #     unsupported by Gerrit
 #     proxyProtocol:
 #       version: 1
@@ -201,7 +201,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: git-web
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
+  tls:
+  - secretName: tls-cert-gerrit
   rules:
   - host: git.haiku-os.org
     http:
