@@ -9,6 +9,9 @@ spec:
   selector:
     matchLabels:
       app: git
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage and gerrit lock files
+    type: Recreate
   template:
     metadata:
       labels:
@@ -20,6 +23,8 @@ spec:
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/gerrit/review_site
+        - name: irccat-password
+          mountPath: /run/secrets/irccat
         env:
           - name: AUTH_TYPE
             value: "OAUTH"
@@ -65,6 +70,9 @@ spec:
       - name: gerrit-data
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
+      - name: irccat-password
+        secret:
+          secretName: irccat-password
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -110,16 +118,17 @@ spec:
             persistentVolumeClaim:
               claimName: gerrit-data-pvc
           restartPolicy: Never
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: git-pdb
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app: git
+#---
+## Without RWX storage, we can't do rolling updates
+#apiVersion: policy/v1
+#kind: PodDisruptionBudget
+#metadata:
+#  name: git-pdb
+#spec:
+#  minAvailable: 0
+#  selector:
+#    matchLabels:
+#      app: git
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

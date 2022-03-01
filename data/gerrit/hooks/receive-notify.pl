@@ -185,14 +185,14 @@ sub irc_notification
         return;
     }
 
-    open my $fh, '<', "/etc/irc/password"
-      or die "Could not open /etc/irc/password for reading: $!";
+    open my $fh, '<', "/run/secrets/irccat/password"
+      or die "Could not open /run/secrets/irccat/password for reading: $!";
     my $password = do { local $/; <$fh> };
 
     #my @lines = split /\n/, $message, 15
     foreach ( split /\n/, $message, 15 ) {
       my $ua = LWP::UserAgent->new;
-      my $req = HTTP::Request->new(POST => "https://build.haiku-os.org/irccat/send");
+      my $req = HTTP::Request->new(POST => "http://irccat/send");
       $req->header('Authorization' => "Bearer $password");
       $req->header('Content-Type' => 'application/x-www-form-urlencoded');
       $req->content("$irc_channels $_");
