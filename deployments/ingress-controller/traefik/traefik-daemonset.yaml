@@ -68,10 +68,15 @@ spec:
         - name: sftp
           containerPort: 1099
         args:
+        - --accesslog=true
+        - --accesslog.filepath=/var/log/access.log
+        - --log.level=DEBUG
         - --providers.kubernetescrd=true
         - --providers.kubernetesingress=true
         - --providers.kubernetesingress.ingressclass=default
         - --entrypoints.web.address=:80
+        - --entrypoints.web.http.redirections.entryPoint.to=webs
+        - --entrypoints.web.http.redirections.entryPoint.scheme=https
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
         - --entrypoints.rsync.address=:12000
@@ -84,6 +89,8 @@ spec:
         - --entrypoints.ssh.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --ping.entryPoint=web
         - --api
+        - --api.dashboard=true
+        - --api.insecure=true
 ---
 apiVersion: v1
 kind: Service
