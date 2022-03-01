@@ -76,6 +76,7 @@ spec:
         - --providers.kubernetesingress.ingressclass=default
         - --entrypoints.web.address=:80
         - --entrypoints.web.http.redirections.entryPoint.to=webs
+        - --entrypoints.web.http.redirections.entryPoint.permanent=false
         - --entrypoints.web.http.redirections.entryPoint.scheme=https
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
@@ -91,6 +92,17 @@ spec:
         - --api
         - --api.dashboard=true
         - --api.insecure=true
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: traefik-pdb
+  namespace: kube-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
 ---
 apiVersion: v1
 kind: Service
