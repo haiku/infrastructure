@@ -84,6 +84,18 @@ spec:
     spec:
       template:
         spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where gerrit is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - git
+                topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
               image: docker.io/haiku/pvbackup:0.2
