@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if [ ! -e $SSH_IDENTITY ]; then
+	echo "SSH Identity file missing at $SSH_IDENTITY!"
+	exit 1
+fi
+
+echo "Setting up ssh..."
+mkdir ~/.ssh
+echo "Host gitremote" > ~/.ssh/config
+echo "	Hostname        $GIT_SERVER" >> ~/.ssh/config
+echo "	IdentityFile    $SSH_IDENTITY" >> ~/.ssh/config
+echo "	IdentitiesOnly  yes" >> ~/.ssh/config
+ssh-keyscan -H $GIT_SERVER >> ~/.ssh/known_hosts
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/*
+
+# push repositories haiku & buildtools to github
+for i in $GIT_REPOS; do
+	if [ ! -d $GIT_PREFIX/$i ]; then
+		echo "$GIT_PREFIX/$i doesn't exist!"
+		continue;
+	fi
+	echo "Entering $GIT_PREFIX/$i..."
+	cd $GIT_PREFIX/$i
+	echo "Pushing to git@$GIT_SERVER:$GIT_ORG/$i..."
+	git push --all git@gitremote:$GIT_ORG/$i 2>&1 | grep -v 'up-to-date'
+done;
+
+echo "Sync complete"
