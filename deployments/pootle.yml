@@ -1,0 +1,75 @@
+### Haiku Pootle
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pootle
+  labels:
+    app: pootle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pootle
+  template:
+    metadata:
+      labels:
+        app: pootle
+    spec:
+      containers:
+      - name: pootle
+        image: docker.io/haiku/pootle:latest
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "512Mi"
+          requests:
+            cpu: "0.25"
+            memory: "48Mi"
+        volumeMounts:
+        - name: pootle-data
+          mountPath: /var/pootle
+      volumes:
+      - name: pootle-data
+        persistentVolumeClaim:
+          claimName: pootle-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pootle-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pootle
+spec:
+  selector:
+    app: pootle
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+---
+# web frontends for pootle
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pootle-web
+spec:
+  rules:
+  - host: i18n.haiku-os.org
+    http:
+      paths:
+      - path: /pootle/
+        pathType: Prefix
+        backend:
+          service:
+            name: pootle
+            port:
+              name: web

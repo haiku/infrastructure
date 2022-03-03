@@ -1,0 +1,75 @@
+### Haiku Userguide
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userguide
+  labels:
+    app: userguide
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userguide
+  template:
+    metadata:
+      labels:
+        app: userguide
+    spec:
+      containers:
+      - name: userguide
+        image: docker.io/haiku/userguide:latest
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "1024Mi"
+          requests:
+            cpu: "0.25"
+            memory: "64Mi"
+        volumeMounts:
+        - name: userguide-data
+          mountPath: /var/pootle
+      volumes:
+      - name: userguide-data
+        persistentVolumeClaim:
+          claimName: userguide-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: userguide-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userguide
+spec:
+  selector:
+    app: userguide
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+---
+# web frontends for pootle
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: userguide-web
+spec:
+  rules:
+  - host: i18n.haiku-os.org
+    http:
+      paths:
+      - path: /userguide/
+        pathType: Prefix
+        backend:
+          service:
+            name: userguide
+            port:
+              name: web

@@ -1,0 +1,81 @@
+### Haiku Pootle
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: i18n-static
+  labels:
+    app: i18n-static
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: i18n-static
+  template:
+    metadata:
+      labels:
+        app: i18n-static
+    spec:
+      containers:
+      - name: pootle
+        image: docker.io/haiku/i18n-static:latest
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "256Mi"
+          requests:
+            cpu: "0.15"
+            memory: "128Mi"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 1
+        livenessProbe:
+          httpGet:
+            port: 80
+            path: /
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: i18n-static-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: downtime
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pootle
+spec:
+  selector:
+    app: pootle
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+---
+# web frontends for trac
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: i18n-static-web
+spec:
+  rules:
+  - host: i18n.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: i18n-static
+            port:
+              name: web
