@@ -1,68 +1,29 @@
 ### Haiku SMTP services
 #
-## Outbound mail from services
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: smtp-relay
-  labels:
-    app: smtp-relay
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: smtp-relay
-  template:
-    metadata:
-      labels:
-        app: smtp-relay
-    spec:
-      containers:
-      - name: smtp
-        image: docker.io/mwader/postfix-relay:latest
-        env:
-        - name: POSTFIX_myhostname
-          value: ingress.ams3.haiku-os.org
-        - name: OPENDKIM_DOMAINS
-          value: ingress.ams3.haiku-os.org discuss.haiku-os.org review.haiku-os.org git.haiku-os.org
-        resources:
-          limits:
-            cpu: "0.25"
-            memory: "64Mi"
-          requests:
-            cpu: "0.15"
-            memory: "32Mi"
-        volumeMounts:
-        - name: smtp-keys
-          mountPath: /etc/opendkim/keys
-      volumes:
-      - name: smtp-keys
-        persistentVolumeClaim:
-          claimName: smtp-keys-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: smtp-keys-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: v1
 kind: Service
 metadata:
   name: smtp
 spec:
-  selector:
-    app: smtp-relay
   ports:
   - name: smtp
     port: 25
+    protocol: TCP
     targetPort: 25
-
+  clusterIP: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: smtp
+subsets:
+- addresses:
+  - ip: 10.133.254.78
+  ports:
+  - name: smtp
+    port: 25
+    protocol: TCP
 ## Inbound mail from users
 ---
 apiVersion: apps/v1
