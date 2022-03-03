@@ -106,7 +106,7 @@ spec:
               - name: S3_BUCKET
                 value: haiku-backups
               - name: S3_MAX_AGE
-                value: 60d
+                value: 30d
               - name: S3_KEY
                 valueFrom:
                   secretKeyRef:
@@ -129,6 +129,57 @@ spec:
           - name: gerrit-data
             persistentVolumeClaim:
               claimName: gerrit-data-pvc
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gerrit-github-sync
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where gerrit is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - git
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: githubsync
+              image: docker.io/haiku/gitsync:1.0
+              env:
+              - name: GIT_ORG
+                value: "haiku"
+              - name: GIT_SERVER
+                value: "github.com"
+              - name: GIT_PREFIX
+                value: "/data/git"
+              - name: GIT_REPOS
+                value: "haiku.git buildtools.git"
+              - name: SSH_IDENTITY
+                value: "/run/secrets/ssh/private"
+              volumeMounts:
+              - name: gerrit-data
+                mountPath: /data
+              - name: github-bot-secret
+                mountPath: /run/secrets/ssh
+          volumes:
+          - name: gerrit-data
+            persistentVolumeClaim:
+              claimName: gerrit-data-pvc
+          - name: github-bot-secret
+            secret:
+              secretName: github-bot
+              defaultMode: 0400
           restartPolicy: Never
 #---
 ## Without RWX storage, we can't do rolling updates
