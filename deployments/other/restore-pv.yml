@@ -1,3 +1,6 @@
+#
+# THIS IS AN EXAMPLE AND NEEDS CUSTOMIZED TO FUNCTION
+#
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -5,6 +8,18 @@ metadata:
 spec:
   template:
     spec:
+      # volumes are attached to a single physical node (RWO), this ensures the restore
+      # job always starts on the same physical node where the application is running
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - git
+            topologyKey: kubernetes.io/hostname
       restartPolicy: Never
       containers:
       - name: pvbackup
