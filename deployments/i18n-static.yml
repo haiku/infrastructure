@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: pootle
-        image: docker.io/haiku/i18n-static:latest
+        image: docker.io/haiku/i18n-static:1
         resources:
           limits:
             cpu: "0.50"
@@ -67,7 +67,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: i18n-static-web
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
+  tls:
+  - secretName: tls-cert-i18n
   rules:
   - host: i18n.haiku-os.org
     http:
