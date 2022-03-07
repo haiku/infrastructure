@@ -104,7 +104,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: discourse
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
+  tls:
+  - hosts:
+    - discuss.haiku-os.org
+    secretName: tls-cert-discourse
   rules:
   - host: "discuss.haiku-os.org"
     http:
