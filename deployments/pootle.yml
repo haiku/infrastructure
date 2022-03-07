@@ -60,13 +60,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pootle-web
+  name: pootle
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
-  - secretName: tls-cert-i18n
+  - hosts:
+    - i18n.haiku-os.org
+    secretName: tls-cert-i18n
   rules:
   - host: i18n.haiku-os.org
     http:
