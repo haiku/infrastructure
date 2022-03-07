@@ -61,7 +61,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: trac-web
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
+  tls:
+  - secretName: tls-cert-trac
   rules:
   - host: dev.haiku-os.org
     http:
