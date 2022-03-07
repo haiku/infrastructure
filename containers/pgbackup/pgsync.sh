@@ -79,7 +79,7 @@ case $ACTION in
 		SNAPSHOT_NAME=${PG_DBNAME}_$(date +"%Y-%m-%d").sql.xz
 		echo "Backup ${PG_DBNAME}..."
 		cd /tmp
-		pg_dump -C -d $PG_DBNAME -U $PG_USERNAME | xz > /tmp/$SNAPSHOT_NAME
+		pg_dump -C -h $PG_HOSTNAME -p $PG_PORT -d $PG_DBNAME -U $PG_USERNAME | xz > /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
 			echo "Error: Problem encounted performing snapshot!"
