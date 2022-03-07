@@ -6,7 +6,7 @@ metadata:
   labels:
     app: trac
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: trac
@@ -66,7 +66,9 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
-  - secretName: tls-cert-trac
+  - hosts:
+    - dev.haiku-os.org
+    secretName: tls-cert-trac
   rules:
   - host: dev.haiku-os.org
     http:
@@ -78,3 +80,114 @@ spec:
             name: trac
             port:
               name: web
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trac-pgbackup
+spec:
+  schedule: "0 0 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pgbackup
+              image: docker.io/haiku/pgbackup:1.0
+              args: ["backup", "trac"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 15d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              - name: PG_HOSTNAME
+                value: postgres
+              - name: PG_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: username
+              - name: PG_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: password
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trac-pvbackup
+spec:
+  schedule: "0 1 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where trac is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - trac
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: pvbackup
+              image: docker.io/haiku/pvbackup:1.0
+              args: ["backup", "trac-data"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 15d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              volumeMounts:
+              - name: trac-data
+                mountPath: /pvs/trac-data
+          volumes:
+          - name: trac-data
+            persistentVolumeClaim:
+              claimName: trac-data-pvc
+          restartPolicy: Never
