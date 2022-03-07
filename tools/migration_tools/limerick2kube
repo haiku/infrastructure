@@ -13,12 +13,16 @@
 ## trac.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_trac_data/_data/. trac-data-pvc
 
-## TODO
+## QUEUE
 
 ## redis.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_redis_data/_data/. redis-data-pvc
 ## discourse.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/community_discourse_shared/_data/. discourse-data-pvc
+## pootle.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_pootle_data/_data/. pootle-data-pvc
+
+## BACKLOG
 
 # buildmaster.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_data_master_x86_64/_data/. buildmaster-data-x86-64-pvc
