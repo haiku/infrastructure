@@ -282,7 +282,11 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
-  - secretName: tls-cert-gerrit
+  - hosts:
+    - git.haiku-os.org
+    - cgit.haiku-os.org
+    - review.haiku-os.org
+    secretName: tls-cert-gerrit
   rules:
   - host: git.haiku-os.org
     http:
