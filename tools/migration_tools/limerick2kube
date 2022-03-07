@@ -20,7 +20,9 @@
 ## discourse.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/community_discourse_shared/_data/. discourse-data-pvc
 ## pootle.yml
-#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_pootle_data/_data/. pootle-data-pvc
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_pootle_data/_data/. pootle-data-pvc
+## userguide.yml
+./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_userguide_data/_data/. userguide-data-pvc
 
 ## BACKLOG
 
