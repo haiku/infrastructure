@@ -77,9 +77,11 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: gerrit-backup
+  name: gerrit-pvbackup
 spec:
   schedule: "0 1 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
@@ -98,7 +100,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: docker.io/haiku/pvbackup:0.2
+              image: docker.io/haiku/pvbackup:1.0
               args: ["backup", "gerrit-data"]
               env:
               - name: S3_HOST
@@ -137,6 +139,8 @@ metadata:
   name: gerrit-github-sync
 spec:
   schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
