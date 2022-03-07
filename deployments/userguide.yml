@@ -6,7 +6,7 @@ metadata:
   labels:
     app: userguide
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: userguide
