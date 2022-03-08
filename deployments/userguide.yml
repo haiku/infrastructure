@@ -27,7 +27,7 @@ spec:
             memory: "64Mi"
         volumeMounts:
         - name: userguide-data
-          mountPath: /var/pootle
+          mountPath: /var/userguide
       volumes:
       - name: userguide-data
         persistentVolumeClaim:
@@ -66,7 +66,9 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
-  - secretName: tls-cert-i18n
+  - hosts:
+    - i18n.haiku-os.org
+    secretName: tls-cert-i18n
   rules:
   - host: i18n.haiku-os.org
     http:
