@@ -9,7 +9,7 @@ metadata:
   labels:
     app: discourse
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: discourse
@@ -94,9 +94,9 @@ metadata:
   name: discourse
 spec:
   selector:
-    k8s-app: discourse-ingress-lb
+    app: discourse
   ports:
-  - name: web
+  - name: www
     port: 80
     targetPort: 80
 ---
@@ -113,7 +113,7 @@ spec:
     - discuss.haiku-os.org
     secretName: tls-cert-discourse
   rules:
-  - host: "discuss.haiku-os.org"
+  - host: discuss.haiku-os.org
     http:
       paths:
       - path: /
