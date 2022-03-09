@@ -64,12 +64,6 @@ spec:
   selector:
     app: downtime
   ports:
-  - name: web
-    port: 80
-    targetPort: 80
   - name: www
-    port: 80
-    targetPort: 80
-  - name: http
     port: 80
     targetPort: 80
