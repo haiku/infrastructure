@@ -100,6 +100,65 @@ spec:
     port: 80
     targetPort: 80
 ---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discourse-pvbackup
+spec:
+  schedule: "0 3 * * 3"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where discourse is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - discourse
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: pvbackup
+              image: docker.io/haiku/pvbackup:1.0
+              args: ["backup", "discourse-data"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 14d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              volumeMounts:
+              - name: discourse-data
+                mountPath: /pvs/discourse-data
+          volumes:
+          - name: discourse-data
+            persistentVolumeClaim:
+              claimName: discourse-data-pvc
+          restartPolicy: Never
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
