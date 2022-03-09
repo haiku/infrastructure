@@ -62,12 +62,12 @@ spec:
         - name: DISCOURSE_DB_USERNAME
           valueFrom:
             secretKeyRef:
-              name: discourse-pgdb
+              name: discourse-pg
               key: username
         - name: DISCOURSE_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: discourse-pgdb
+              name: discourse-pg
               key: password
         volumeMounts:
         - name: discourse-data
