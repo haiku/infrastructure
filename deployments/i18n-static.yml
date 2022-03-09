@@ -68,7 +68,7 @@ kind: Ingress
 metadata:
   name: i18n-static-web
   annotations:
-#   cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
