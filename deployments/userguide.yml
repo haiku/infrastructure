@@ -6,7 +6,7 @@ metadata:
   labels:
     app: userguide
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: userguide
@@ -73,7 +73,7 @@ spec:
   - host: i18n.haiku-os.org
     http:
       paths:
-      - path: /userguide/
+      - path: /userguide
         pathType: Prefix
         backend:
           service:

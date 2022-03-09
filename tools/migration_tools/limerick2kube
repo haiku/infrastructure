@@ -12,17 +12,17 @@
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_gerrit_data/_data/. gerrit-data-pvc
 ## trac.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_trac_data/_data/. trac-data-pvc
+## redis.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_redis_data/_data/. redis-data-pvc
+## discourse.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/community_discourse_shared/_data/. discourse-data-pvc
+## pootle.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_pootle_data/_data/. pootle-data-pvc
+## userguide.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_userguide_data/_data/. userguide-data-pvc
 
 ## QUEUE
 
-## redis.yml
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/support_redis_data/_data/. redis-data-pvc
-## discourse.yml
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/community_discourse_shared/_data/. discourse-data-pvc
-## pootle.yml
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_pootle_data/_data/. pootle-data-pvc
-## userguide.yml
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_userguide_data/_data/. userguide-data-pvc
 
 ## BACKLOG
 
