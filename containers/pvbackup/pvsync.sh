@@ -60,7 +60,8 @@ case $ACTION in
 		SNAPSHOT_NAME=${VOLUME}_$(date +"%Y-%m-%d").tar.xz
 		echo "Snapshot ${VOLUME}..."
 		cd $BASE/$VOLUME
-		tar -cvJf /tmp/$SNAPSHOT_NAME --exclude 'tmp/*' *
+		# We omit some things we universally don't want to backup
+		tar -cvJf /tmp/$SNAPSHOT_NAME --exclude 'tmp/*' --exclude 'backups/*' --exclude 'logs/*' *
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing snapshot! (tar)"
 			exit 1
