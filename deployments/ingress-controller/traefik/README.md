@@ -25,3 +25,17 @@ are auto-created from the k8s, and storage classes are ReadWriteOnce
 
 Traefik works with cert-mananger to prove proof-of-ownership of various URL's through LetsEncrypt.
 ACME HTTP proof to be technical
+
+### How are certs provisoned?
+
+1. cert-manager picks up on ingresses with the following annotation:
+    ```
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    ```
+    > It is recommended to not add the cert-issuer annotation until DNS has been switched over!
+    > cert-manager could easily exhaust the maximum failed SSL cert requests per day if it loops indefinitely
+    > asking for a DNS name which doesn't valdidate!
+2. When an ingress is discovered with the above annotation, cert-manager attempts to provision a certificate for it through letsencrypt ACME HTTP validation.
+3. cert-manager examines the tls.hosts of the ingress to determine which domains it needs a certificate for.
+4. If a certificate is successfully obtained, it is stored within kubernetes in the secret name specified at tls.secretName.
+5. Traefik detects a secret at tls.secretName in the ingress, and uses it for the ingress.
