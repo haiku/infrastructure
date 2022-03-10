@@ -22,7 +22,8 @@
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_userguide_data/_data/. userguide-data-pvc
 
 ## QUEUE
-
+## haikudepotserver.yml
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/cdn_hds_secrets/. haikudepotserver-data-pvc
 
 ## BACKLOG
 
