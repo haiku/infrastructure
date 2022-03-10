@@ -73,7 +73,7 @@ spec:
   - host: i18n.haiku-os.org
     http:
       paths:
-      - path: /pootle/
+      - path: /pootle
         pathType: Prefix
         backend:
           service:
