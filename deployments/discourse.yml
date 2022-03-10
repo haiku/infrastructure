@@ -151,7 +151,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: docker.io/haiku/pvbackup:1.0
+              image: docker.io/haiku/pvbackup:1.1
               args: ["backup", "discourse-data"]
               env:
               - name: S3_HOST
