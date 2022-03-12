@@ -17,32 +17,45 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: docker.io/haiku/haikudepotserver:1.0.128
+        image: haiku/haikudepotserver:1.0.128
+        env:
+        - name: HDS_SMTP_HOST
+          value: "smtp"
+        - name: HDS_AUTHENTICATION_JWS_ISSUER
+          value: "haikuinc.haikudepotserver"
+        - name: HDS_JDBC_URL
+          value: "jdbc:postgresql://postgres:5432/haikudepotserver"
+        - name: HDS_JDBC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: haikudepotserver-pg
+              key: username
+        - name: HDS_JDBC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: haikudepotserver-pg
+              key: password
         resources:
           limits:
             cpu: "1.0"
             memory: "2Gi"
           requests:
-            cpu: "0.5"
+            cpu: "0.50"
             memory: "512Mi"
-        volumeMounts:
-        - name: haikudepotserver-data
-          mountPath: /secrets
-      volumes:
-      - name: haikudepotserver-data
-        persistentVolumeClaim:
-          claimName: haikudepotserver-data-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: haikudepotserver-data-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 128Mi
+        startupProbe:
+          httpGet:
+            path: /__metric/healthcheck
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /__metric/healthcheck
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service
@@ -54,7 +67,7 @@ spec:
   ports:
   - name: web
     port: 80
-    targetPort: 80
+    targetPort: 8080
 ---
 # web frontends for haikudepotserver
 apiVersion: networking.k8s.io/v1
@@ -62,13 +75,13 @@ kind: Ingress
 metadata:
   name: haikudepotserver
   annotations:
-#    cert-manager.io/cluster-issuer: letsencrypt-production
+#   cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
-  tls:
-  - hosts:
-    - depot.haiku-os.org
-    secretName: tls-cert-depot
+# tls:
+# - hosts:
+#   - depot.haiku-os.org
+#   secretName: tls-cert-haikudepotserver
   rules:
   - host: depot.haiku-os.org
     http:
@@ -80,3 +93,55 @@ spec:
             name: haikudepotserver
             port:
               name: web
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-pgbackup
+spec:
+  schedule: "0 0 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pgbackup
+              image: docker.io/haiku/pgbackup:1.0
+              args: ["backup", "haikudepotserver"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 15d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              - name: PG_HOSTNAME
+                value: postgres
+              - name: PG_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: username
+              - name: PG_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: password
