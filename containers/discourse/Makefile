@@ -1,7 +1,9 @@
+VERSION = 2.8.1
+
 default:
-	docker build --no-cache -t docker.io/haiku/discourse:latest .
+	docker build --no-cache -t docker.io/haiku/discourse:$(VERSION) .
 shell:
-	docker run -it docker.io/haiku/discourse:latest /bin/bash -l
+	docker run -it docker.io/haiku/discourse:$(VERSION) /bin/bash -l
 test:
 	docker kill redis || true
 	docker kill discourse || true
@@ -14,8 +16,8 @@ test:
 	docker run -d --name redis --network discourse redis:latest
 	sleep 20
 	docker rm discourse || true
-	docker run --rm --network discourse --env-file test.env docker.io/haiku/discourse:latest bundle exec rake db:create
-	docker run -d --name discourse --network discourse -P --env-file test.env docker.io/haiku/discourse:latest
+	docker run --rm --network discourse --env-file test.env docker.io/haiku/discourse:$(VERSION) bundle exec rake db:create
+	docker run -d --name discourse --network discourse -P --env-file test.env docker.io/haiku/discourse:$(VERSION)
 clean:
 	docker kill redis || true
 	docker kill discourse || true
@@ -25,4 +27,4 @@ clean:
 	docker rm redis || true
 	docker rm discourse || true
 push:
-	docker push docker.io/haiku/discourse:latest
+	docker push docker.io/haiku/discourse:$(VERSION)
