@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: haiku/haikudepotserver:1.0.128
+        image: haiku/haikudepotserver:1.0.129
         env:
         - name: HDS_SMTP_HOST
           value: "smtp"
