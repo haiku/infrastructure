@@ -1,7 +1,7 @@
 #
 # A sane discourse container without the "meta-build" and "launcher"
 #
-FROM ruby:3.0-bullseye
+FROM docker.io/ruby:3.0-bullseye
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
@@ -19,7 +19,7 @@ RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data
 # Install Discourse
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
 RUN mkdir -p /apps && cd /apps && tar xvf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
-RUN gem install bundler:2.3.4
+RUN gem install bundler:2.3.4 && npm install -g terser
 RUN cd /apps/discourse && bundle install
 
 COPY supervisord.conf /etc/supervisord.conf
