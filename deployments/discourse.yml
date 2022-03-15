@@ -13,6 +13,9 @@ spec:
   selector:
     matchLabels:
       app: discourse
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage and gerrit lock files
+    type: Recreate
   template:
     metadata:
       labels:
@@ -20,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: docker.io/haiku/discourse:2.8.1
+        image: docker.io/haiku/discourse:2.8.1.1
         resources:
           limits:
             cpu: "2.0"
