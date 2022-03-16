@@ -158,6 +158,56 @@ Pressing ctl+c will terminate the port-forwarding proxy
 *Manual database import:*
 ```cat coolstuff.sql | kubectl exec -i deployment/postgres -- psql -U postgres```
 
+## Forcing CronJobs
+
+We leverage multiple jobs to perform various automatic activities within kubernetes. Some example
+jobs include postgresql backups to s3, persistent volume backups to s3, and syncing various git
+repositories.
+
+Once and a while, you may want to force these jobs to run before performing maintenance, or for
+testing purposes.
+
+* pgbackup - PostgreSQL backup jobs
+* pvbackup - Persistent volume backup jobs
+
+> There are several example restore jobs in deployments/other.  These can be manually edited
+> and applied to restore data.  It's highly recommended to review these CAREFULLY before use
+> as a mistake could result in unattended data loss.
+>
+> These restore jobs should be used on empty databases / persistent volumes only!
+
+1. Listing CronJobs
+    ```
+    $ kubectl get cronjobs
+    NAME                        SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+    discourse-pgbackup          0 0 * * 1,4   False     0        2d14h           6d13h
+    discourse-pvbackup          0 3 * * 3     False     0        11h             6d17h
+    gerrit-github-sync          0 * * * *     False     0        38m             13d
+    gerrit-pvbackup             0 1 * * 1,4   False     0        2d13h           8d
+    haikudepotserver-pgbackup   0 0 * * 1,4   False     0        2d14h           3d21h
+    .
+    ```
+2. Forcing a CronJob to run
+    This is a great thing to do before any maintenance :-)
+    ```
+    $ kubectl create job --from=cronjob/discourse-pgbackup discourse-pgbackup-manual-220316
+    ```
+3. Monitoring manual CronJob
+    ```
+    $ kubectl get jobs
+    NAME                                 COMPLETIONS   DURATION   AGE
+    discourse-pgbackup-manual-220316     1/1           1m         1m
+
+    $ kubectl logs jobs/discourse-pgbackup-manual-220316
+    Backup discourse...
+    Backup complete!
+    Encryption complete!
+    Added `s3remote` successfully.
+    `/tmp/discourse_2022-03-14.sql.xz.gpg` -> `s3remote/haiku-backups/pg-discourse/discourse_2022-03-14.sql.xz.gpg`
+    Total: 0 B, Transferred: 136.45 MiB, Speed: 77.32 MiB/s
+    Snapshot of discourse completed successfully! (haiku-backups/pg-discourse/discourse_2022-03-14.sql.xz.gpg)
+    ```
+
 # Secrets
 
 For obvious reasons, :key: secrets are omitted from this repository.
