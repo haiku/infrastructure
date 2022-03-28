@@ -1,0 +1,105 @@
+---
+resource_types:
+  - name: irccat-resource
+    type: docker-image
+    source:
+      repository: haiku/irccat-resource
+roles:
+  - name: owner
+    github:
+      teams: ["haiku:infrastructure"]
+    local:
+      users: ["admin"]
+resources:
+  - name: haiku-git
+    type: git
+    icon: git
+    source:
+      uri: https://review.haiku-os.org/haiku.git
+      branch: ((branch))
+  - name: haikuporter-git
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/haikuports/haikuporter.git
+      branch: ((branch))
+  - name: haikuports-git
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/haikuports/haikuports.git
+      branch: ((branch))
+  - name: haikuports-cross-git
+    type: git
+    icon: git
+    source:
+      uri: https://github.com/haikuports/haikuports.cross.git
+      branch: ((branch))
+  - name: irc
+    type: irccat-resource
+    icon: bullhorn
+    source:
+      uri: https://build.haiku-os.org/irccat/send
+      secret: ((irccat-secret))
+task-build-image: &task-build-image
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/toolchain-worker-((branch)) }
+  inputs:
+    - name: haiku-git
+    - name: haikuporter-git
+    - name: haikuports-git
+    - name: haikuports-cross-git
+  outputs:
+    - name: generated.((arch))
+  run:
+    path: /bin/bash
+    args:
+      - -c
+      - |
+        cd generated.((arch))
+        TOOLCHAIN_PRIMARY=""
+        TOOLCHAIN_SECONDARY=""
+        case "((arch))" in
+            "x86_gcc2h")
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
+                SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
+                ;;
+            "x86_64h")
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_64)
+                SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
+                ;;
+            *)
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+        esac
+        ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY --bootstrap ../haikuporter-git/haikuporter ../haikuports-cross-git ../haikuports-git
+        jam -j1 -q @bootstrap-raw
+# Jobs
+jobs:
+  - name: haiku-bootstrap-((arch))
+    public: true
+    #on_failure:
+    #  try:
+    #    put: irc
+    #    params:
+    #      message: "haiku.%PURPLE((branch))%NORMAL: %GREENbootstrap%NORMAL of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
+    plan:
+      - get: haiku-git
+        trigger: false
+      - get: haikuporter-git
+        trigger: false
+      - get: haikuports-git
+        trigger: false
+      - get: haikuports-cross-git
+        trigger: false
+      - task: bootstrap-((branch))-((arch))
+        config:
+          << : *task-build-image

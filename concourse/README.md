@@ -22,7 +22,7 @@ Concourse is now running on localhost:8080. The username / password is test/test
 
 Install the fly CLI by downloading it from the web ui and placing it at /usr/local/bin/fly
 
-### Bootstrap
+### Setup
 
 Create the initial required teams as an admin user...
 
@@ -68,3 +68,25 @@ fly -t haiku set-team -n r1beta1 --github-team=haiku:infrastructure --non-intera
 ## Deploying
 
 ./deploy.sh secrets.yml
+
+## Teams
+
+We use the "teams" feature of concourse to group related jobs together.
+
+### Special Teams
+
+* bootstrap - These pipelines run a bootstrap. These are generally hit or miss on functionality.
+  * No outputs, mostly for debugging if our bootstap works for a specific architecture
+* continuous - These pipelines run on every push to haiku.
+  * Reports build failures to irc and elsewhere
+
+### Release Teams
+
+* nightly - These pipelines run nightly and push resulting artifacts to s3
+  * Generate nightly images and repositories
+  * aka everything on download.haiku-os.org and at https://eu.hpkg.haiku-os.org/haiku/master/(arch)/current
+* r1beta3 - Release pipelines run on branch commits and push resulting artifacts to s3
+  * Generate release images and repositories
+    * Release images only generally used for release candidates until final release.
+    * Repositories built through the whole life of a release to provide updates.
+  * aka everything on download.haiku-os.org and at https://eu.hpkg.haiku-os.org/haiku/r1beta3/(arch)/current

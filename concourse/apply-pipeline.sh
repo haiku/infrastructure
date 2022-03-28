@@ -50,7 +50,7 @@ else
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 fi
 
-if [ "$TEAM" != "continuous" ]; then
+if [ "$TEAM" != "continuous" ] && [ "$TEAM" != "bootstrap" ]; then
 	echo "Deploy toolchain builder..."
 	$FLY_CLI -t haiku set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -l $SECRETS -c pipelines/toolchain-builder.yml
 	$FLY_CLI -t haiku expose-pipeline -p toolchain-$BRANCH
@@ -83,6 +83,8 @@ for ARCH in $ARCHES; do
 
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
+	elif [ "$TEAM" == "bootstrap" ]; then
+		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
 	else
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -v bucket_image=$BUCKET_IMAGE -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
