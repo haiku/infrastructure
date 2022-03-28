@@ -1,0 +1,144 @@
+### Concourse
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: concourse-web
+  labels:
+    app: concourse-web
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: concourse-web
+  template:
+    metadata:
+      labels:
+        app: concourse-web
+    spec:
+      containers:
+      - name: concourse-web
+        image: docker.io/concourse/concourse:7.6.0
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "512Mi"
+          requests:
+            cpu: "0.25"
+            memory: "48Mi"
+        env:
+        - name: CONCOURSE_EXTERNAL_URL
+          value: "https://ci.haiku-os.org"
+        - name: CONCOURSE_POSTGRES_HOST
+          value: "postgres"
+        - name: CONCOURSE_POSTGRES_PORT
+          value: "5432"
+        - name: CONCOURSE_TSA_BIND_PORT
+          value: "8022"
+        - name: CONCOURSE_TSA_HOST_KEY
+          value: "/keys/tsa_host_key"
+        - name: CONCOURSE_TSA_AUTHORIZED_KEYS
+          value: "/keys/authorized_worker_keys"
+        - name: CONCOURSE_SESSION_SIGNING_KEY
+          value: "/keys/session_signing_key"
+        - name: CONCOURSE_CONTAINER_PLACEMENT_STRATEGY
+          value: "limit-active-tasks"
+        - name: CONCOURSE_MAX_ACTIVE_TASKS_PER_WORKER
+          value: "2"
+        - name: CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN
+          value: "50"
+        - name: CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN
+          value: "100"
+        - name: CONCOURSE_POSTGRES_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: concourse-pg
+              key: database
+        - name: CONCOURSE_POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: concourse-pg
+              key: username
+        - name: CONCOURSE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: concourse-pg
+              key: password
+        - name: CONCOURSE_MAIN_TEAM_LOCAL_USER
+          valueFrom:
+            secretKeyRef:
+              name: concourse-auth
+              key: local-user
+        - name: CONCOURSE_GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: concourse-auth
+              key: github-client-id
+        - name: CONCOURSE_GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: concourse-auth
+              key: github-client-secret
+        - name: CONCOURSE_MAIN_TEAM_GITHUB_TEAM
+          valueFrom:
+            secretKeyRef:
+              name: concourse-auth
+              key: github-team
+        - name: CONCOURSE_MAIN_TEAM_GITHUB_TEAM
+          valueFrom:
+            secretKeyRef:
+              name: concourse-auth
+              key: github-user
+        volumeMounts:
+        - name: keys
+          mountPath: "/keys"
+      volumes:
+      - name: keys
+        secret:
+          secretName: concourse-keys
+          items:
+          - key: session-signing-key
+            path: session_signing_key
+          - key: tsa-host-key
+            path: tsa_host_key
+          - key: authorized-worker-keys
+            path: authorized_worker_keys
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: concourse-web
+spec:
+  selector:
+    app: concourse-web
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+---
+# web frontend for concourse
+# originally I wanted to put this on build.haiku-os.org/concourse,
+# however concourse doesn't support prefix paths (worker communication)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: git-web
+  annotations:
+#   cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - ci.haiku-os.org
+    secretName: tls-cert-ci
+  rules:
+  - host: ci.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: concourse-web
+            port:
+              name: web
