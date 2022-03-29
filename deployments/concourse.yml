@@ -102,7 +102,6 @@ spec:
             path: tsa_host_key
           - key: authorized-worker-keys
             path: authorized_worker_keys
-
 ---
 apiVersion: v1
 kind: Service
@@ -142,3 +141,40 @@ spec:
             name: concourse-web
             port:
               name: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: concourse-atc
+spec:
+  selector:
+    app: concourse-web
+  ports:
+  - name: atc
+    port: 8022
+    targetPort: 8022
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: concourse-atcmiddle
+spec:
+  inFlightConn:
+    amount: 25
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: concourse-atctcp
+spec:
+  entryPoints:
+    - sshatc
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: concourse-atc
+      port: 8022
+      weight: 10
+      terminationDelay: 900000
+    middlewares:
+    - name: concourse-atcmiddle

@@ -65,6 +65,8 @@ spec:
           containerPort: 443
         - name: rsync
           containerPort: 12000
+	- name: sshatc
+          containerPort: 8022
         - name: sftp
           containerPort: 1099
         args:
@@ -88,6 +90,7 @@ spec:
         - --entrypoints.smtp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.ssh.address=:22
         - --entrypoints.ssh.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.sshatc.address=:8022
         - --ping.entryPoint=web
         - --api
         - --api.dashboard=true
@@ -130,6 +133,9 @@ spec:
     - protocol: TCP
       port: 12000
       name: rsync
+    - protocol: TCP
+      port: 8022
+      name: sshatc
     - protocol: TCP
       port: 1099
       name: sftp
