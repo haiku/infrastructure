@@ -1,0 +1,79 @@
+### Download
+### A python script and template html to parse s3 buckets
+### of nightly images, and present them on download.haiku-os.org
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: download
+  labels:
+    app: download
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: download
+  template:
+    metadata:
+      labels:
+        app: download
+    spec:
+      containers:
+      - name: download
+        image: docker.io/haiku/download:20220331
+        env:
+        - name: CONFIG_PATH
+          value: "/secrets/config.toml"
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+        volumeMounts:
+        - name: download-config
+          mountPath: "/secrets"
+      volumes:
+      - name: download-config
+        secret:
+          secretName: download-config
+          items:
+          - key: config.toml
+            path: config.toml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: download
+spec:
+  selector:
+    app: download
+  ports:
+  - name: www
+    port: 8080
+    targetPort: 8080
+---
+# web frontend for download
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: download
+  annotations:
+#   cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - ci.haiku-os.org
+    secretName: tls-cert-download
+  rules:
+  - host: download.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: download
+            port:
+              name: www
