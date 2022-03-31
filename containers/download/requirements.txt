@@ -2,6 +2,3 @@
 boto
 Mako
 toml
-
-# tools for the image
-supervisor
