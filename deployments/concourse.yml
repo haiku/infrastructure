@@ -6,7 +6,7 @@ metadata:
   labels:
     app: concourse-web
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: concourse-web
@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: concourse-web
-        image: docker.io/concourse/concourse:7.6.0
+        image: docker.io/concourse/concourse:7.7.1
+        args: [ "web" ]
         resources:
           limits:
             cpu: "1.0"
@@ -111,9 +112,9 @@ spec:
   selector:
     app: concourse-web
   ports:
-  - name: web
-    port: 80
-    targetPort: 80
+  - name: www
+    port: 8080
+    targetPort: 8080
 ---
 # web frontend for concourse
 # originally I wanted to put this on build.haiku-os.org/concourse,
@@ -123,7 +124,7 @@ kind: Ingress
 metadata:
   name: concourse-web
   annotations:
-#   cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
@@ -140,7 +141,7 @@ spec:
           service:
             name: concourse-web
             port:
-              name: web
+              name: www
 ---
 apiVersion: v1
 kind: Service
