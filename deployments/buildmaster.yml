@@ -16,56 +16,6 @@
 # deleted. In theory we could create a volume snapshot
 # of the unattached volume and restore it to a new
 # PVC via kubernetes.
-
-## Teleport doesn't seem used lol
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: teleport
-#  labels:
-#    app: teleport
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: teleport
-#  template:
-#    metadata:
-#      labels:
-#        app: teleport
-#    spec:
-#      containers:
-#      - name: teleport
-#        image: mmlr/teleport
-#        command: ["./teleport"]
-#        args: ["server", "5825", "/run/secrets/auth.db"]
-#        volumeMounts:
-#        - name: teleport-db
-#          readOnly: true
-#          mountPath: /run/secrets
-#      volumes:
-#        - name: teleport-db
-#          secret:
-#            secretName: teleport-db
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: worker-teleport
-#spec:
-#  selector:
-#    app: teleport
-#  ports:
-#  - name: teleport 
-#    port: 5825
-#    targetPort: 5825
-#  - name: mmlr-x86-64
-#    port: 5001
-#    targetPort: 5001
-#  - name: mmlr-x86-gcc2
-#    port: 5000
-#    targetPort: 5000
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
