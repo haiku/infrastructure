@@ -59,12 +59,12 @@ kind: Ingress
 metadata:
   name: download
   annotations:
-#   cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
 spec:
   tls:
   - hosts:
-    - ci.haiku-os.org
+    - download.haiku-os.org
     secretName: tls-cert-download
   rules:
   - host: download.haiku-os.org
