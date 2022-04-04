@@ -23,10 +23,10 @@ metadata:
   labels:
     app: haikuporter
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
-      app: haikuporter
+      app: buildmaster
   template:
     metadata:
       labels:
@@ -127,7 +127,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+      storage: 250Gi
 ---
 # pretty much just Haiku sources at this point
 apiVersion: v1
@@ -141,3 +141,79 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildmaster
+spec:
+  selector:
+    app: buildmaster
+  ports:
+  - name: www
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: www-build
+  labels:
+    app: www-build
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: www-build
+  template:
+    metadata:
+      labels:
+        app: www-build
+    spec:
+      containers:
+      - name: www-build
+        image: docker.io/haiku/www-build:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: www-build
+spec:
+  selector:
+    app: www-build
+  ports:
+  - name: www
+    port: 80
+    targetPort: 80
+---
+# web frontend for buildmaster
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: buildmaster
+  annotations:
+#   cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - build.haiku-os.org
+    secretName: tls-cert-build
+  rules:
+  - host: build.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: www-build
+            port:
+              name: www
+      - path: /buildmaster
+        pathType: Prefix
+        backend:
+          service:
+            name: buildmaster
+            port:
+              name: www
