@@ -7,6 +7,9 @@ metadata:
     app: trac
 spec:
   replicas: 1
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage
+    type: Recreate
   selector:
     matchLabels:
       app: trac
