@@ -30,7 +30,7 @@ spec:
   template:
     metadata:
       labels:
-        app: haikuporter
+        app: buildmaster
     spec:
       containers:
       - name: buildmaster-frontend
