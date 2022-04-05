@@ -1,0 +1,69 @@
+# This mounts the specified filesystem on every k8s node
+# via rclone + fuse. It can then be consumed anywhere within
+# the cluster.  We shouldn't serve data from this mount for
+# public consumption.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: rclonefs-provider
+  name: rclonefs-provider
+spec:
+  template:
+    metadata:
+      labels:
+        app: rclonefs-haiku-repo-haikuports
+    spec:
+      containers:
+      - name: rclonefs
+        image: haiku/rclonefs:3.15-1
+        securityContext:
+          privileged: true
+        env:
+        - name: BACKEND
+          value: "tardigrade"
+        - name: BUCKET
+          value: "haiku-repo-haikuports"
+        - name: STORJ_SATELLITE
+          value: "europe-west-1.storj.io"
+        - name: STORJ_ACCESS_GRANT
+          valueFrom:
+            secretKeyRef:
+              name: storj-accessgrant
+              key: access-grant
+        - name: STORJ_PASS
+          valueFrom:
+            secretKeyRef:
+              name: storj-accessgrant
+              key: password
+        volumeMounts:
+        - name: devfuse
+          mountPath: /dev/fuse
+        - name: rclonefs
+          mountPath: /rclonefs:shared
+      volumes:
+      - name: devfuse
+        hostPath:
+          path: /dev/fuse
+      - name: rclonefs
+        hostPath: # gcp gke friendly path
+          path: /home/haiku-repo-haikuports
+---
+#usage:
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: test-pd
+#spec:
+#  containers:
+#  - name: s3-test-container
+#    image: nginx
+#    securityContext:
+#      privileged: true
+#    volumeMounts:
+#    - name: data
+#      mountPath: /repo-haikuports:shared
+#  volumes:
+#  - name: data
+#    hostPath:
+#      path: /home/haiku-repo-haikuports
