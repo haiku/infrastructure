@@ -48,6 +48,40 @@ spec:
     port: 80
     targetPort: 8000
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hpkg-haikuports-config
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes 3;
+    error_log /dev/stdout;
+    events {
+      worker_connections 1024;
+    }
+    http {
+      access_log /dev/stdout;
+      server {
+        listen 80;
+        server_name _;
+        location /haikuports/master/build-packages {
+          root /usr/share/nginx/html/build-packages;
+          autoindex on;
+        }
+        location /haikuports {
+          root /usr/share/nginx/html/repository;
+          autoindex on;
+        }
+        location /healthz {
+          return 200 "healthy boi!\n";
+        }
+        location / {
+          return 302 https://download.haiku-os.org;
+        }
+      }
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -78,11 +112,33 @@ spec:
       containers:
       - name: nginx
         image: docker.io/nginx:stable-alpine
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: www
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: www
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 3
         volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx
+          readOnly: true
         - name: buildmaster-packages
           mountPath: "/usr/share/nginx/html"
           readOnly: true
       volumes:
+        - name: nginx-config
+          configMap:
+            name: hpkg-haikuports-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
         - name: buildmaster-packages
           persistentVolumeClaim:
             claimName: buildmaster-packages-pvc
