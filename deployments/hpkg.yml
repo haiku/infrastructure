@@ -66,7 +66,7 @@ data:
         listen 80;
         server_name _;
         location /haikuports/master/build-packages {
-          alias /usr/share/nginx/html/build-packages;
+          alias /usr/share/nginx/html/build-packages/master;
           autoindex off;
         }
         location /haikuports {
