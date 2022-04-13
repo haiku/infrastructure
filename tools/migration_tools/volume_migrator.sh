@@ -17,10 +17,11 @@ fi
 
 SOURCE=$1
 VOLUME=$2
+WORK=/home/kallisti5/migration/$VOLUME
 
 echo "Beginning rsync of $SOURCE..."
-mkdir -p /tmp/$VOLUME
-rsync --exclude 'tmp' --exclude 'backups' --exclude 'backup' -avz --delete -e "ssh -p 2222" $1 /tmp/$VOLUME
+mkdir -p $WORK
+rsync --exclude 'tmp' --exclude 'backups' --exclude 'backup' -avzH --delete -e "ssh -p 2222" $1 $WORK
 
 echo "Rsync complete"
 
@@ -62,10 +63,10 @@ echo "Installing rsync..."
 kubectl exec pod/pvc-$VOLUME -- apk add rsync
 
 echo "Beginning rsync to pod..."
-rsync -za0v --delete --blocking-io --rsync-path="/pvcs/${VOLUME}" --rsh="kubectl exec pvc-${VOLUME} -i -- " /tmp/$VOLUME/. rsync:/pvcs/${VOLUME}
+rsync -za0v --delete --blocking-io --rsync-path="/pvcs/${VOLUME}" --rsh="kubectl exec pvc-${VOLUME} -i -- " $WORK/. rsync:/pvcs/${VOLUME}
 
 echo "Cleaning up migration pod..."
 kubectl delete pod/pvc-$VOLUME
 
 echo "Done!"
-echo "You may want to erase the data in /tmp/$VOLUME once you go live!"
+echo "You may want to erase the data in $WORK once you go live!"
