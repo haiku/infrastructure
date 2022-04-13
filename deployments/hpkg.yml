@@ -44,7 +44,7 @@ spec:
   selector:
     app: hpkg-haiku
   ports:
-  - name: www
+  - name: hpkg-haiku-www
     port: 80
     targetPort: 8000
 ---
@@ -66,12 +66,12 @@ data:
         listen 80;
         server_name _;
         location /haikuports/master/build-packages {
-          root /usr/share/nginx/html/build-packages;
-          autoindex on;
+          alias /usr/share/nginx/html/build-packages;
+          autoindex off;
         }
         location /haikuports {
-          root /usr/share/nginx/html/repository;
-          autoindex on;
+          alias /usr/share/nginx/html/repository;
+          autoindex off;
         }
         location /healthz {
           return 200 "healthy boi!\n";
@@ -115,13 +115,13 @@ spec:
         readinessProbe:
           httpGet:
             path: /healthz
-            port: www
+            port: 80
           initialDelaySeconds: 15
           periodSeconds: 5
         livenessProbe:
           httpGet:
             path: /healthz
-            port: www
+            port: 80
           initialDelaySeconds: 30
           periodSeconds: 5
           failureThreshold: 3
@@ -155,34 +155,44 @@ spec:
     port: 80
     targetPort: 80
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-hpkg-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /haiku/
+---
 # web frontends for package repos
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hpkg
   annotations:
-#   cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-hpkg-prefix@kubernetescrd
 spec:
-#  tls:
-#  - hosts:
-#    - eu.hpkg.haiku-os.org
-#    secretName: tls-cert-eu-hpkg
+  tls:
+  - hosts:
+    - eu.hpkg.haiku-os.org
+    secretName: tls-cert-eu-hpkg
   rules:
   - host: eu.hpkg.haiku-os.org
     http:
       paths:
-      - path: /haiku
+      - path: /haiku/
         pathType: Prefix
         backend:
           service:
             name: hpkg-haiku
             port:
-              name: www
-      - path: /haikuports
+              number: 80
+      - path: /
         pathType: Prefix
         backend:
           service:
             name: hpkg-haikuports
             port:
-              name: www
+              number: 80

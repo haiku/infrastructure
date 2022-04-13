@@ -21,14 +21,14 @@
 ## userguide.yml
 #./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/dev_userguide_data/_data/. userguide-data-pvc
 
-## QUEUE
-
 # buildmaster.yml
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_data_master_x86_64/_data/. buildmaster-data-x86-64-pvc
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_data_master_x86_gcc2/_data/. buildmaster-data-x86-64-pvc
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_sources/_data/. buildmaster-sources-pvc
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_data_master_x86_64/_data/. buildmaster-data-x86-64-pvc
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_data_master_x86_gcc2/_data/. buildmaster-data-x86-gcc2-pvc
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/volumes/ci_sources/_data/. buildmaster-sources-pvc
+#
+#./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/plugins/0b25ebdee8b48451b1459c6c1965570c948ef97028d78e96057a0962b482ce84/propagated-mount/volumes/ci-packages/data/. \
+#	buildmaster-packages-pvc
 
-./volume_migrator.sh root@limerick.ams3.haiku-os.org:/var/lib/docker/plugins/0b25ebdee8b48451b1459c6c1965570c948ef97028d78e96057a0962b482ce84/propagated-mount/volumes/ci-packages/data/. \
-	buildmaster-packages-pvc
+## QUEUE
 
 ## BACKLOG
