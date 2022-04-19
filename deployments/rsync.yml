@@ -30,7 +30,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: rsync-server
-        image: docker.io/haiku/repo-mirror:0.2
+        image: docker.io/haiku/repo-mirror:0.4
         resources:
           limits:
             cpu: "1.0"
@@ -38,6 +38,8 @@ spec:
         env:
         - name: VOLUMES
           value: "/haikuports-data"
+        - name: PROXY_PROTOCOL
+          value: "yes"
         volumeMounts:
         - name: buildmaster-packages
           mountPath: /haikuports-data
@@ -109,9 +111,11 @@ spec:
   routes:
   - match: HostSNI(`*`)
     services:
-    - name: rsync-server
+    - name: rsync
       port: 12000
       weight: 10
       terminationDelay: 900000
+      proxyProtocol:
+        version: 1
     middlewares:
     - name: rsync-ingressmiddle

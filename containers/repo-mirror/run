@@ -6,6 +6,9 @@ echo "log file = /dev/stdout" > /etc/rsyncd.conf
 echo "port = 12000" >> /etc/rsyncd.conf
 echo "use chroot = yes" >> /etc/rsyncd.conf
 echo "max connections = 10" >> /etc/rsyncd.conf
+if [ ! -z "$PROXY_PROTOCOL" ]; then
+	echo "proxy protocol = $PROXY_PROTOCOL" >> /etc/rsyncd.conf
+fi
 
 for V in ${VOLUMES}; do
 	SUBPATH=${V}
