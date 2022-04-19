@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rsync-server
+  labels:
+    app: rsync-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rsync-server
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rsync-server
+    spec:
+      # Run on the buildmaster node for shared access to packages pvc
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - buildmaster
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: rsync-server
+        image: docker.io/haiku/repo-mirror:0.2
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+        env:
+        - name: VOLUMES
+          value: "/haikuports-data"
+        volumeMounts:
+        - name: buildmaster-packages
+          mountPath: /haikuports-data
+        - name: access-lists
+          mountPath: /run/config
+      volumes:
+      - name: access-lists
+        configMap:
+          name: rsync-access-list
+      - name: buildmaster-packages
+        persistentVolumeClaim:
+          claimName: buildmaster-packages-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rsync-access-list
+data:
+  haikuports-master: |2
+    # cdn.haiku.nz (jessicah)
+    101.100.139.54
+    # mirror.fsmg.org.nz
+    163.7.134.123
+    163.7.134.121
+    2404:138:134:120::2
+    2404:138:134:122::2
+    # home (kallisti5) (ipfs testing)
+    70.112.18.26
+    # mirror (kallisti5) (hpkr.lax1.terarocket.io)
+    45.63.53.102
+    # haiku.datente.com  (@warrenmyers)
+    136.243.154.164
+    # tnonline.net (mail:at:lechevalier.se)
+    81.170.131.138
+    2001:470:28:704::1
+    # truenetwork.ru
+    94.247.111.11
+    94.247.111.12
+    94.247.111.13
+    94.247.111.14
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rsync
+spec:
+  selector:
+    app: rsync-server
+  ports:
+  - name: rsync
+    port: 12000
+    targetPort: 12000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: rsync-ingressmiddle
+spec:
+  inFlightConn:
+    amount: 10
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: rsync-ingresstcp
+spec:
+  entryPoints:
+    - rsync
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: rsync-server
+      port: 12000
+      weight: 10
+      terminationDelay: 900000
+    middlewares:
+    - name: rsync-ingressmiddle

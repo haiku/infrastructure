@@ -1,5 +1,7 @@
 #!/bin/sh
 
+CONFIG_PATH="/run/config"
+
 echo "log file = /dev/stdout" > /etc/rsyncd.conf
 echo "port = 12000" >> /etc/rsyncd.conf
 echo "use chroot = yes" >> /etc/rsyncd.conf
@@ -31,10 +33,12 @@ for V in ${VOLUMES}; do
 
 			echo "hosts deny = *" >> /etc/rsyncd.conf
 			ALLOW=""
-			if [ -f /repo-whitelist/${SHARENAME}/rsync-whitelist ]; then
-				for i in $(sed -e '/^#/d' /repo-whitelist/${SHARENAME}/rsync-whitelist); do
+			if [ -f $CONFIG_PATH/${SHARENAME} ]; then
+				for i in $(sed -e '/^#/d' $CONFIG_PATH/${SHARENAME}); do
 					ALLOW="${ALLOW} $i"
 				done
+			else
+				echo "Warning: No allowed hosts for $V in $CONFIG_PATH"
 			fi
 			echo "hosts allow = ${ALLOW}" >> /etc/rsyncd.conf
 		fi

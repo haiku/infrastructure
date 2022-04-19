@@ -1,4 +1,4 @@
-FROM alpine
+FROM docker.io/alpine:3.15
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 RUN apk add --update rsync
