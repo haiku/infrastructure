@@ -37,12 +37,14 @@ spec:
             memory: "1Gi"
         env:
         - name: VOLUMES
-          value: "/haikuports-data"
+          value: "/haikuports-data /haiku-release-mirror"
         - name: PROXY_PROTOCOL
           value: "yes"
         volumeMounts:
         - name: buildmaster-packages
           mountPath: /haikuports-data
+        - name: haiku-release-mirror
+          mountPath: /haiku-release-mirror/haiku-release
         - name: access-lists
           mountPath: /run/config
       volumes:
@@ -52,12 +54,37 @@ spec:
       - name: buildmaster-packages
         persistentVolumeClaim:
           claimName: buildmaster-packages-pvc
+      - name: haiku-release-mirror
+        persistentVolumeClaim:
+          claimName: haiku-release-mirror
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: rsync-access-list
 data:
+  haiku-release: |2
+    # cdn.haiku.nz (jessicah)
+    101.100.139.54
+    # mirror.fsmg.org.nz
+    163.7.134.123
+    163.7.134.121
+    2404:138:134:120::2
+    2404:138:134:122::2
+    # home (kallisti5) (ipfs testing)
+    70.112.18.26
+    # mirror (kallisti5) (hpkr.lax1.terarocket.io)
+    45.63.53.102
+    # haiku.datente.com  (@warrenmyers)
+    136.243.154.164
+    # tnonline.net (mail:at:lechevalier.se)
+    81.170.131.138
+    2001:470:28:704::1
+    # truenetwork.ru
+    94.247.111.11
+    94.247.111.12
+    94.247.111.13
+    94.247.111.14
   haikuports-master: |2
     # cdn.haiku.nz (jessicah)
     101.100.139.54
@@ -93,6 +120,19 @@ spec:
     port: 12000
     targetPort: 12000
 ---
+# state data for builds like logs of buildruns, buildrun id
+# tracking, builder connection information.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: haiku-release-mirror
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: MiddlewareTCP
 metadata:
@@ -119,3 +159,56 @@ spec:
         version: 1
     middlewares:
     - name: rsync-ingressmiddle
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haiku-release-mirror
+spec:
+  schedule: "0 6 * * 0"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where gerrit is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - buildmaster
+                topologyKey: kubernetes.io/hostname
+          restartPolicy: Never
+          containers:
+            - name: rclone-mirror
+              image: docker.io/haiku/rclone-mirror:3.15-3
+              env:
+              - name: BACKEND
+                value: s3
+              - name: BUCKET
+                value: haiku-release
+              - name: S3_ENDPOINT
+                value: "https://s3.us-east-1.wasabisys.com"
+              - name: S3_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: wasabi-access-ro-s3
+                    key: s3_key
+              - name: S3_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: wasabi-access-ro-s3
+                    key: s3_secret
+              volumeMounts:
+              - name: haiku-release-mirror
+                mountPath: /data
+          volumes:
+          - name: haiku-release-mirror
+            persistentVolumeClaim:
+              claimName: haiku-release-mirror
