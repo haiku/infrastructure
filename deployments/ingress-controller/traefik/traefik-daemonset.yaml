@@ -115,6 +115,8 @@ kind: Service
 metadata:
   name: traefik-ingress-service
   namespace: kube-system
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
