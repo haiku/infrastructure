@@ -69,6 +69,8 @@ spec:
           containerPort: 8022
         - name: sftp
           containerPort: 1099
+        - name: gemini
+          containerPort: 1965
         args:
         - --accesslog=true
         - --accesslog.filepath=/var/log/access.log
@@ -94,6 +96,8 @@ spec:
         - --entrypoints.ssh.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.sshatc.address=:8022
         - --entrypoints.sshatc.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.gemini.address=:1965
+        - --entrypoints.gemini.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --ping.entryPoint=web
         - --api
         - --api.dashboard=true
@@ -144,6 +148,9 @@ spec:
     - protocol: TCP
       port: 1099
       name: sftp
+    - protocol: TCP
+      port: 1965
+      name: gemini
 ---
 apiVersion: networking.k8s.io/v1
 kind: IngressClass
