@@ -1,0 +1,60 @@
+#!/bin/sh
+
+if [ -z "$CONFIG_PATH" ]; then
+	echo "info: CONFIG_PATH undefined, assuming /run/config"
+	export CONFIG_PATH=/run/config
+fi
+
+CONFIG=/etc/nginx/nginx.conf
+
+cat <<EOF > $CONFIG
+user nginx;
+worker_processes 2;
+error_log /dev/stdout;
+events {
+  worker_connections 1024;
+}
+http {
+  access_log /dev/stdout;
+  server {
+    listen 80;
+    server_name _;
+    location / {
+      return 302 https://www.haiku-os.org;
+    }
+    location /healthz {
+      return 200 "Healthy!";
+    }
+  }
+EOF
+
+# Here we append any simple "redirects" from config
+for i in $(find $CONFIG_PATH -type f); do
+	NAME=$(basename $i)
+	TARGET=$(cat $i | head -1 | cut -d';' -f1)
+	INCLUDE_REQUEST=$(cat $i | head -1 | cut -d';' -f2)
+	POSTFIX=""
+
+	echo "adding $i..."
+	if [ "$INCLUDE_REQUEST" == "true" ]; then
+		POSTFIX="\$request_uri"
+	fi
+cat <<EOF >> $CONFIG
+  server {
+    listen 80;
+    server_name $NAME;
+    return 302 $TARGET$POSTFIX;
+  }
+EOF
+done
+
+echo "}" >> $CONFIG
+
+nginx -t
+if [ $? -ne 0 ]; then
+	echo "WARNING: Error in nginx config"
+	exit 1;
+fi
+
+echo "Starting nginx..."
+exec nginx -g "daemon off;"

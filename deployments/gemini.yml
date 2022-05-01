@@ -1,0 +1,70 @@
+### Gemini
+### A tiny website for low-bandwidth users.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gemini
+  labels:
+    app: gemini
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gemini
+  template:
+    metadata:
+      labels:
+        app: gemini
+    spec:
+      containers:
+      - name: gemini 
+        image: docker.io/haiku/website-gemini:aea5b95
+        env:
+        - name: TLS_HOSTNAME
+          value: "lofi.haiku-os.org"
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "128Mi"
+          requests:
+            cpu: "0.25"
+            memory: "16Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gemini
+spec:
+  selector:
+    app: gemini
+  ports:
+  - name: gemini
+    port: 1965
+    targetPort: 1965
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: gemini-ingressmiddle
+spec:
+  inFlightConn:
+    amount: 256
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: gemini-ingresstcp
+spec:
+  entryPoints:
+    - gemini
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: gemini
+      port: 1965
+      weight: 10
+      terminationDelay: 30
+#      proxyProtocol:
+#        version: 1
+    middlewares:
+    - name: gemini-ingressmiddle

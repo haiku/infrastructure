@@ -1,0 +1,115 @@
+# Redirect things to places
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redirector-config
+data:
+  haiku-os.org: https://www.haiku-os.org;true
+  api.haiku-os.org: https://www.haiku-os.org/docs/api;true
+  lofi.haiku-os.org: https://www.haiku-os.org;false
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redirector-www-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - haiku-os.org
+    secretName: tls-cert-haiku-os
+  rules:
+  - host: haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: redirector
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redirector-misc-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - lofi.haiku-os.org
+    - api.haiku-os.org
+    secretName: tls-cert-redirector
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: redirector
+            port:
+              number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redirector
+  labels:
+    app: redirector
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redirector
+  template:
+    metadata:
+      labels:
+        app: redirector
+    spec:
+      containers:
+      - name: redirector
+        image: docker.io/haiku/redirector:0.3.1
+        ports:
+        - name: www 
+          containerPort: 80
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: www
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: www
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 1
+          successThreshold: 1
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: redirector-config
+          mountPath: /run/config
+      volumes:
+      - name: redirector-config
+        configMap:
+          name: redirector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redirector
+spec:
+  selector:
+    app: redirector
+  ports:
+  - name: www
+    port: 80
+    targetPort: 80
