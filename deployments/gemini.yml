@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: gemini 
-        image: docker.io/haiku/website-gemini:aea5b95
+        image: docker.io/haiku/website-gemini:90d71d1
         env:
         - name: TLS_HOSTNAME
           value: "lofi.haiku-os.org"
@@ -29,6 +29,13 @@ spec:
           requests:
             cpu: "0.25"
             memory: "16Mi"
+        volumeMounts:
+        - name: certificates
+          mountPath: /certs
+      volumes:
+      - name: certificates
+        secret:
+          secretName: tls-cert-redirector
 ---
 apiVersion: v1
 kind: Service
