@@ -194,6 +194,7 @@ spec:
   stripPrefix:
     prefixes:
       - /buildmaster/
+      - /irccat/
 ---
 # web frontend for buildmaster
 apiVersion: networking.k8s.io/v1
@@ -227,3 +228,10 @@ spec:
             name: buildmaster
             port:
               name: www
+      - path: /irccat
+        pathType: Prefix
+        backend:
+          service:
+            name: irccat
+            port:
+              number: 80

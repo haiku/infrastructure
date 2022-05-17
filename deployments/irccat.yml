@@ -46,5 +46,3 @@ spec:
   - name: web
     port: 80
     targetPort: 8045
-
-# TODO: Ingress for builders at https://build.haiku-os.org/irccat
