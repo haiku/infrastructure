@@ -38,14 +38,14 @@ chmod 750 /sftp/build-packages
 
 chown -R submit:users /sftp/build-packages/${arch}
 for arch in arm arm64 m68k ppc sparc riscv64 x86 x86_64; do
-	echo "Upload new packages to the relevant directory!" > /sftp/README
-	echo "" >> /sftp/README
-	echo "  * build-packages - New build-packages (locally build, maybe unbootstraped)" >> /sftp/README
 	mkdir -p /sftp/build-packages/${arch}
 	chown -R submit:users /sftp/build-packages/${arch}
 	chmod 770 /sftp/build-packages/${arch}
 done
 
+echo "Upload new packages to the relevant directory!" > /sftp/README
+echo "" >> /sftp/README
+echo "  * build-packages - New build-packages (locally build, maybe unbootstraped)" >> /sftp/README
 chown root:root /sftp /sftp/README
 chmod 611 /sftp/README
 chmod 755 /sftp
