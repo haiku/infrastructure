@@ -1,9 +1,28 @@
 #!/bin/bash
 
-if [ -z "${GERRIT_UIDS}" ]; then
-	echo "This tool needs at least one Gerrit uid in GERRIT_UIDS to allow access to!"
+GERRIT_SERVER="https://review.haiku-os.org"
+
+if [ -z "${GERRIT_EMAILS}" ]; then
+	echo "This tool needs at least one Gerrit uid in GERRIT_EMAILS to allow access to!"
 	exit 1
 fi
+
+if [ -z "${GERRIT_SA}" ]; then
+	echo "This tool need provided a Gerrit service account as GERRIT_SA!"
+	exit 1
+fi
+
+lookup_gerrit_id() {
+        curl -s --header "Content-Type: application/json" \
+		--user ${GERRIT_SA} \
+                ${GERRIT_SERVER}/a/accounts/?q=name:$1 | egrep -v "^)]}'$" | jq ".[]._account_id"
+}
+
+get_ssh_keys() {
+	curl -s --header "Content-Type: application/json" \
+		--user ${GERRIT_SA} \
+		${GERRIT_SERVER}/a/accounts/$1/sshkeys | egrep -v "^)]}'$" | jq -r '.[].ssh_public_key'
+}
 
 # TODO: Once we move to kubernetes, keep these in secrets. For now they'll change on every
 #       startup
@@ -15,19 +34,10 @@ if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
 	chmod 700 /etc/ssh/ssh_host*
 fi
 
-cd ~
-git clone /gerrit/git/All-Users.git
-cd All-Users
-
 # Collect ssh public keys from users in gerrit
-for id in ${GERRIT_UIDS}; do
-	git fetch origin refs/users/${id:(-2)}/${id}:${id}
-	git checkout ${id}
-	if [ -f authorized_keys ]; then
-		cat authorized_keys >> /etc/authorized_keys/submit
-	else
-		echo "No authorized_keys for UID $id!"
-	fi
+for email in ${GERRIT_EMAILS}; do
+	GERRIT_UID=$(lookup_gerrit_id ${email})
+	get_ssh_keys $GERRIT_UID >> /etc/authorized_keys/submit
 done
 chown -R submit:users /etc/authorized_keys/submit
 chmod 600 /etc/authorized_keys/submit

@@ -2,13 +2,13 @@ FROM docker.io/alpine:3.4
 
 MAINTAINER Haiku, Inc.
 
-RUN apk update && apk upgrade &&  apk --update --no-cache add openssh git bash \
+RUN apk update && apk upgrade &&  apk --update --no-cache add openssh bash curl jq \
 	&& adduser -D -H -s /bin/bash -G users submit \
 	&& passwd -u submit \
 	&& mkdir /etc/authorized_keys
 
 ADD entry.sh /entry.sh
-RUN chmod 755 /entry.sh && mkdir /gerrit && mkdir /sftp
+RUN chmod 755 /entry.sh && mkdir /sftp
 
 ADD sshd_config /etc/ssh/sshd_config
 
