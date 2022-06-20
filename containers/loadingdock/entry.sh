@@ -1,26 +1,30 @@
 #!/bin/bash
 
-GERRIT_SERVER="https://review.haiku-os.org"
+if [ -z "${GERRIT_SERVER}" ]; then
+	echo "This tool needs provided a Gerrit server hostname as GERRIT_SERVER!"
+	exit 1
+fi
 
-if [ -z "${GERRIT_EMAILS}" ]; then
-	echo "This tool needs at least one Gerrit uid in GERRIT_EMAILS to allow access to!"
+if [ -z "${ACCESS_GROUP_ID}" ]; then
+	echo "This tool needs provided a Gerrit group id as ACCESS_GROUP_ID!"
 	exit 1
 fi
 
 if [ -z "${GERRIT_SA}" ]; then
-	echo "This tool need provided a Gerrit service account as GERRIT_SA!"
+	echo "This tool needs provided a Gerrit service account as GERRIT_SA!"
 	exit 1
 fi
 
-lookup_gerrit_id() {
-        curl -s --header "Content-Type: application/json" \
-		--user ${GERRIT_SA} \
-                ${GERRIT_SERVER}/a/accounts/?q=name:$1 | egrep -v "^)]}'$" | jq ".[]._account_id"
+collect_users() {
+	curl -s --header "Content-Type: application/json" \
+		--user ${GERRIT_SA} --insecure \
+		${GERRIT_SERVER}/a/groups/${ACCESS_GROUP_ID}/members \
+		| egrep -v "^)]}'$" | jq -r ".[]._account_id" | tr '\n' ' '
 }
 
 get_ssh_keys() {
 	curl -s --header "Content-Type: application/json" \
-		--user ${GERRIT_SA} \
+		--user ${GERRIT_SA} --insecure \
 		${GERRIT_SERVER}/a/accounts/$1/sshkeys | egrep -v "^)]}'$" | jq -r '.[].ssh_public_key'
 }
 
@@ -35,9 +39,8 @@ if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
 fi
 
 # Collect ssh public keys from users in gerrit
-for email in ${GERRIT_EMAILS}; do
-	GERRIT_UID=$(lookup_gerrit_id ${email})
-	get_ssh_keys $GERRIT_UID >> /etc/authorized_keys/submit
+for id in $(collect_users); do
+	get_ssh_keys $id >> /etc/authorized_keys/submit
 done
 chown -R submit:users /etc/authorized_keys/submit
 chmod 600 /etc/authorized_keys/submit

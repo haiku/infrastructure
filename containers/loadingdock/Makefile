@@ -1,4 +1,4 @@
-VERSION = 0.1
+VERSION = 0.2
 default:
 	docker build --no-cache --tag docker.io/haiku/loadingdock:$(VERSION) .
 test:

@@ -6,19 +6,16 @@ build-packages are software packages which are actively used during the build of
 ## Requirements
 
 Environment:
-  * GERRIT_UIDS: List of Gerrit user ID's (number, seen on profile) who can access this service.
+  * GERRIT_SA: Service account in Gerrit to access API (username:password)
+  * ACCESS_GROUP_ID: Group to allow access to via ssh public keys.
 
 Volumes:
   * /sftp: A volume to store incoming packages
-  * /gerrit: A read-only mount of gerrit for access of "All-Users.git"
 
 ## Process
 
-On startup, this container examines the provided GERRIT_UIDS and pulls the public keys for the
-users from Gerrit.
-
-These public keys are allowed access to the service.  Users can submit haiku package files
-for their desired architecture.
+On startup, this container scans the members of ACCESS_GROUP_ID for ssh public
+keys and sets up an sftp server.
 
 After uploaded packages have been modified > 15 minutes ago, they are picked up by forklift
 which moves them to the build-packages packages repository.
@@ -29,14 +26,11 @@ which moves them to the build-packages packages repository.
 
 ## Onboarding Users
 
-Any users in Gerrit can be added to the loadingdock service.
+* Add any users who need access to the group matching ACCESS_GROUP_ID. (Generally "Loading Dock")
+* Restart this container.
 
-  * User obtains their Gerrit ID from https://review.haiku-os.org/settings/#Profile and provides this ID to the sysadmin team
-  * User confirms their Gerrit account has SSH keys configured
+# TODO
 
-The sysadmins will add the GERRIT_UIDS to the "GERRIT_UIDS" environment variable and
-restart the container.
-
-> Eventually the goal is to make this access Gerrit group based
-
-Users will then have access to submit@limerick.ams3.haiku-os.org:1099 to upload packages
+* We might want to periodically rescan the memberships of ACCESS_GROUP_ID and reform the user list.
+  for now the container needs restarted to pickup changes
+* Static SSH host keys

@@ -1,0 +1,101 @@
+# Accepts packages from developers for things like build-packages
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hpkg-loadingdock
+  labels:
+    app: hpkg-loadingdock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hpkg-loadingdock
+  template:
+    metadata:
+      labels:
+        app: hpkg-loadingdock
+    spec:
+      # Run on the buildmaster node for shared access to packages pvc by forklift
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - buildmaster
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: loadingdock
+        image: docker.io/haiku/loadingdock:0.2
+        volumeMounts:
+        - name: sftp
+          mountPath: "/sftp"
+        env:
+        - name: GERRIT_SERVER
+          value: "http://review"
+        - name: GERRIT_SA
+          valueFrom:
+            secretKeyRef:
+              name: gerrit-automation-sa
+              key: key
+        - name: ACCESS_GROUP_ID
+          value: "3c545e4a0e1566910a7be0a13b856de27616be10"
+      volumes:
+      - name: sftp
+        persistentVolumeClaim:
+          claimName: loadingdock-data-pv
+---
+# incoming packages
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loadingdock-data-pv
+spec:
+  storageClassName: do-block-storage
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadingdock
+spec:
+  selector:
+    app: hpkg-loadingdock
+  ports:
+  - name: sftp
+    port: 22
+    targetPort: 22
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: loadingdock-middle
+spec:
+  inFlightConn:
+    amount: 25
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: loadingdock-sftp
+spec:
+  entryPoints:
+  - sftp
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: loadingdock
+      port: 22
+      weight: 10
+      terminationDelay: 900000
+      # breaks sshd, didn't see a config option either
+      #proxyProtocol:
+      #  version: 1
+    middlewares:
+    - name: loadingdock-middle
