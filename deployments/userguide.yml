@@ -17,7 +17,33 @@ spec:
     spec:
       containers:
       - name: userguide
-        image: docker.io/haiku/userguide:1
+        image: docker.io/haiku/userguide:1.0-1
+        env:
+        - name: REF_DIR
+          value: data/source_docs
+        - name: EXPORT_DIR
+          value: data/export/docs
+        - name: IMPORT_DIR
+          value: data/import
+        - name: BASE_DOMAIN
+          value: https://i18n.haiku-os.org
+        - name: DB_SERVER
+          value: postgres
+        - name: DB_BASENAME
+          valueFrom:
+            secretKeyRef:
+              name: userguide-pg
+              key: database
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: userguide-pg
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: userguide-pg
+              key: password
         resources:
           limits:
             cpu: "0.50"
@@ -27,7 +53,7 @@ spec:
             memory: "64Mi"
         volumeMounts:
         - name: userguide-data
-          mountPath: /var/userguide
+          mountPath: /var/app/userguide/data
       volumes:
       - name: userguide-data
         persistentVolumeClaim:
