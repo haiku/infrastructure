@@ -5,17 +5,55 @@
 #  * private key called "haiku-repo"
 #  * local API server
 
+# IPFS Server
+IPFS_API_SERVER="127.0.0.1"
+IPFS_API_PORT="5001"
+
+LOG="/tmp/mfs-publish.log"
+exec 1>$LOG
+exec 2>&1
+
+function pin {
+	URI="$1"
+	BEARER="$2"
+	LATEST_HASH="$3"
+	echo "Pinning at $URI..."
+	curl -X POST $URI \
+	  --header 'Accept: */*' \
+	  --header "Authorization: Bearer $BEARER" \
+	  --header 'Content-Type: application/json' \
+	  -d "{ \"cid\": \"$LATEST_HASH\", \"name\": \"hpkg.haiku-os.org\" }"
+}
+
 echo "=== $(date) Starting publish..."
 
-export IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"
-HASH=$(ipfs --api /ip4/127.0.0.1/tcp/5001 files flush | jq -r .Cid)
+curl -sSf http://$IPFS_API_SERVER:$IPFS_API_PORT/version
+if [ $? -ne 0 ]; then
+	echo "ERROR: IPFS Daemon not running!"
+	exit 1
+fi
+export IPFS="ipfs --api /ip4/$IPFS_API_SERVER/tcp/$IPFS_API_PORT"
 
-$IPFS name publish --key=haiku-repo $HASH
+CURRENT_HASH=$($IPFS resolve /ipns/hpkg.haiku-os.org | cut -d \/ -f3)
+LATEST_HASH=$($IPFS files flush | jq -r .Cid)
+
+echo "=== Updating /ipns/hpkg.haiku-os.org from $CURRENT_HASH to $LATEST_HASH"
+$IPFS name publish --key=haiku-repo $LATEST_HASH
+
+# Give things some time to settle
+sleep 30
+
+echo "=== Updating pins..."
+
+# web3.storage
+pin https://api.web3.storage/pins SECRET $LATEST_HASH
+
+# filebase.io
+pin https://api.filebase.io/v1/ipfs/pins SECRET $LATEST_HASH
 
 # Try to make sure we cache our latest content in a few places
 # to aid discovery of the latest CID
-sleep 30
-curl https://us.hpkg.haiku-os.org || true
-curl https://de.hpkg.haiku-os.org || true
-curl https://ipfs.io/ipns/hpkg.haiku-os.org || true
-curl https://cloudflare-ipfs.com/ipns/hpkg.haiku-os.org || true
+echo "=== Hitting gateways to pre-cache"
+curl https://us.hpkg.haiku-os.org > /dev/null 2>&1 || true
+curl https://ipfs.io/ipns/hpkg.haiku-os.org > /dev/null 2>&1 || true
+curl https://cloudflare-ipfs.com/ipns/hpkg.haiku-os.org 2>&1 || true

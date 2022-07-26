@@ -1,23 +1,43 @@
 #!/bin/bash
-  
-if [ $# -ne 1 ]; then
-	echo "Usage: $0 <branch>"
-fi
-
-export IPFS="ipfs --api /ip4/127.0.0.1/tcp/5001"
-
-# Virtual "MFS" directory for Haiku repos
-MFSBASE=/haiku
+# IPFS Haiku Sync
+# Sync haiku repositories to IPFS
 
 # Local location of repo files
 PREFIX=/s3/haiku-repositories-us
 
+# Virtual "MFS" directory for Haiku repos
+MFSBASE=/haiku
+
+# IPFS Server
+IPFS_API_SERVER="127.0.0.1"
+IPFS_API_PORT="5001"
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <branch>"
+fi
+
+curl -sSf http://$IPFS_API_SERVER:$IPFS_API_PORT/version
+if [ $? -ne 0 ]; then
+	echo "ERROR: IPFS Daemon not running!"
+	exit 1
+fi
+export IPFS="ipfs --api /ip4/$IPFS_API_SERVER/tcp/$IPFS_API_PORT"
+
+if [ ! -d $PREFIX/$BRANCH ]; then
+	echo "ERROR: s3 mount not present!"
+	exit 1
+fi
+
 BRANCH=$1
-ARCHES="x86_64 x86_gcc2"
+ARCHES="x86_64 x86_gcc2 riscv64"
 
 if [ "$BRANCH" == "master" ]; then
 	ARCHES="$ARCHES arm sparc"
 fi
+
+LOG="/tmp/haiku-sync-$BRANCH.log"
+exec 1>$LOG
+exec 2>&1
 
 for ARCH in $ARCHES; do
         date
