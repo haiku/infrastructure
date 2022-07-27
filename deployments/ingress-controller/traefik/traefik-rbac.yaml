@@ -60,6 +60,7 @@ subjects:
 - kind: ServiceAccount
   name: traefik-ingress-controller
   namespace: kube-system
+---
 
 #######
 # CRD crap
