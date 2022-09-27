@@ -1,4 +1,4 @@
-VERSION = 2.8.4
+VERSION = 2.8.8
 
 default:
 	docker build --no-cache -t docker.io/haiku/discourse:$(VERSION) .
