@@ -168,7 +168,7 @@ spec:
               - name: GIT_PREFIX
                 value: "/data/git"
               - name: GIT_REPOS
-                value: "haiku.git buildtools.git"
+                value: "haiku.git buildtools.git userguide.git jamfile-engine.git"
               - name: SSH_IDENTITY
                 value: "/run/secrets/ssh/private"
               volumeMounts:
