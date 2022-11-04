@@ -84,11 +84,6 @@ spec:
             secretKeyRef:
               name: concourse-auth
               key: github-team
-        - name: CONCOURSE_MAIN_TEAM_GITHUB_TEAM
-          valueFrom:
-            secretKeyRef:
-              name: concourse-auth
-              key: github-user
         volumeMounts:
         - name: keys
           mountPath: "/keys"

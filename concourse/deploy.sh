@@ -26,13 +26,15 @@ fly -t haiku set-team -n continuous --github-team=haiku:infrastructure --non-int
 fly -t haiku set-team -n nightly --github-team=haiku:infrastructure --non-interactive
 ./apply-pipeline.sh nightly master $1
 
-## r1beta2 team. Builds released weekly. Artifacts pushed to release buckets
-fly -t haiku set-team -n r1beta2 --github-team=haiku:infrastructure --non-interactive
-./apply-pipeline.sh r1beta2 r1beta2 $1
+## release branches. Builds released weekly. Artifacts pushed to release buckets
+# HINT: fly -t haiku set-team -n r1beta4 --github-team=haiku:infrastructure
+BRANCH_LAST=r1beta3
+BRANCH_CURRENT=r1beta4
 
-## r1beta3 team. Builds released twice weekly. Artifacts pushed to release buckets
-fly -t haiku set-team -n r1beta3 --github-team=haiku:infrastructure --non-interactive
-./apply-pipeline.sh r1beta3 r1beta3 $1
+fly -t haiku set-team -n $BRANCH_LAST --github-team=haiku:infrastructure --non-interactive
+./apply-pipeline.sh $BRANCH_LAST $BRANCH_LAST $1
+fly -t haiku set-team -n $BRANCH_CURRENT --github-team=haiku:infrastructure --non-interactive
+./apply-pipeline.sh $BRANCH_CURRENT $BRANCH_CURRENT $1
 
 ## bootstrap team. Runs through the bootstrap process.
 fly -t haiku set-team -n bootstrap --github-team=haiku:infrastructure --non-interactive
