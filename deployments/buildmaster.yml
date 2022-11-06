@@ -43,7 +43,7 @@ spec:
         - name: buildmaster-packages
           mountPath: /var/instances/haikuports
       - name: buildmaster-x86-64
-        image: docker.io/haikuporter/buildmaster:1.2.7-5
+        image: docker.io/haikuporter/buildmaster:1.2.7-6
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
@@ -54,12 +54,14 @@ spec:
         - name: buildmaster-data-x86-64
           mountPath: /var/buildmaster
         env:
+          - name: SYSTEM_PACKAGE_BRANCH
+            value: "r1beta4_4"
           - name: BUILD_TARGET_ARCH
             value: "x86_64"
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: docker.io/haikuporter/buildmaster:1.2.7-5
+        image: docker.io/haikuporter/buildmaster:1.2.7-6
         #command: ["bootstrap", "x86_gcc2", "x86"]
         command: ["loop"]
         volumeMounts:
@@ -70,6 +72,8 @@ spec:
         - name: buildmaster-data-x86-gcc2
           mountPath: /var/buildmaster
         env:
+          - name: SYSTEM_PACKAGE_BRANCH
+            value: "r1beta4_4"
           - name: BUILD_TARGET_ARCH
             value: "x86_gcc2"
           - name: REPOSITORY_TRIGGER_URL
