@@ -14,6 +14,10 @@ resources:
       stop: 6:00 AM
       location: America/Chicago
       days: ((days))
+  - name: manual-trigger
+    type: time
+    source:
+      interval: 1m
   - name: haiku-git
     type: git
     icon: git
@@ -22,11 +26,18 @@ resources:
       branch: ((branch))
 # Jobs
 jobs:
+  - name: manual-trigger
+    plan:
+    - put: manual-trigger
   - name: image-((branch))-((arch))
     public: true
     plan:
       - get: pipeline-time-trigger
         trigger: true
+      - get: manual-trigger
+        trigger: true
+        passed:
+          - manual-trigger
       - get: haiku-git
         trigger: false
       - task: build-((branch))-((media))
@@ -189,6 +200,10 @@ jobs:
     plan:
       - get: pipeline-time-trigger
         trigger: true
+      - get: manual-trigger
+        trigger: true
+        passed:
+          - manual-trigger
       - get: haiku-git
         trigger: false
       - task: build-((branch))-repository
