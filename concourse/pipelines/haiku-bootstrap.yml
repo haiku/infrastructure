@@ -1,9 +1,9 @@
 ---
-resource_types:
-  - name: irccat-resource
-    type: docker-image
-    source:
-      repository: haiku/irccat-resource
+#resource_types:
+#  - name: irccat-resource
+#    type: docker-image
+#    source:
+#      repository: haiku/irccat-resource
 roles:
   - name: owner
     github:
@@ -35,12 +35,12 @@ resources:
     source:
       uri: https://github.com/haikuports/haikuports.cross.git
       branch: ((branch))
-  - name: irc
-    type: irccat-resource
-    icon: bullhorn
-    source:
-      uri: https://build.haiku-os.org/irccat/send
-      secret: ((irccat-secret))
+#  - name: irc
+#    type: irccat-resource
+#    icon: bullhorn
+#    source:
+#      uri: https://build.haiku-os.org/irccat/send
+#      secret: ((irccat-secret))
 task-build-image: &task-build-image
   platform: linux
   image_resource:
