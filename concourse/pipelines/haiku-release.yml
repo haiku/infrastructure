@@ -102,10 +102,13 @@ jobs:
                             ;;
                     esac
                 fi
+                if [[ "((branch))" != "master" ]]; then
+                    export SOURCES="--include-sources"
+                fi
                 if [[ -f efi.key ]]; then
-                    ../haiku-git/configure --efi-signing-key efi.key --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
+                    ../haiku-git/configure --efi-signing-key efi.key --distro-compatibility official $SOURCES $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 else
-                    ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
+                    ../haiku-git/configure --distro-compatibility official $SOURCES $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 fi
                 jam -j2 -q @((profile))-((media))
                 rm -f efi.key
