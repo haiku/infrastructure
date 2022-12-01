@@ -59,7 +59,6 @@ fly -t haiku set-team -n r1beta1 --github-team=haiku:infrastructure --non-intera
 *Object Storage Access, Used to upload images / repos*
   * s3key - S3 Bucket Access Key
   * s3secret - S3 Bucket Secret Key
-  * s3endpoint - S3 Server
 
 *Docker Hub Access, Used to push 'toolchain' containers*
   * docker-hub-user - Docker Hub User
