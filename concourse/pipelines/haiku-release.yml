@@ -5,6 +5,13 @@ roles:
       teams: ["haiku:infrastructure"]
     local:
       users: ["admin"]
+resource_types:
+- name: rclone
+  type: registry-image
+  source:
+    repository: docker.io/kallisti5/concourse-rclone-resource
+    #repository: sothr/concourse-rclone-resource
+    tag: 1.60.1
 resources:
   - name: pipeline-time-trigger
     type: time
@@ -20,9 +27,20 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+  - name: wasabi-east
+    type: rclone
+    source:
+      config: |
+        [remote]
+        type = s3
+        provider = Wasabi
+        access_key_id = ((s3key))
+        secret_access_key = ((s3secret))
+        endpoint = s3.us-east-1.wasabisys.com
+        acl = public-read
 # Jobs
 jobs:
-  - name: image-((branch))-((arch))
+  - name: compile-((branch))-((arch))
     public: true
     plan:
       - get: pipeline-time-trigger
@@ -99,9 +117,10 @@ jobs:
                 else
                     ../haiku-git/configure --distro-compatibility official $SOURCES $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
                 fi
-                jam -j2 -q @((profile))-((media))
+                jam -q -j2 @((profile))-((media))
+                #jam -q build \<repository\>Haiku # not really needed
                 rm -f efi.key
-      - task: package-((branch))-((media))
+      - task: package-((media))
         config:
           platform: linux
           image_resource:
@@ -112,10 +131,6 @@ jobs:
             - name: generated.((arch))
           outputs:
             - name: images.((arch))
-          params:
-            S3_ENDPOINT: ((s3endpoint))
-            S3_KEY: ((s3key))
-            S3_SECRET: ((s3secret))
           run:
             path: /bin/bash
             args:
@@ -123,144 +138,33 @@ jobs:
               - -c
               - |
                 RELEASE=$(git -C haiku-git describe --tags --long | cut -d\- -f1,2 | sed 's/\-/\_/g' | sed 's/\_0//g')
+                NAME="haiku-((branch))-$RELEASE-((arch))-((media))"
+                cd generated.((arch))
+                # Normalize the artifact name
                 if [[ "((media))" == "anyboot" ]]; then
-                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).iso"
-                  cp generated.((arch))/haiku-((profile))-((media)).iso images.((arch))/${ARTIFACT}
+                  EXTENSION="iso"
+                  cp haiku-((profile))-((media)).${EXTENSION} ${NAME}.${EXTENSION}
                 elif [[ "((media))" == "mmc" ]]; then
-                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).image"
-                  cp generated.((arch))/haiku-((media)).image images.((arch))/${ARTIFACT}
+                  EXTENSION="image"
+                  cp haiku-((media)).${EXTENSION} ${NAME}.${EXTENSION}
                 elif [[ "((media))" == "raw" ]]; then
-                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).image"
-                  cp generated.((arch))/haiku-((profile)).image images.((arch))/${ARTIFACT}
+                  EXTENSION="image"
+                  cp haiku-((profile)).${EXTENSION} ${NAME}.${EXTENSION}
                 fi
-                cd images.((arch))
+                ARTIFACT="${NAME}.${EXTENSION}"
                 # If nightly; compress build as tightly as possible
                 if [[ "((branch))" == "master" ]]; then
-                  cp ../haiku-git/ReadMe.md ReadMe.md
-                  zip -9 haiku-((branch))-$RELEASE-((arch))-((media)).zip ReadMe.md ${ARTIFACT}
-                  rm -f *.md *.image *.iso
-                  ARTIFACT="haiku-((branch))-$RELEASE-((arch))-((media)).zip"
+                  zip -j -9 ../images.((arch))/${NAME}.zip ../haiku-git/ReadMe.md ${ARTIFACT}
+                  ARTIFACT="${NAME}.zip"
                 fi
+                # Change to output directory to generate remaining information
+                cd ../images.((arch))
                 sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
                 echo "untrusted comment: minisign encrypted secret key" > /tmp/minisign.key
                 echo "((minisign-private))" >> /tmp/minisign.key
                 echo "((minisign-key))" | minisign -H -s /tmp/minisign.key -Sm ${ARTIFACT}
                 rm -f /tmp/minisign.key
-                mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp -q ${ARTIFACT} remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT} was successfully uploaded!"
-                mc cp -q ${ARTIFACT}.sha256 remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.sha256 was successfully uploaded!"
-                mc cp -q ${ARTIFACT}.minisig remote/((bucket_image))/((arch))/
-                echo "$S3_ENDPOINT/((bucket_image))/((arch))/${ARTIFACT}.minisig was successfully uploaded!"
-      - task: catkeys-((branch))-((arch))
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source: { repository: haiku/toolchain-worker-((branch)) }
-          inputs:
-            - name: haiku-git
-            - name: generated.((arch))
-          outputs:
-            - name: catkeys.((arch))
-          params:
-            S3_ENDPOINT: ((s3endpoint))
-            S3_KEY: ((s3key))
-            S3_SECRET: ((s3secret))
-          run:
-            path: /bin/bash
-            args:
-              - -e
-              - -c
-              - |
-                cd generated.((arch))
-                jam -q catkeys
-                cd objects
-                find catalogs/ -name 'en.catkeys' -exec cp --parents -r {} ../../catkeys.((arch))/ \;
-                cd ../../catkeys.((arch))
-                ARTIFACT="haiku-((branch))-((arch))-catkeys.zip"
-                zip -9 -r ${ARTIFACT} catalogs/
-                sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
-                mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp -q ${ARTIFACT} remote/haiku-translations/
-                echo "$S3_ENDPOINT/haiku-translations/${ARTIFACT} was successfully uploaded!"
-                mc cp -q ${ARTIFACT}.sha256 remote/haiku-translations/
-                echo "$S3_ENDPOINT/haiku-translations/${ARTIFACT}.sha256 was successfully uploaded!"
-  - name: repo-((branch))-((arch))
-    public: true
-    plan:
-      - get: pipeline-time-trigger
-        trigger: true
-      - get: haiku-git
-        trigger: false
-      - task: build-((branch))-repository
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source: { repository: haiku/toolchain-worker-((branch)) }
-          inputs:
-            - name: haiku-git
-          outputs:
-            - name: generated.((arch))
-          run:
-            path: /bin/bash
-            args:
-              - -e
-              - -c
-              - |
-                export PATH="$PATH:/usr/local/bin"
-                cd haiku-git && git restore-mtime && cd ..
-                cd generated.((arch))
-                TOOLCHAIN_PRIMARY=""
-                TOOLCHAIN_SECONDARY=""
-                case "((arch))" in
-                    "x86_gcc2h")
-                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
-                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/${PRI_TRIPLET}-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
-                        ;;
-                    "x86_64h")
-                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_64)
-                        SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/${PRI_TRIPLET}-"
-                        TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
-                        ;;
-                    *)
-                        PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
-                        TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
-                        TOOLCHAIN_SECONDARY=""
-                        ;;
-                esac
-                # Geolocation service / Geocoding service key
-                echo "// Autogenerated by the build system" > ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
-                echo "#define DEFAULT_GEOLOCATION_SERVICE_KEY \"$DEFAULT_GEOLOCATION_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
-                echo "#define DEFAULT_GEOCODING_SERVICE_KEY \"$DEFAULT_GEOCODING_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
-                # EFI Signing Key
-                # TODO: risc-v is efi, but sbsign needs code added to support signing
-                if [[ "((branch))" != "r1beta3" ]]; then
-                    case "((arch))" in
-                        "x86_64")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                        "arm")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                        "arm64")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                    esac
-                fi
-                if [[ -f efi.key ]]; then
-                    ../haiku-git/configure --efi-signing-key efi.key --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-                else
-                    ../haiku-git/configure --distro-compatibility official $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-                fi
-                jam -q @((profile))-raw build \<repository\>Haiku
-                rm -f efi.key
-      - task: prepare-((branch))-repository
+      - task: package-repository
         config:
           platform: linux
           image_resource:
@@ -271,10 +175,6 @@ jobs:
             - name: generated.((arch))
           outputs:
             - name: repository.((arch))
-          params:
-            S3_ENDPOINT: ((s3endpoint))
-            S3_KEY: ((s3key))
-            S3_SECRET: ((s3secret))
           run:
             path: /bin/bash
             args:
@@ -296,6 +196,44 @@ jobs:
                 echo "((minisign-private))" >> /tmp/minisign.key
                 echo "((minisign-key))" | minisign -H -s /tmp/minisign.key -Sm $TARGET_REPO/repo
                 rm -f /tmp/minisign.key
-                mc config host add remote $S3_ENDPOINT $S3_KEY $S3_SECRET --api "s3v4"
-                mc cp -q --recursive $TARGET_REPO remote/((bucket_repo))/((branch))/$PRI_ARCH/
-                echo "Haiku $PRI_ARCH repository $VERSION was successfully uploaded!"
+      - task: package-catkeys
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: haiku/toolchain-worker-((branch)) }
+          inputs:
+            - name: haiku-git
+            - name: generated.((arch))
+          outputs:
+            - name: catkeys.((arch))
+          run:
+            path: /bin/bash
+            args:
+              - -e
+              - -c
+              - |
+                cd generated.((arch))
+                #jam -q catkeys
+                cd objects
+                find catalogs/ -name 'en.catkeys' -exec cp --parents -r {} ../../catkeys.((arch))/ \;
+                cd ../../catkeys.((arch))
+                ARTIFACT="haiku-((branch))-((arch))-catkeys.zip"
+                zip -9 -r ${ARTIFACT} catalogs/
+                rm -rf catalogs
+                sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
+      - put: wasabi-east
+        params:
+          source: images.((arch))
+          destination:
+          - dir: "remote:((bucket_image))/((arch))/"
+      - put: wasabi-east
+        params:
+          source: repository.((arch))
+          destination:
+          - dir: "remote:((bucket_repo))/((branch))/"
+      - put: wasabi-east
+        params:
+          source: catkeys.((arch))
+          destination:
+          - dir: "remote:haiku-translations/"
