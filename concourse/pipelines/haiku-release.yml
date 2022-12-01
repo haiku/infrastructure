@@ -152,10 +152,13 @@ jobs:
                   cp haiku-((profile)).${EXTENSION} ${NAME}.${EXTENSION}
                 fi
                 ARTIFACT="${NAME}.${EXTENSION}"
-                # If nightly; compress build as tightly as possible
                 if [[ "((branch))" == "master" ]]; then
+                  # If nightly; compress build as tightly as possible
                   zip -j -9 ../images.((arch))/${NAME}.zip ../haiku-git/ReadMe.md ${ARTIFACT}
                   ARTIFACT="${NAME}.zip"
+                else
+                  # otherwise, raw image in output directory
+                  mv ${ARTIFACT} ../images.((arch))/
                 fi
                 # Change to output directory to generate remaining information
                 cd ../images.((arch))
