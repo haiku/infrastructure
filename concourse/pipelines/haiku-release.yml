@@ -11,7 +11,7 @@ resource_types:
   source:
     repository: docker.io/kallisti5/concourse-rclone-resource
     #repository: sothr/concourse-rclone-resource
-    tag: 1.60.1
+    tag: 1.60.1-0
 resources:
   - name: pipeline-time-trigger
     type: time
@@ -167,6 +167,8 @@ jobs:
                 echo "((minisign-private))" >> /tmp/minisign.key
                 echo "((minisign-key))" | minisign -H -s /tmp/minisign.key -Sm ${ARTIFACT}
                 rm -f /tmp/minisign.key
+                echo "Resulting artifacts:"
+                find . -ls
       - task: package-repository
         config:
           platform: linux
@@ -199,6 +201,8 @@ jobs:
                 echo "((minisign-private))" >> /tmp/minisign.key
                 echo "((minisign-key))" | minisign -H -s /tmp/minisign.key -Sm $TARGET_REPO/repo
                 rm -f /tmp/minisign.key
+                echo "Resulting artifacts:"
+                find $TARGET_REPO -ls
       - task: package-catkeys
         config:
           platform: linux
@@ -230,13 +234,22 @@ jobs:
           source: images.((arch))
           destination:
           - dir: "remote:((bucket_image))/((arch))/"
+            args:
+              - -c
+              #- -vv
       - put: wasabi-east
         params:
           source: repository.((arch))
           destination:
           - dir: "remote:((bucket_repo))/((branch))/"
+            args:
+              - -c
+              #- -vv
       - put: wasabi-east
         params:
           source: catkeys.((arch))
           destination:
           - dir: "remote:haiku-translations/"
+            args:
+              - -c
+              #- -vv
