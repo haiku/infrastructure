@@ -43,7 +43,7 @@ spec:
         - name: buildmaster-packages
           mountPath: /var/instances/haikuports
       - name: buildmaster-x86-64
-        image: docker.io/haikuporter/buildmaster:1.2.7-6
+        image: docker.io/haikuporter/buildmaster:1.2.7-8
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
@@ -61,7 +61,7 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: docker.io/haikuporter/buildmaster:1.2.7-6
+        image: docker.io/haikuporter/buildmaster:1.2.7-8
         #command: ["bootstrap", "x86_gcc2", "x86"]
         command: ["loop"]
         volumeMounts:
