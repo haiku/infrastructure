@@ -5,7 +5,8 @@ FROM docker.io/ruby:3.0-bullseye
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 
-ENV DISCOURSE_VERSION=2.8.8
+ARG VERSION 2.8.0
+ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
 # See: https://www.postgresql.org/download/linux/debian/
