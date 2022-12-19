@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: docker.io/haiku/discourse:2.8.8
+        image: docker.io/haiku/discourse:2.8.13
         resources:
           limits:
             cpu: "2.0"
