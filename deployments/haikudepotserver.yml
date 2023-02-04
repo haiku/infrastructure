@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: haiku/haikudepotserver:1.0.138
+        image: haiku/haikudepotserver:1.0.139
         env:
         - name: HDS_SMTP_HOST
           value: "smtp"
@@ -47,15 +47,15 @@ spec:
             memory: "512Mi"
         startupProbe:
           httpGet:
-            path: /__metric/healthcheck
-            port: 8080
+            path: /actuator/health
+            port: 8081
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 60
         livenessProbe:
           httpGet:
-            path: /__metric/healthcheck
-            port: 8080
+            path: /actuator/health
+            port: 8081
           initialDelaySeconds: 10
           periodSeconds: 30
           failureThreshold: 2
