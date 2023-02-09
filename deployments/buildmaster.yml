@@ -55,7 +55,7 @@ spec:
           mountPath: /var/buildmaster
         env:
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta4_31"
+            value: "r1beta4_69"
           - name: BUILD_TARGET_ARCH
             value: "x86_64"
           - name: REPOSITORY_TRIGGER_URL
@@ -73,7 +73,7 @@ spec:
           mountPath: /var/buildmaster
         env:
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta4_31"
+            value: "r1beta4_69"
           - name: BUILD_TARGET_ARCH
             value: "x86_gcc2"
           - name: REPOSITORY_TRIGGER_URL
