@@ -1,0 +1,67 @@
+---
+resource_types:
+- name: gerrit
+  type: registry-image
+  source:
+    repository: docker.io/haiku/gerrit-resource
+    tag: 0.0.4
+resources:
+- name: haiku-git
+  type: gerrit
+  source:
+    url: https://review.haiku-os.org
+    query: status:open project:haiku branch:((branch)) -is:wip
+    username: ((gerrit-username))
+    password: ((gerrit-password))
+task-build-image: &task-build-image
+  platform: linux
+  image_resource:
+    type: registry-image
+    source: { repository: haiku/toolchain-worker-((branch)) }
+  inputs:
+    - name: haiku-git
+  outputs:
+    - name: generated.((arch))
+  run:
+    path: /bin/bash
+    args:
+      - -c
+      - |
+        cd generated.((arch))
+        TOOLCHAIN_PRIMARY=""
+        TOOLCHAIN_SECONDARY=""
+        case "((arch))" in
+            "x86_gcc2h")
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
+                SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_gcc2/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
+                ;;
+            "x86_64h")
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_64)
+                SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-x86_64/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
+                ;;
+            *)
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
+                TOOLCHAIN_SECONDARY=""
+                ;;
+        esac
+        ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
+        jam -j4 -q @((profile))-((media))
+jobs:
+  - name: gerrit-((arch))-patch
+    plan:
+      - get: haiku-git
+        version: every
+        trigger: true
+      - task: validate-((arch))
+        config:
+          << : *task-build-image
+      - put: haiku-git
+        params:
+          repository: haiku-git
+          message: CI passed on ((arch)) ${ATC_EXTERNAL_URL}
+          labels: {Verified: 1}

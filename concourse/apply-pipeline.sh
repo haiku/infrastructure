@@ -83,6 +83,7 @@ for ARCH in $ARCHES; do
 
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
+		$FLY_CLI -t haiku set-pipeline -n -p gerrit-$BRANCH-$ARCH  -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-gerrit.yml
 	elif [ "$TEAM" == "bootstrap" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
 	else
