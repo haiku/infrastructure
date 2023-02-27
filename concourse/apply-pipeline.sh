@@ -50,6 +50,12 @@ else
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 fi
 
+if [ "$TEAM" == "continuous" ]; then
+	# This one is all-in-one
+	$FLY_CLI -t haiku set-pipeline -n -p gerrit-$BRANCH  -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-gerrit-build.yml
+	$FLY_CLI -t haiku expose-pipeline -p gerrit-$BRANCH
+fi
+
 if [ "$TEAM" != "continuous" ] && [ "$TEAM" != "bootstrap" ]; then
 	echo "Deploy toolchain builder..."
 	$FLY_CLI -t haiku set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -l $SECRETS -c pipelines/toolchain-builder.yml
@@ -83,7 +89,6 @@ for ARCH in $ARCHES; do
 
 	if [ "$TEAM" == "continuous" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
-		$FLY_CLI -t haiku set-pipeline -n -p gerrit-$BRANCH-$ARCH  -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-gerrit.yml
 	elif [ "$TEAM" == "bootstrap" ]; then
 		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
 	else

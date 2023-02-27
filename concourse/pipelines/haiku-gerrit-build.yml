@@ -20,17 +20,15 @@ task-build-image: &task-build-image
     source: { repository: haiku/toolchain-worker-((branch)) }
   inputs:
     - name: haiku-git
-  outputs:
-    - name: generated.((arch))
   run:
     path: /bin/bash
     args:
       - -c
       - |
-        cd generated.((arch))
+        mkdir generated.${BUILD_ARCH} && cd generated.${BUILD_ARCH}
         TOOLCHAIN_PRIMARY=""
         TOOLCHAIN_SECONDARY=""
-        case "((arch))" in
+        case "${BUILD_ARCH}" in
             "x86_gcc2h")
                 PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86_gcc2)
                 SEC_TRIPLET=$(../haiku-git/build/scripts/find_triplet x86)
@@ -44,24 +42,45 @@ task-build-image: &task-build-image
                 TOOLCHAIN_SECONDARY="--cross-tools-prefix /toolchains/cross-tools-x86/bin/${SEC_TRIPLET}-"
                 ;;
             *)
-                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ((arch)))
-                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-((arch))/bin/${PRI_TRIPLET}-"
+                PRI_TRIPLET=$(../haiku-git/build/scripts/find_triplet ${BUILD_ARCH})
+                TOOLCHAIN_PRIMARY="--cross-tools-prefix /toolchains/cross-tools-${BUILD_ARCH}/bin/${PRI_TRIPLET}-"
                 TOOLCHAIN_SECONDARY=""
                 ;;
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-        jam -j4 -q @((profile))-((media))
+        jam -j4 -q @${BUILD_PROFILE}
 jobs:
-  - name: gerrit-((arch))-patch
+  - name: gerrit-patch-builder
     plan:
       - get: haiku-git
         version: every
         trigger: true
-      - task: validate-((arch))
+      - task: validate-x86_64
         config:
+          params:
+            BUILD_ARCH: x86_64
+            BUILD_PROFILE: nightly-anyboot
+          << : *task-build-image
+      - task: validate-x86_gcc2h
+        config:
+          params:
+            BUILD_ARCH: x86_gcc2h
+            BUILD_PROFILE: nightly-anyboot
+          << : *task-build-image
+      - task: validate-arm
+        config:
+          params:
+            BUILD_ARCH: arm
+            BUILD_PROFILE: minimum-mmc
+          << : *task-build-image
+      - task: validate-riscv64
+        config:
+          params:
+            BUILD_ARCH: riscv64
+            BUILD_PROFILE: minimum-mmc
           << : *task-build-image
       - put: haiku-git
         params:
           repository: haiku-git
-          message: CI passed on ((arch)) ${ATC_EXTERNAL_URL}
+          message: CI/CD builds passed. ${ATC_EXTERNAL_URL}/teams/continuous/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}
           labels: {Verified: 1}
