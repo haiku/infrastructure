@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: gerrit
-        image: docker.io/haiku/gerrit:3.4.5
+        image: docker.io/haiku/gerrit:3.4.8
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/gerrit/review_site
