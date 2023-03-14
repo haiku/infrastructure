@@ -1,5 +1,10 @@
 FROM docker.io/fedora:34
 
+MAINTAINER Haiku, Inc. <contact@haiku-os.org>
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/general-worker
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+
 USER root
 
 RUN dnf install -y \

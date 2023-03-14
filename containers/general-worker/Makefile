@@ -1,6 +1,8 @@
+VERSION = latest
+REGISTRY = ghcr.io/haiku
 default:
-	podman build --pull --no-cache --tag docker.io/haiku/general-worker:latest .
+	podman build --pull --no-cache --tag ${REGISTRY}/general-worker:${VERSION} .
 enter:
-	podman run -it docker.io/haiku/general-worker:latest /bin/bash -l
+	podman run -it ${REGISTRY}/general-worker:${VERSION} /bin/bash -l
 push:
-	podman push docker.io/haiku/general-worker:latest
+	podman push ${REGISTRY}/general-worker:${VERSION}
