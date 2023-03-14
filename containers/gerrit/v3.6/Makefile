@@ -1,4 +1,4 @@
-VERSION = 3.6.3
+VERSION = 3.6.3-1
 default:
 	podman build --no-cache --tag docker.io/haiku/gerrit:${VERSION} .
 test:

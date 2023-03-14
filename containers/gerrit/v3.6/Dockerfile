@@ -4,12 +4,15 @@ MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 # Overridable defaults
 ENV GERRIT_HOME /var/gerrit
+ENV GERRIT_PLUGIN_BUNDLE ${GERRIT_HOME}/bundled_plugins
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_WAR ${GERRIT_HOME}/gerrit.war
 ENV GERRIT_BRANCH 3.6
 ENV GERRIT_VERSION 3.6.3
 ENV GERRIT_USER gerrit2
 ENV GERRIT_INIT_ARGS "--install-plugin=download-commands"
+ENV INTERNAL_PLUGINS="plugin-manager hooks"
+ENV EXTERNAL_PLUGINS="account avatars-gravatar events-log oauth admin-console healthcheck"
 
 # Add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN adduser -D -h "${GERRIT_HOME}" -g "Gerrit User" -s /sbin/nologin "${GERRIT_USER}"
@@ -19,32 +22,25 @@ RUN set -x \
 	    perl perl-cgi perl-libwww perl-lwp-protocol-https git-gitweb curl su-exec \
 		openjdk17 openjdk17-jdk openjdk17-jre openjdk17-jre-headless 
 
-RUN mkdir /docker-entrypoint-init.d
+RUN mkdir /docker-entrypoint-init.d && mkdir -p ${GERRIT_PLUGIN_BUNDLE}
 
 #Download gerrit.war
 RUN curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VERSION}.war -o $GERRIT_WAR
-#Only for local test
-#COPY gerrit-${GERRIT_VERSION}.war $GERRIT_WAR
 
-ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
-ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
-
-# Download plugins bazel-stable-3.2
-#ENV PLUGINS=""
-#ENV PLUGIN_VERSION=bazel-stable-3.2
-#RUN for i in ${PLUGINS}; do \
-#	echo "Install $i..." \
-#	curl -fL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
-#		-o ${GERRIT_HOME}/$i.jar; \
-#	done;
+# Extract any internal plugins (Thanks Nix OS for the idea!)
+RUN for i in ${INTERNAL_PLUGINS}; do \
+	echo "Install $i..."; \
+	java -jar $GERRIT_WAR cat plugins/$i.jar > ${GERRIT_PLUGIN_BUNDLE}/$i.jar; \
+	done;
 
 # Download plugins bazel-master-stable-*
-ENV PLUGINS="avatars-gravatar events-log oauth admin-console"
+ENV GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
+ENV GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-bin/plugins
 ENV PLUGIN_VERSION=bazel-master-stable-${GERRIT_BRANCH}
-RUN for i in ${PLUGINS}; do \
+RUN for i in ${EXTERNAL_PLUGINS}; do \
 	echo "Install $i..." \
-	curl -fL ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
-		-o ${GERRIT_HOME}/$i.jar; \
+	wget ${GERRITFORGE_URL}/job/plugin-$i-${PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/$i/$i.jar \
+		-O ${GERRIT_PLUGIN_BUNDLE}/$i.jar; \
 	done;
 
 # Ensure the entrypoint scripts are in a fixed location
