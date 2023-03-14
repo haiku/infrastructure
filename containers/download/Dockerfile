@@ -2,7 +2,7 @@ FROM docker.io/alpine:3.15
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
-LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/discourse
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/download
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
 ADD requirements.txt /
