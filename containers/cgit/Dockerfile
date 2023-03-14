@@ -1,4 +1,10 @@
 FROM docker.io/alpine:3.14.2
+
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/cgit
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+LABEL org.opencontainers.artifact.description cgit Interface for Haiku
+
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
 RUN apk add --update \

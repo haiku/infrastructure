@@ -1,4 +1,6 @@
+VERSION = 1.2.3-5
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/cgit:1.2.3-5 .
+	docker build --no-cache --tag ${REGISTRY}/cgit:${VERSION} .
 push:
-	docker push docker.io/haiku/cgit:1.2.3-5
+	docker push ${REGISTRY}/cgit:${VERSION}
