@@ -1,5 +1,10 @@
 FROM debian:buster-slim
 
+MAINTAINER Haiku, Inc. <contact@haiku-os.org>
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/pootle
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+
 # Set the working directory to /app
 WORKDIR /app
 

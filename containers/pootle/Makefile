@@ -1,6 +1,6 @@
 VERSION = 2.7.6-1
-
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/pootle:$(VERSION) .
+	docker build --no-cache --tag ${REGISTRY}/pootle:${VERSION} .
 push:
-	docker push docker.io/haiku/pootle:$(VERSION)
+	docker push ${REGISTRY}/pootle:${VERSION}
