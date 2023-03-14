@@ -1,4 +1,5 @@
 FROM docker.io/alpine:3.17
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure/containers/gerrit/v3.6
 
 MAINTAINER Haiku, Inc <haiku-inc@gmail.com>
 
