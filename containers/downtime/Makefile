@@ -1,11 +1,13 @@
+VERSION = latest
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/downtime:latest .
+	docker build --no-cache --tag ${REGISTRY}/downtime:${VERSION} .
 test:
-	docker run -d --name downtime-test -eNOTICE_TEXT="BAM IT BROKE" -P docker.io/haiku/downtime:latest
+	docker run -d --name downtime-test -eNOTICE_TEXT="BAM IT BROKE" -P ${REGISTRY}/downtime:${VERSION}
 enter:
-	docker run -it docker.io/haiku/downtime:latest /bin/sh -l
+	docker run -it ${REGISTRY}/downtime:${VERSION} /bin/sh -l
 clean:
 	docker stop downtime-test
 	docker rm downtime-test
 push:
-	docker push docker.io/haiku/downtime:latest
+	docker push ${REGISTRY}/downtime:${VERSION}
