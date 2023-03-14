@@ -1,10 +1,11 @@
 VERSION=20230211
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/download:$(VERSION) .
+	docker build --no-cache --tag ${REGISTRY}/download:$(VERSION) .
 test:
-	docker run -d --name download-test -P docker.io/haiku/download:$(VERSION)
+	docker run -d --name download-test -P ${REGISTRY}/download:$(VERSION)
 clean:
 	docker stop download-test
 	docker rm download-test
 push:
-	docker push docker.io/haiku/download:$(VERSION)
+	docker push ${REGISTRY}/download:$(VERSION)
