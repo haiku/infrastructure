@@ -1,4 +1,6 @@
+VERSION = 1.2
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/pvbackup:1.2 .
+	docker build --no-cache --tag ${REGISTRY}/pvbackup:${VERSION} .
 push:
-	docker push docker.io/haiku/pvbackup:1.2
+	docker push ${REGISTRY}/pvbackup:${VERSION}
