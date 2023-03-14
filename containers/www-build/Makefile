@@ -1,6 +1,8 @@
+VERSION = latest
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/www-build:latest .
+	docker build --no-cache --tag ${REGISTRY}/www-build:${VERSION} .
 push:
-	docker push docker.io/haiku/www-build:latest
+	docker push ${REGISTRY}/www-build:${VERSION}
 test:
-	docker run -P docker.io/haiku/www-build:latest
+	docker run -P ${REGISTRY}/www-build:${VERSION}
