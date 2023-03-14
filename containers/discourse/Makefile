@@ -1,9 +1,10 @@
 VERSION = 2.8.13
+REGISTRY = ghcr.io/haiku
 
 default:
-	docker build --no-cache --build-arg VERSION=$(VERSION) -t docker.io/haiku/discourse:$(VERSION) .
+	docker build --no-cache --build-arg VERSION=${VERSION} -t ${REGISTRY}/discourse:${VERSION} .
 shell:
-	docker run -it docker.io/haiku/discourse:$(VERSION) /bin/bash -l
+	docker run -it ${REGISTRY}/discourse:${VERSION} /bin/bash -l
 test:
 	docker kill redis || true
 	docker kill discourse || true
@@ -16,8 +17,8 @@ test:
 	docker run -d --name redis --network discourse redis:latest
 	sleep 20
 	docker rm discourse || true
-	docker run --rm --network discourse --env-file test.env docker.io/haiku/discourse:$(VERSION) bundle exec rake db:create
-	docker run -d --name discourse --network discourse -P --env-file test.env docker.io/haiku/discourse:$(VERSION)
+	docker run --rm --network discourse --env-file test.env ${REGISTRY}/discourse:${VERSION} bundle exec rake db:create
+	docker run -d --name discourse --network discourse -P --env-file test.env ${REGISTRY}/discourse:${VERSION}
 clean:
 	docker kill redis || true
 	docker kill discourse || true
@@ -27,4 +28,4 @@ clean:
 	docker rm redis || true
 	docker rm discourse || true
 push:
-	docker push docker.io/haiku/discourse:$(VERSION)
+	docker push ${REGISTRY}/discourse:${VERSION}
