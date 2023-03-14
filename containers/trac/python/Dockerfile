@@ -2,6 +2,10 @@
 
 FROM docker.io/python:2.7-alpine
 
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/trac/python
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+
 # Set the working directory to /app
 WORKDIR /app
 

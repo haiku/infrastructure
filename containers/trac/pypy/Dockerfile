@@ -1,5 +1,9 @@
 FROM docker.io/pypy:2.7-slim
 
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/trac/pypy
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+
 # Set the working directory to /app
 WORKDIR /app
 

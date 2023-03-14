@@ -1,4 +1,6 @@
+REGISTRY = ghcr.io/haiku
+VERSION = 1.4.3
 default:
-	docker build --no-cache --tag docker.io/haiku/trac:1.4.3 .
+	docker build --no-cache --tag ${REGISTRY}/trac:${VERSION} .
 push:
-	docker push docker.io/haiku/trac:1.4.3
+	docker push ${REGISTRY}/trac:${VERSION}
