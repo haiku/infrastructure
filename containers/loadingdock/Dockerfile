@@ -1,6 +1,9 @@
 FROM docker.io/alpine:3.4
 
 MAINTAINER Haiku, Inc.
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/loadingdock
+LABEL org.opencontainers.image.vendor Haiku, Inc.
 
 RUN apk update && apk upgrade &&  apk --update --no-cache add openssh bash curl jq \
 	&& adduser -D -H -s /bin/bash -G users submit \
