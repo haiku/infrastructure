@@ -1,4 +1,6 @@
+VERSION = 1.0
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/gitsync:1.0 .
+	docker build --no-cache --tag ${REGISTRY}/gitsync:${VERSION} .
 push:
-	docker push docker.io/haiku/gitsync:1.0
+	docker push ${REGISTRY}/gitsync:${VERSION}
