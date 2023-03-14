@@ -1,6 +1,8 @@
+VERSION = 7.6.0
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/concourse-web:7.6.0 .
+	docker build --no-cache --tag ${REGISTRY}/concourse-web:${VERSION} .
 push:
-	docker push docker.io/haiku/concourse-web:7.6.0
+	docker push ${REGISTRY}/concourse-web:${VERSION}
 test:
-	docker run docker.io/haiku/concourse-web:7.6.0
+	docker run ${REGISTRY}/concourse-web:${VERSION}
