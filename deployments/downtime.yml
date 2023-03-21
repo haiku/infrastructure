@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: downtime
-        image: docker.io/haiku/downtime:latest
+        image: ghcr.io/haiku/downtime:latest
         env:
         - name: NOTICE_TEXT
           value: "This service is undergoing maintenance, we'll be back soon!"

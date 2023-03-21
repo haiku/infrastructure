@@ -100,7 +100,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: docker.io/haiku/pvbackup:1.1
+              image: ghcr.io/haiku/pvbackup:1.2
               args: ["backup", "gerrit-data"]
               env:
               - name: S3_HOST
@@ -159,7 +159,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: githubsync
-              image: docker.io/haiku/gitsync:1.0
+              image: ghcr.io/haiku/gitsync:1.0
               env:
               - name: GIT_ORG
                 value: "haiku"
