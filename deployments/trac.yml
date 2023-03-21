@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: trac
-        image: docker.io/haiku/trac:1.4.3-pypy
+        image: ghcr.io/haiku/trac:1.4.3-pypy
         env:
         - name: PYPY_GC_MAX
           value: "1.8GB"
@@ -102,7 +102,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: pgbackup
-              image: docker.io/haiku/pgbackup:1.0
+              image: ghcr.io/haiku/pgbackup:1.0
               args: ["backup", "trac"]
               env:
               - name: S3_HOST
@@ -165,7 +165,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: docker.io/haiku/pvbackup:1.2
+              image: ghcr.io/haiku/pvbackup:1.2
               args: ["backup", "trac-data"]
               env:
               - name: S3_HOST
