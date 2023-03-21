@@ -30,7 +30,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: rsync-server
-        image: docker.io/haiku/repo-mirror:0.4
+        image: ghcr.io/haiku/repo-mirror:0.4
         resources:
           limits:
             cpu: "1.0"
@@ -203,7 +203,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: rclone-mirror
-              image: docker.io/haiku/rclone-mirror:3.15-3
+              image: ghcr.io/haiku/rclone-mirror:3.15-3
               env:
               - name: BACKEND
                 value: s3
