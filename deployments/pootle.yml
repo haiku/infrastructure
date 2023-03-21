@@ -10,6 +10,9 @@ spec:
   selector:
     matchLabels:
       app: pootle
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage
+    type: Recreate
   template:
     metadata:
       labels:
@@ -17,7 +20,7 @@ spec:
     spec:
       containers:
       - name: pootle
-        image: docker.io/haiku/pootle:2.7.6-1
+        image: ghcr.io/haiku/pootle:2.7.6-1
         resources:
           limits:
             cpu: "1.0"
