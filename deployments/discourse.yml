@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: docker.io/haiku/discourse:2.8.13
+        image: ghcr.io/haiku/discourse:2.8.13
         resources:
           limits:
             cpu: "2.0"
@@ -154,7 +154,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: docker.io/haiku/pvbackup:1.1
+              image: ghcr.io/haiku/pvbackup:1.2
               args: ["backup", "discourse-data"]
               env:
               - name: S3_HOST
@@ -203,7 +203,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: pgbackup
-              image: docker.io/haiku/pgbackup:1.0
+              image: ghcr.io/haiku/pgbackup:1.0
               args: ["backup", "discourse"]
               env:
               - name: S3_HOST
