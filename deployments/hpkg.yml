@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: haiku/hpkgbouncer:0.3.1
+        image: ghcr.io/haiku/hpkgbouncer:0.3.1
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
