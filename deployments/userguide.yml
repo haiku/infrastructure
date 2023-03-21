@@ -10,6 +10,9 @@ spec:
   selector:
     matchLabels:
       app: userguide
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage
+    type: Recreate
   template:
     metadata:
       labels:
@@ -17,7 +20,7 @@ spec:
     spec:
       containers:
       - name: userguide
-        image: docker.io/haiku/userguide:1.0-1
+        image: ghcr.io/haiku/userguide:1.0-1
         env:
         - name: REF_DIR
           value: data/source_docs
