@@ -60,9 +60,10 @@ fly -t haiku set-team -n r1beta1 --github-team=haiku:infrastructure --non-intera
   * s3key - S3 Bucket Access Key
   * s3secret - S3 Bucket Secret Key
 
-*Docker Hub Access, Used to push 'toolchain' containers*
-  * docker-hub-user - Docker Hub User
-  * docker-hub-password - Docker Hub Password
+*Container Registry Access, Used to push 'toolchain' containers*
+  * container-registry - Container registry / org (aka, ghcr.io/haiku)
+  * container-registry-user - Container registry user
+  * container-registry-password - Container registry password
 
 ## Deploying
 

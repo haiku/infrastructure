@@ -52,7 +52,7 @@ jobs:
           platform: linux
           image_resource:
             type: registry-image
-            source: { repository: haiku/toolchain-worker-((branch)) }
+            source: { repository: ((container-registry))/toolchain-worker-((branch)) }
           inputs:
             - name: haiku-git
           outputs:
@@ -125,7 +125,7 @@ jobs:
           platform: linux
           image_resource:
             type: registry-image
-            source: { repository: haiku/general-worker }
+            source: { repository: ((container-registry))/general-worker }
           inputs:
             - name: haiku-git
             - name: generated.((arch))
@@ -174,7 +174,7 @@ jobs:
           platform: linux
           image_resource:
             type: registry-image
-            source: { repository: haiku/general-worker }
+            source: { repository: ((container-registry))/general-worker }
           inputs:
             - name: haiku-git
             - name: generated.((arch))
@@ -208,7 +208,7 @@ jobs:
           platform: linux
           image_resource:
             type: registry-image
-            source: { repository: haiku/toolchain-worker-((branch)) }
+            source: { repository: ((container-registry))/toolchain-worker-((branch)) }
           inputs:
             - name: haiku-git
             - name: generated.((arch))

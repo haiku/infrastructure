@@ -39,23 +39,23 @@ resources:
     icon: docker
     source:
       email: contact@haiku-inc.org
-      username: ((docker-hub-user))
-      password: ((docker-hub-password))
-      repository: haiku/toolchain-worker-((branch))
+      username: ((container-registry-user))
+      password: ((container-registry-password))
+      repository: ((container-registry))/toolchain-worker-((branch))
   - name: toolchain-container-((branch))-latest
     type: docker-image
     icon: docker
     source:
       email: contact@haiku-inc.org
-      username: ((docker-hub-user))
-      password: ((docker-hub-password))
-      repository: haiku/toolchain-worker-((branch))
+      username: ((container-registry-user))
+      password: ((container-registry-password))
+      repository: ((container-registry))/toolchain-worker-((branch))
 # Common Tasks
 task-build-jam: &task-build-jam
   platform: linux
   image_resource:
     type: registry-image
-    source: { repository: haiku/general-worker }
+    source: { repository: ((container-registry))/general-worker }
   inputs:
     - name: buildtools-git
   run:
@@ -75,7 +75,7 @@ task-build-crosstools: &task-build-crosstools
   platform: linux
   image_resource:
     type: registry-image
-    source: { repository: haiku/general-worker }
+    source: { repository: ((container-registry))/general-worker }
   inputs:
     - name: haiku-git
     - name: buildtools-git
@@ -188,7 +188,7 @@ jobs:
             - name: container-context
           image_resource:
             type: registry-image
-            source: { repository: haiku/general-worker }
+            source: { repository: ((container-registry))/general-worker }
           run:
             path: /bin/sh
             args:

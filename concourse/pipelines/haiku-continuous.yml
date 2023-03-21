@@ -27,7 +27,7 @@ task-build-image: &task-build-image
   platform: linux
   image_resource:
     type: registry-image
-    source: { repository: haiku/toolchain-worker-((branch)) }
+    source: { repository: ((container-registry))/toolchain-worker-((branch)) }
   inputs:
     - name: haiku-git
   outputs:
