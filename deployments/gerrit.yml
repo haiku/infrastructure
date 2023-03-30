@@ -159,7 +159,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: githubsync
-              image: ghcr.io/haiku/gitsync:1.0
+              image: ghcr.io/haiku/gitsync:1.2
               env:
               - name: GIT_ORG
                 value: "haiku"

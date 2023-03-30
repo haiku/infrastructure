@@ -1,4 +1,4 @@
-VERSION = 1.0
+VERSION = 1.2
 REGISTRY = ghcr.io/haiku
 default:
 	docker build --no-cache --tag ${REGISTRY}/gitsync:${VERSION} .

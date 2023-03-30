@@ -21,10 +21,11 @@ for i in $GIT_REPOS; do
 		echo "$GIT_PREFIX/$i doesn't exist!"
 		continue;
 	fi
+	git config --global --add safe.directory $GIT_PREFIX/$i
 	echo "Entering $GIT_PREFIX/$i..."
 	cd $GIT_PREFIX/$i
 	echo "Pushing to git@$GIT_SERVER:$GIT_ORG/$i..."
-	git push --all git@gitremote:$GIT_ORG/$i 2>&1 | grep -v 'up-to-date'
+	git push -f --all git@gitremote:$GIT_ORG/$i 2>&1 | grep -v 'up-to-date'
 done;
 
 echo "Sync complete"
