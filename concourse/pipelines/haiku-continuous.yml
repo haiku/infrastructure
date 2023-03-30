@@ -65,11 +65,11 @@ task-build-image: &task-build-image
 jobs:
   - name: haiku-((branch))-((arch))
     public: true
-    on_success:
-      try:
-        put: irc
-        params:
-          message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
+    #on_success:
+    #  try:
+    #    put: irc
+    #    params:
+    #      message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
     on_failure:
       try:
         put: irc
