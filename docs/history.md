@@ -51,13 +51,29 @@
     * Support unhelpful and suprised (pissed?) i was asking for updates every two hours when they haven't given me an update or ETA.
   * online.net restored service. Things came back up as expected.
 
-## Aug 2019+ Digital Ocean (current) days (~$100 USD/mo)
+## Aug 2019+ Digital Ocean (current) days (~$120 USD/mo)
 
   * Moved to a VM at DigitalOcean in Amsterdam (EU/GDPR)
   * Successfully moved to Docker Swarm
   * Using local SSD storage for persistant data, with a few block attachments for big things managed by rexray.
   * Speeds have been improved, system fairly stable
 
-## Feb 2022 Digital Ocean managed Kubernetes
+## Feb 2022 Digital Ocean managed Kubernetes (~$210.93 USD/mo)
 
-  * Migrating to a managed Kubernetes cluster in Amsterdam (EU/GDPR)
+  * Rexray project dead, substantial risk.  Migrate to k8s.
+  * Rewrite Docker Swarm compose into Kubernetes workloads.
+  * Shift to Traefik 2.x as our IngressController and Traefik CRD's only where needed
+  * Deploy an isolated, traditional mail server vm so we can RPTR's
+  * Moved to a three node managed Kubernetes cluster in Amsterdam (EU/GDPR)
+  * Automatic encrypted backups via k8s CronJobs
+    * Persistent volume backups to private S3 buckets via k8s CronJob
+    * Database backups to private S3 buckets via k8s CronJob
+	* Backup containers can also perform decryption + restores
+  * Close to zero-downtime upgrades... however large shared RWO storage volumes for haikuports means we
+    are unable to use plain deployments (we have to group things that use the same PV on the
+    same physical k8s node)
+
+## Mar 2023
+
+  * Migrate containers from Docker (docker.io) to Github Container Registry (ghcr.io) due to
+    announced end of Free team accounts.
