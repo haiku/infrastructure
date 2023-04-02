@@ -98,7 +98,7 @@ step_list = [
           ["git", "pull", "--rebase"], work_dir=SYNC_SETTINGS["repository_dir"]),
 ]
 # Allow for the setting 'skip_push' to allow for a debugging mode where all the steps are executed, except for the push
-if not settings.get("skip_push", False):
+if not SYNC_SETTINGS.get("skip_push", False):
     step_list.append(Step("commit_push", "Push the changes to the Haiku Repository", ["git", "push"],
          work_dir=SYNC_SETTINGS["repository_dir"]))
 
