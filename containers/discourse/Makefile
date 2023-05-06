@@ -1,4 +1,4 @@
-VERSION = 2.8.13
+VERSION = 3.0.3
 REGISTRY = ghcr.io/haiku
 
 default:
@@ -12,9 +12,9 @@ test:
 	sleep 5
 	docker rm postgres || true
 	docker network create discourse || true
-	docker run -d --name postgres --network discourse -e POSTGRES_PASSWORD=mysecretpassword postgres:latest
+	docker run -d --name postgres --network discourse -e POSTGRES_PASSWORD=mysecretpassword docker.io/postgres:latest
 	docker rm redis || true
-	docker run -d --name redis --network discourse redis:latest
+	docker run -d --name redis --network discourse docker.io/redis:latest
 	sleep 20
 	docker rm discourse || true
 	docker run --rm --network discourse --env-file test.env ${REGISTRY}/discourse:${VERSION} bundle exec rake db:create
