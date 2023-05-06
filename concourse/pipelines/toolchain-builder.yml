@@ -50,17 +50,6 @@ resources:
       username: ((container-registry-user))
       password: ((container-registry-password))
       repository: ((container-registry))/toolchain-worker-((branch))
-  - name: wasabi-east
-    type: rclone
-    source:
-      config: |
-        [remote]
-        type = s3
-        provider = Wasabi
-        access_key_id = ((s3key))
-        secret_access_key = ((s3secret))
-        endpoint = s3.us-east-1.wasabisys.com
-        acl = public-read
 # Common Tasks
 task-build-jam: &task-build-jam
   platform: linux
@@ -179,38 +168,6 @@ jobs:
           << : *task-build-crosstools
           outputs:
             - name: crosstools.x86_gcc2
-      - task: prepare-artifact-archive
-        config:
-          platform: linux
-          inputs:
-            - name: crosstools.arm
-            - name: crosstools.arm64
-            - name: crosstools.m68k
-#            - name: crosstools.ppc
-            - name: crosstools.riscv64
-            - name: crosstools.sparc
-            - name: crosstools.x86
-            - name: crosstools.x86_64
-            - name: crosstools.x86_gcc2
-          outputs:
-            - name: crosstools.archive
-          image_resource:
-            type: registry-image
-            source: { repository: ((container-registry))/general-worker }
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |
-                ARTIFACT=haiku-((branch))-latest.zip
-                zip -j -9 crosstools.archive/${ARTIFACT} crosstools.*/cross-tools-*
-                cd crosstools.archive
-                echo "untrusted comment: minisign encrypted secret key" > /tmp/minisign.key
-                echo "((minisign-private))" >> /tmp/minisign.key
-                echo "((minisign-key))" | minisign -H -s /tmp/minisign.key -Sm ${ARTIFACT}
-                rm -f /tmp/minisign.key
-                echo "Resulting artifacts:"
-                find . -ls
       - task: prepare-container-context
         config:
           platform: linux
@@ -269,11 +226,3 @@ jobs:
           tag_file: container-context/latesttag
           labels_file: container-context/labels.json
           build: container-context
-      - put: wasabi-east
-        params:
-          source: crosstools.archive
-          destination:
-          - dir: "remote:toolchains/((branch))/"
-            args:
-              - -c
-              #- -vv
