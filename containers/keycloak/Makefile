@@ -1,4 +1,4 @@
-VERSION = 21.1-1
+VERSION = 21.1-2
 REGISTRY = ghcr.io/haiku
 
 FEATURES = docker
