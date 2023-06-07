@@ -1,0 +1,95 @@
+### Haiku Keycloak SSO
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: ghcr.io/haiku/keycloak:21.1-3
+        args: ["start", "--optimized"]
+        env:
+        - name: KC_HOSTNAME_URL
+          value: https://sso.haiku-os.org/
+        - name: KC_HOSTNAME_ADMIN_URL
+          value: https://sso.haiku-os.org/
+        - name: KC_SPI_THEME_WELCOME_THEME
+          value: "haiku"
+        - name: KC_HTTP_ENABLED
+          value: "true"
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_DB_URL_HOST
+          value: "postgres"
+        - name: KC_DB_URL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-secrets
+              key: DB_NAME
+        - name: KC_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-secrets
+              key: DB_USERNAME
+        - name: KC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-secrets
+              key: DB_PASSWORD
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.25"
+            memory: "768Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sso
+spec:
+  selector:
+    app: keycloak
+  ports:
+  - name: keycloak-public
+    port: 8080
+  - name: keycloak-ssl
+    port: 8443
+---
+# web frontend for sso access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sso
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - sso.haiku-os.org
+    secretName: tls-cert-sso
+  rules:
+  - host: sso.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sso
+            port:
+              name: keycloak-public
