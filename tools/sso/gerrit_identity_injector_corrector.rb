@@ -16,7 +16,11 @@ if ARGV.count != 1
 end
 
 # ARGV.first is ...
+# Contributors:
 # curl -s --header "Content-Type: application/json" --user "username:password" https://review.haiku-os.org/a/groups/groupid/members | grep -v ")]}'" > ~/gerrit-developers.json
+
+# All active users:
+# for i in $(curl -s --header "Content-Type: application/json" --user "username:password" https://review.haiku-os.org/a/accounts/?q=is:active | grep -v ")]}'" | jq | grep _account_id | cut -d':' -f2); do curl -s --header "Content-Type: application/json" --user "username:password" https://review.haiku-os.org/a/accounts/$i | grep -v ")]}'" >> ~/gerrit-users.json; done
 
 data = File.read(ARGV.first)
 users = JSON.parse(data)
@@ -27,15 +31,43 @@ users = JSON.parse(data)
 # git checkout FETCH_HEAD
 
 users.each do |user|
-  external_id = "keycloak-oauth:#{user["username"]}"
+  firstname = user["name"].split(' ').first
+  lastname = user["name"].gsub("#{firstname} ","").lstrip
+
+  username = user["username"]
+  email = user["email"]
+
+  if username == username.downcase
+    next
+  end
+
+  puts "Detected #{username} is mixed case!"
+
+  bad_external_id = "keycloak-oauth:#{username}"
+  bad_external_id_hash = Digest::SHA1.hexdigest(bad_external_id)
+
+  bad_refid = bad_external_id_hash.insert(2, '/')
+  bad_refid_segment = bad_refid.split('/')
+
+  if File.exists?(bad_refid)
+    puts "Detected #{username} was created as mixed case!"
+    File.delete(bad_refid)
+  end
+
+  external_id = "keycloak-oauth:#{username.downcase}"
   external_id_hash = Digest::SHA1.hexdigest(external_id)
+
+  if email == nil or email.length <= 3
+    puts "SKIP: #{username} (#{firstname} #{lastname}) missing email! Skipping..."
+    next
+  end
 
   refid = external_id_hash.insert(2, '/')
   refid_segment = refid.split('/')
   Dir.mkdir(refid_segment[0]) unless Dir.exist?(refid_segment[0])
   data =  "[externalId \"#{external_id}\"]\n"
   data += "       accountId = #{user["_account_id"]}\n"
-  data += "       email = #{user["email"]}\n"
+  data += "       email = #{email}\n"
   puts "Adding #{user["username"]} as #{refid}..."
   File.write(refid, data)
 end
