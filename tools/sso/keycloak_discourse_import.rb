@@ -9,7 +9,7 @@ end
 
 KeycloakAdmin.configure do |config|
   config.use_service_account = false
-  config.server_url          = "https://auth.haiku-os.org/auth"
+  config.server_url          = "https://sso.haiku-os.org"
   config.server_domain       = "auth.haiku-os.org"
   config.client_id           = "admin-cli"
   config.client_realm_name   = "master"
@@ -23,7 +23,7 @@ end
 users = CSV.read(ARGV.first, :headers => true)
 
 # XXX FIRST 3 USERS TO NOT SPAM EVERYONE WHILE IN DEV
-users.first(3).each do |user|
+users.each do |user|
 	firstname = user[1].split(' ')[0]
 	lastname = user[1].split(' ')[1]
 
@@ -36,13 +36,13 @@ users.first(3).each do |user|
 	password = (0...128).map { ('a'..'z').to_a[rand(26)] }.join
 	email_verified = false
 	begin
-		KeycloakAdmin.realm("master").users.create!(username, email, password, email_verified, "en")
+		KeycloakAdmin.realm("haiku").users.create!(username, email, password, email_verified, "en")
 	rescue RuntimeError => error
 		puts "FAIL - Unable to add #{username} - #{error}"
 		next
 	end
 	puts "SUCCESS - Added #{username} - #{email}..."
 
-	newuser = KeycloakAdmin.realm("master").users.search(email).first
-	KeycloakAdmin.realm("master").users.update(newuser.id, update_name)
+	newuser = KeycloakAdmin.realm("haiku").users.search(email).first
+	KeycloakAdmin.realm("haiku").users.update(newuser.id, update_name)
 end
