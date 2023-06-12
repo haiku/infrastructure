@@ -33,7 +33,8 @@ RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal \
     && . $HOME/.cargo/env \
 	&&  cargo install oxipng \
-	&& mv $HOME/.cargo/bin/oxipng /usr/local/bin/
+	&& mv $HOME/.cargo/bin/oxipng /usr/local/bin/ \
+	&& rustup self uninstall -y
 
 # Install Discourse
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
