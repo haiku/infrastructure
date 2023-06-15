@@ -12,7 +12,7 @@ end
 KeycloakAdmin.configure do |config|
 	config.use_service_account = false
 	config.server_url		  = "https://sso.haiku-os.org"
-	config.server_domain	   = "auth.haiku-os.org"
+	config.server_domain	   = "sso.haiku-os.org"
 	config.client_id		   = "admin-cli"
 	config.client_realm_name   = "master"
 	config.use_service_account = false
