@@ -1,6 +1,8 @@
 ---
 roles:
   - name: owner
+    oauth:
+      groups: ["admin"]
     github:
       teams: ["haiku:infrastructure"]
     local:

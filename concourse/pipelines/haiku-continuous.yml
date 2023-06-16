@@ -6,6 +6,8 @@ resource_types:
       repository: haiku/irccat-resource
 roles:
   - name: owner
+    oauth:
+      groups: ["admin"]
     github:
       teams: ["haiku:infrastructure"]
     local:
