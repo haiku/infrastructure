@@ -76,7 +76,7 @@ for ARCH in $ARCHES; do
 		PROFILE="minimum"
 		MEDIA="raw"
 	elif [ "$ARCH" == "riscv64" ]; then
-		PROFILE="minimum"
+		PROFILE="nightly"
 		MEDIA="mmc"
 	elif [ "$ARCH" == "ppc" ]; then
 		# TODO: PPC needs a "unified" bootable target. At the moment you build
