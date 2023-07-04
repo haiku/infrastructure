@@ -93,6 +93,8 @@ data:
     # osuosl.org
     140.211.166.134
     2605:bc80:3010::134
+    # files.mc9.eu/haiku (waluswko.net)
+    85.193.207.26
   haikuports-master: |2
     # cdn.haiku.nz (jessicah)
     101.100.139.54
@@ -123,6 +125,8 @@ data:
     # osuosl.org
     140.211.166.134
     2605:bc80:3010::134
+    # files.mc9.eu/haiku (waluswko.net)
+    85.193.207.26
 ---
 apiVersion: v1
 kind: Service
