@@ -1,7 +1,7 @@
 # This list is generated from a fresh virtualenv when Trac is installed
 Babel==2.7.0
 bleach==3.1.0
-certifi==2019.6.16
+certifi==2022.12.7
 chardet==3.0.4
 docutils==0.15.2
 html2rest==0.2.2
