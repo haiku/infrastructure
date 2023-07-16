@@ -9,7 +9,7 @@ idna==2.8
 Jinja2==2.10.1
 MarkupSafe==1.1.1
 pkginfo==1.5.0.1
-Pillow==2.6.2
+Pillow==9.3.0
 Pygments==2.5.2
 pytz==2019.2
 readme-renderer==24.0
