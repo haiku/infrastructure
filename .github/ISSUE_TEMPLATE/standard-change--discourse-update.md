@@ -16,7 +16,7 @@ Dev-tested by the container developer.
 ### Steps to implement the change
 _Note: Please mark changes from the default steps below in *bold*_
 
-1. Verify that the image is available in the [package registry](https://github.com/haiku/haikudepotserver/pkgs/container/discourse).
+1. Verify that the image is available in the [package registry](https://github.com/haiku/discourse/pkgs/container/discourse).
 2. Make the installation read-only using the *Enable read-only* button on the [Admin/Backups](https://discuss.haiku-os.org/admin/backups) page.
 3. Start a backup by using the *Backup* button on that page.
 4. Update the version in the infrastructure repository in `deployments/discourse.yml`.
@@ -36,8 +36,8 @@ None
 ### Rollback Plan
 If the update is unsuccesful, try rolling back the image with the following commands:
 ```
-$ git restore deployments/haikudepotserver.yml
-$ kubectl apply -f deployments/haikudepotserver.yml
+$ git restore deployments/discourse.yml
+$ kubectl apply -f deployments/discourse.yml
 ```
 
 If the update applied database transformations, or the database go corrupted in any other way, use Discourse's built in database restore features to return the data to the previously saved version.
