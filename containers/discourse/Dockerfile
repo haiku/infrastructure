@@ -65,4 +65,3 @@ WORKDIR /apps/discourse
 
 CMD "/init"
 
-HEALTHCHECK --start-period=5m CMD curl --fail http://`hostname`:80/ || exit 1
