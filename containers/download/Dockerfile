@@ -18,6 +18,5 @@ RUN apk add --update python3 python3-dev py-pip git libgcc curl && \
 USER nobody
 
 EXPOSE 8080
-HEALTHCHECK --start-period=3m --retries=2 CMD curl --fail http://`hostname`:8080/ || exit 1
 
 CMD ["/entry.sh"]

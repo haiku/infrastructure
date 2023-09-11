@@ -1,4 +1,4 @@
-VERSION=20230211
+VERSION=20230910
 REGISTRY = ghcr.io/haiku
 default:
 	docker build --no-cache --tag ${REGISTRY}/download:$(VERSION) .
