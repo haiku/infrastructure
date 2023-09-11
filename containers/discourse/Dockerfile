@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=3.0.3
+ARG VERSION=3.1.0
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
@@ -23,7 +23,11 @@ RUN wget --quiet -O - https://deb.nodesource.com/setup_18.x | bash -
 RUN wget --quiet -O - https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
 
-RUN apt-get update && apt-get install -y git bash build-essential postgresql-client-14 python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli nodejs yarn && pip3 install supervisor
+RUN apt-get update \
+    && apt-get install -y git bash build-essential postgresql-client-14 postgresql-13-pgvector \
+		python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli nodejs \
+		yarn ripgrep \
+	&& pip3 install supervisor
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Install a rust compiler and install oxipng
