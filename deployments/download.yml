@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: download
-        image: docker.io/haiku/download:20230910
+        image: ghcr.io/haiku:20230910
         env:
         - name: CONFIG_PATH
           value: "/secrets/config.toml"
