@@ -4,10 +4,12 @@
 
 ### Requirements
 
-  * Worker running Linux (I used Fedora)
-    * Use any Linux you like, but make *sure* it has a *recent* kernel and has containerd / runc
+  * Worker running Linux
+    * Fedora or Rocky Linux recommended as containerd seems more stable on these platforms
+    * Debian may be functional, but has only undergone limited testing
+    * Ubuntu has been problematic in the past due to their usage of apparmor and ufw
   * 4 GiB or more memory
-  * Basic OS install, seperate partition / filesystem for Concourse work directory.
+  * Basic OS install, separate partition / filesystem for Concourse work directory.
     * 16 GiB (or more) for OS (ext4 preferred)
     * Concourse Work Directory (/opt/concourse/worker)
       * 100 GiB (or more) of disk space
@@ -21,19 +23,25 @@
   * Write out the settings to /opt/concourse/worker.env
     ```
     CONCOURSE_WORK_DIR=/opt/concourse/worker
-    CONCOURSE_RUNTIME=containerd
     CONCOURSE_TSA_WORKER_PRIVATE_KEY=/opt/concourse/worker_key
     CONCOURSE_TSA_PUBLIC_KEY=/opt/concourse/tsa_host_key.pub
     CONCOURSE_TSA_HOST=ci.haiku-os.org:8022
-    #CONCOURSE_GARDEN_ALLOW_HOST_ACCESS=true
+    CONCOURSE_BAGGAGECLAIM_DRIVER=btrfs
+    CONCOURSE_BIND_IP=127.0.0.1
+    CONCOURSE_BIND_PORT=7777
+    # If you want to use containerd
+    CONCOURSE_RUNTIME=containerd
     CONCOURSE_CONTAINERD_DNS_SERVER=1.1.1.1
     CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE=false
+    # If you want to use the older garden
+    #CONCOURSE_RUNTIME=garden
+    #CONCOURSE_GARDEN_ALLOW_HOST_ACCESS=true
     #CONCOURSE_GARDEN_DNS_SERVER=1.1.1.1
     #CONCOURSE_GARDEN_DNS_PROXY_ENABLE=false
-    CONCOURSE_BAGGAGECLAIM_DRIVER=btrfs
-    CONCOURSE_BIND_PORT=7777
-    CONCOURSE_BIND_IP=127.0.0.1
     ```
+  * The ```_DNS_SERVER=``` entries above solve an invalid resolv.conf within containers. This cause
+    is some linux distros are set to nameserver 127.0.0.1 for caching (which is invalid within a
+    container).  Essentually you're telling the containers which nameserver to use in their resolv.conf
 
   * ```CONCOURSE_WORK_DIR``` is a path to a btrfs filesystem with at least ~100 GB (builds happen here).
   * ```BAGGAGECLAIM_DRIVER=btrfs``` means it's expected that ```CONCOURSE_WORK_DIR``` is btrfs formatted.
@@ -78,3 +86,34 @@
   * ```systemctl daemon-reload```
   * ```systemctl enable concourse```
   * ```systemctl start concourse```
+
+### Common Problems
+
+#### garden based containers can't mount cgroup to rootfs
+
+**Problem**
+
+The older (and default) container engine is written for an old cgroupsv1 world which causes
+this error. Modern kernels have moved onto cgroupsv2
+
+> mounting \"cgroup\" to rootfs at \"/sys/fs/cgroup\" caused: invalid argument"
+
+**Solution**
+
+A [bug report](https://github.com/concourse/concourse/issues/8675) references this
+and highlights a solution of adding ```systemd.unified_cgroup_hierarchy=false``` to your kernel
+boot flags (edit /etc/default/grub; update-grub).   This is a hack however, and may impact
+systemd functionality.
+
+Using the systemd backend is recommended as it is more modern and supported
+
+#### systemd based containers can't access the internet
+
+**Problem**
+
+This is an issue we ran into on an Ubuntu 22.x builder.  The cause was never found.
+
+**Solution**
+
+We reverted to the older garden-based backend which appeared to result in functional builds
+when paired with "garden based containers can't mount cgroup to rootfs" solution above.
