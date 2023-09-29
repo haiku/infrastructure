@@ -4,21 +4,34 @@
 
 ### Requirements
 
-  * Worker running Linux
-    * Fedora or Rocky Linux recommended as containerd seems more stable on these platforms
-    * Debian may be functional, but has only undergone limited testing
-    * Ubuntu has been problematic in the past due to their usage of apparmor and ufw
+  * Worker running Debian 12+
+    * Debian is recommended as it is the tested platform
+    * Ubuntu may be functional, but historically has been problematic
+    * RHEL or RHEL Clones no longer support the required btrfs filesystem. Their loss.
   * 4 GiB or more memory
-  * Basic OS install, separate partition / filesystem for Concourse work directory.
+  * Minimum OS install separate partition / filesystem for Concourse work directory.
+    * Two disks (One for OS, one NVMe for builds) is "nice" but not required.
     * 16 GiB (or more) for OS (ext4 preferred)
     * Concourse Work Directory (/opt/concourse/worker)
       * 100 GiB (or more) of disk space
       * BTRFS formatted
-      * NVMe Storage is preferred 
+      * NVMe Storage is preferred
 
-### Setup
+### Debian Setup
 
-  * Download the latest concourse, extract to /opt/
+  * Install a minimal Debian 12 system with SSH running. GUI not needed
+  * Hostname hbXX01  (where XX are your initials, this is what people see for the builder)
+  * Install the pre-requirements
+    ```
+    apt install btrfs-progs sudo vim iptables
+    mkdir -p /opt/concourse/worker
+    ```
+  * Add your btrfs partition to /etc/fstab (be sure to adjust the disk):
+    ```
+    echo '/dev/nvme0n1p1 /opt/concourse/worker btrfs defaults,noatime,compress=zstd 0 0' >> /etc/fstab
+    mount -a
+    ```
+  * Download the latest concourse matching our server version, extract to /opt/
     https://github.com/concourse/concourse/releases/
   * Write out the settings to /opt/concourse/worker.env
     ```
@@ -29,7 +42,7 @@
     CONCOURSE_BAGGAGECLAIM_DRIVER=btrfs
     CONCOURSE_BIND_IP=127.0.0.1
     CONCOURSE_BIND_PORT=7777
-    # If you want to use containerd
+    # If you want to use containerd (recommended)
     CONCOURSE_RUNTIME=containerd
     CONCOURSE_CONTAINERD_DNS_SERVER=1.1.1.1
     CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE=false
@@ -58,7 +71,7 @@
     KillMode=process
     LimitNPROC=infinity
     LimitNOFILE=infinity
-    MemoryLimit=infinity
+    MemoryMax=infinity
     TasksMax=infinity
     Restart=on-failure
     RestartSec=10
@@ -76,7 +89,7 @@
     ```
 
   * Generate worker private key:
-    ```/opt/concourse/bin/concourse generate-key -f /opt/concourse/worker_key```
+    ```/opt/concourse/bin/concourse generate-key -t ssh -f /opt/concourse/worker_key```
     * Add worker public key (/opt/concourse/worker_key.pub) to concourse server.
   * Get the public key from the concourse server:
     ```ssh-keyscan -t ssh-rsa -p 8022  ci.haiku-os.org```
