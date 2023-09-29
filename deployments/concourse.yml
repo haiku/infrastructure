@@ -27,6 +27,8 @@ spec:
             cpu: "0.25"
             memory: "48Mi"
         env:
+        - name: CONCOURSE_ENABLE_P2P_VOLUME_STREAMING
+          value: "false"
         - name: CONCOURSE_EXTERNAL_URL
           value: "https://ci.haiku-os.org"
         - name: CONCOURSE_POSTGRES_HOST
@@ -78,11 +80,11 @@ spec:
         - name: CONCOURSE_OAUTH_USERINFO_URL
           value: https://sso.haiku-os.org/realms/haiku/protocol/openid-connect/userinfo
         - name: CONCOURSE_OAUTH_OIDC_SCOPE
-          value: profile offline_access roles openid email
+          value: openid
         - name: CONCOURSE_OAUTH_USER_ID_KEY
           value: email
         - name: CONCOURSE_OAUTH_GROUPS_KEY
-          value: realm_access.roles
+          value: roles
         - name: CONCOURSE_OAUTH_CLIENT_ID
           valueFrom:
             secretKeyRef:
@@ -93,26 +95,6 @@ spec:
             secretKeyRef:
               name: concourse-auth
               key: oauth-client-secret
-        - name: CONCOURSE_MAIN_TEAM_LOCAL_USER
-          valueFrom:
-            secretKeyRef:
-              name: concourse-auth
-              key: local-user
-        - name: CONCOURSE_GITHUB_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: concourse-auth
-              key: github-client-id
-        - name: CONCOURSE_GITHUB_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: concourse-auth
-              key: github-client-secret
-        - name: CONCOURSE_MAIN_TEAM_GITHUB_TEAM
-          valueFrom:
-            secretKeyRef:
-              name: concourse-auth
-              key: github-team
         volumeMounts:
         - name: keys
           mountPath: "/keys"
