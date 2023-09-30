@@ -1,4 +1,4 @@
-FROM docker.io/pypy:2.7-slim
+FROM docker.io/pypy:3.10-slim
 
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/trac/pypy
@@ -23,5 +23,3 @@ CMD /opt/pypy/bin/tracd -b 0.0.0.0 -p 80 -s /var/trac/dev.haiku-os.org
 
 # Make port 80 available to the outside world
 EXPOSE 80
-
-HEALTHCHECK CMD curl --fail http://`hostname`:80/ || exit 1
