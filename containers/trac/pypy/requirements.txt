@@ -1,33 +1,21 @@
 # This list is generated from a fresh virtualenv when Trac is installed
-Babel==2.7.0
-bleach==3.1.0
-certifi==2019.6.16
-chardet==3.0.4
-docutils==0.15.2
-html2rest==0.2.2
-idna==2.8
-Jinja2==2.10.1
-MarkupSafe==1.1.1
-pkginfo==1.5.0.1
-Pillow==6.2.2
-Pygments==2.5.2
-pytz==2019.2
-readme-renderer==24.0
-Reindent==0.1.1
-requests==2.22.0
-requests-toolbelt==0.9.1
-setuptools-subversion==3.1
-six==1.12.0
-tqdm==4.33.0
-twine==1.13.0
-urllib3==1.25.3
+Babel==2.12.1
+cffi==1.15.1
+docutils==0.20.1
+greenlet==0.4.13
+hpy==0.0.4
+html5lib==1.1
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+Pygments==2.16.1
+pytz==2023.3.post1
+readline==6.2.4.1
+six==1.16.0
+textile==4.0.2
 webencodings==0.5.1
 
 # Optional module for PostgreSQL
 psycopg2cffi==2.9.0
 
-# Module for compatibility with AccountManager
-Genshi==0.7.3
-
-# Customized Trac 1.4
-git+https://github.com/haiku/trac.git@1.4.3-haiku
+# Customized Trac 1.6
+git+https://github.com/haiku/trac.git@1.6.0-haiku
