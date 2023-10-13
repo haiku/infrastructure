@@ -71,10 +71,8 @@ data:
     163.7.134.121
     2404:138:134:120::2
     2404:138:134:122::2
-    # home (kallisti5) (ipfs testing)
-    70.112.18.26
-    # mirror (kallisti5) (hpkr.lax1.terarocket.io)
-    45.63.53.102
+    # ipfs mirroring (kallisti5)
+    45.77.212.186
     # rit.edu
     129.21.171.72
     129.21.171.98
@@ -103,10 +101,8 @@ data:
     163.7.134.121
     2404:138:134:120::2
     2404:138:134:122::2
-    # home (kallisti5) (ipfs testing)
-    70.112.18.26
-    # mirror (kallisti5) (hpkr.lax1.terarocket.io)
-    45.63.53.102
+    # ipfs mirroring (kallisti5)
+    45.77.212.186
     # rit.edu
     129.21.171.72
     129.21.171.98
