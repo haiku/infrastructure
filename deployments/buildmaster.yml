@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: docker.io/haikuporter/buildmaster-frontend:1.2.7-2
+        image: ghcr.io/haikuports/haikuporter/frontend:1.2.8-2
         volumeMounts:
         - name: buildmaster-data-x86-gcc2
           mountPath: /var/instances/master/x86_gcc2
@@ -43,7 +43,7 @@ spec:
         - name: buildmaster-packages
           mountPath: /var/instances/haikuports
       - name: buildmaster-x86-64
-        image: docker.io/haikuporter/buildmaster:1.2.7-9
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.2.8-2
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
@@ -53,6 +53,9 @@ spec:
           mountPath: /var/sources
         - name: buildmaster-data-x86-64
           mountPath: /var/buildmaster
+        - name: signing-secrets
+          mountPath: "/run/secrets/repo_signing"
+          readOnly: true
         env:
           - name: SYSTEM_PACKAGE_BRANCH
             value: "r1beta4_87"
@@ -61,7 +64,7 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: docker.io/haikuporter/buildmaster:1.2.7-9
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.2.8-2
         #command: ["bootstrap", "x86_gcc2", "x86"]
         command: ["loop"]
         volumeMounts:
@@ -71,6 +74,9 @@ spec:
           mountPath: /var/packages
         - name: buildmaster-data-x86-gcc2
           mountPath: /var/buildmaster
+        - name: signing-secrets
+          mountPath: "/run/secrets/repo_signing"
+          readOnly: true
         env:
           - name: SYSTEM_PACKAGE_BRANCH
             value: "r1beta4_87"
@@ -91,6 +97,16 @@ spec:
         - name: buildmaster-sources
           persistentVolumeClaim:
             claimName: buildmaster-sources-pvc
+        - name: signing-secrets
+          projected:
+            sources:
+            - secret:
+                name: haiku-artifact-signing
+                items:
+                  - key: minisign-haiku-2019.key
+                    path: privatekey
+                  - key: minisign-haiku-2019.password
+                    path: privatekeypass
 ---
 # state data for builds like logs of buildruns, buildrun id
 # tracking, builder connection information.
