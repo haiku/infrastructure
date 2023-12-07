@@ -49,7 +49,7 @@ spec:
     port: 1965
     targetPort: 1965
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: MiddlewareTCP
 metadata:
   name: gemini-ingressmiddle
@@ -57,7 +57,7 @@ spec:
   inFlightConn:
     amount: 256
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRouteTCP
 metadata:
   name: gemini-ingresstcp

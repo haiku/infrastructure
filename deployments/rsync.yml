@@ -149,7 +149,7 @@ spec:
     requests:
       storage: 30Gi
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: MiddlewareTCP
 metadata:
   name: rsync-ingressmiddle
@@ -157,7 +157,7 @@ spec:
   inFlightConn:
     amount: 10
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRouteTCP
 metadata:
   name: rsync-ingresstcp
