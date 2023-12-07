@@ -62,6 +62,43 @@ spec:
     port: 80 
     targetPort: 80
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+    name: trac-scanblock
+spec:
+  plugin:
+    scanblock:
+      blockPrivate: "false"
+      blockSeconds: "120"
+      minScanPercent: "50"
+      minScanRequests: "5"
+      minTotalRequests: "25"
+      playGames: "false"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: cloud-denyip
+spec:
+  plugin:
+    denyip:
+      ipDenyList:
+      - 3.80.0.0/12      # aws ec2 hammering trac
+      - 3.224.0.0/12     # aws ec2 hammering trac
+      - 34.192.0.0/10    # aws ec2 hammering trac
+      - 35.152.0.0/13    # aws ec2 hammering trac
+      - 35.160.0.0/12    # aws ec2 hammering trac
+      - 35.176.0.0/13    # aws ec2 hammering trac
+      - 44.192.0.0/11    # aws ec2 hammering trac
+      - 47.74.0.0/15     # alibaba hammering trac
+      - 47.76.0.0/14     # alibaba hammering trac
+      - 47.80.0.0/13     # alibaba hammering trac
+      - 54.36.148.0/22   # OVH hammering trac
+      - 188.165.192.0/18 # OVH hammering trac
+      - 54.210.0.0/15    # aws ec2 hammering trac
+      - 136.243.0.0/16   # Hetzner UA hammering trac
+---
 # web frontends for trac
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -70,6 +107,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-cloud-denyip@kubernetescrd
 spec:
   tls:
   - hosts:
