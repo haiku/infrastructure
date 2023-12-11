@@ -71,9 +71,9 @@ spec:
     scanblock:
       blockPrivate: "false"
       blockSeconds: "120"
-      minScanPercent: "50"
-      minScanRequests: "5"
-      minTotalRequests: "25"
+      minScanPercent: "60"
+      minScanRequests: "20"
+      minTotalRequests: "50"
       playGames: "false"
 ---
 apiVersion: traefik.io/v1alpha1
