@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: gemini 
-        image: ghcr.io/haiku/website-gemini:7664d6f
+        image: ghcr.io/haiku/website-gemini:5e424b3
         env:
         - name: TLS_HOSTNAME
           value: "lofi.haiku-os.org"
