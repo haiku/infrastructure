@@ -25,8 +25,13 @@ end
 users = CSV.read(ARGV.first, :headers => true)
 
 users.each do |user|
-	firstname = user[1].split(' ')[0]
-	lastname = user[1].split(' ')[1]
+	if user["name"] == nil
+		firstname = "Unknown"
+		lastname = "Unknown"
+	else
+		firstname = user["name"].split(' ')[0]
+		lastname = user["name"].split(' ')[1]
+	end
 
 	update_name = Hash.new
 	update_name.merge!({firstName: firstname}) if firstname && firstname.length > 0
@@ -36,6 +41,24 @@ users.each do |user|
 	email = user[3]
 	password = (0...128).map { ('a'..'z').to_a[rand(26)] }.join
 	email_verified = true
+
+	if user["active"] == "false"
+		puts "Skipping inactive user #{username} - #{user["name"]} <#{email}>..."
+		next
+	end
+
+	if user["trust_level"].to_i == 0
+		puts "Skipping no trust user #{username} - #{user["name"]} <#{email}>..."
+		next
+	end
+
+	if user["posts_read_count"].to_i < 2
+		puts "Skipping low post read user #{username} - #{user["name"]} <#{email}>..."
+		next
+	end
+
+	# XXX: COMMENT ME OUT TO CHECK EACH USER IN KEYBASE
+	next
 
 	# First, search for users with matching emails...
 	existing_users = KeycloakAdmin.realm("haiku").users.search({email: email})
@@ -58,6 +81,9 @@ users.each do |user|
 	   puts "ERROR: username #{username} exists multiple times? :-/"
 	   next
 	end
+
+	# XXX: COMMENT ME OUT TO CREATE EACH USER
+	next
 
 	# Now.. we have users in discourse without a matching email or username in keycloak
 	#  let's create them
