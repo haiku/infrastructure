@@ -1,8 +1,8 @@
-VERSION = 3.1.4
+VERSION = 3.2.0
 REGISTRY = ghcr.io/haiku
 
 default:
-	docker build --no-cache --build-arg VERSION=${VERSION} -t ${REGISTRY}/discourse:${VERSION} .
+	docker build --layers --no-cache --build-arg VERSION=${VERSION} -t ${REGISTRY}/discourse:${VERSION} .
 shell:
 	docker run -it ${REGISTRY}/discourse:${VERSION} /bin/bash -l
 test:
