@@ -90,6 +90,7 @@ jobs:
     public: true
     #on_failure:
     #  try:
+    #    tags: ["((worker_tag))"]
     #    put: irc
     #    params:
     #      message: "haiku.%PURPLE((branch))%NORMAL: %GREENbootstrap%NORMAL of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"

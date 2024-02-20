@@ -74,6 +74,7 @@ jobs:
     #      message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL was %GREENsuccessful%NORMAL ${BUILD_URL}"
     on_failure:
       try:
+        tags: ["((worker_tag))"]
         put: irc
         params:
           message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
