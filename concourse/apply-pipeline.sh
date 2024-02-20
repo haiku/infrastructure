@@ -5,9 +5,15 @@ if [ $# -ne 3 ]; then
 	exit 1
 fi
 
+# Build on alternative physical sites
+WORKER_TAG="site_av"
+#WORKER_TAG="site_rl"
+
 TEAM="$1"
 BRANCH="$2"
 SECRETS="$3"
+COMMON_FLAGS="-n -l $SECRETS -v worker_tag=$WORKER_TAG -v branch=$BRANCH"
+
 
 if [ ! -f $SECRETS ]; then
 	echo "Unable to access secrets file $SECRETS!"
@@ -52,13 +58,13 @@ fi
 
 if [ "$TEAM" == "continuous" ]; then
 	# This one is all-in-one
-	$FLY_CLI -t haiku set-pipeline -n -p gerrit-$BRANCH  -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-gerrit-build.yml
+	$FLY_CLI -t haiku set-pipeline -p gerrit-$BRANCH $COMMON_FLAGS -c pipelines/haiku-gerrit-build.yml
 	$FLY_CLI -t haiku expose-pipeline -p gerrit-$BRANCH
 fi
 
 if [ "$TEAM" != "continuous" ] && [ "$TEAM" != "bootstrap" ]; then
 	echo "Deploy toolchain builder..."
-	$FLY_CLI -t haiku set-pipeline -n -p toolchain-$BRANCH -v branch=$BRANCH -l $SECRETS -c pipelines/toolchain-builder.yml
+	$FLY_CLI -t haiku set-pipeline -n -p toolchain-$BRANCH $COMMON_FLAGS -c pipelines/toolchain-builder.yml
 	$FLY_CLI -t haiku expose-pipeline -p toolchain-$BRANCH
 fi
 
@@ -88,11 +94,11 @@ for ARCH in $ARCHES; do
 	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$MEDIA"
 
 	if [ "$TEAM" == "continuous" ]; then
-		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
+		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
 	elif [ "$TEAM" == "bootstrap" ]; then
-		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
+		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
 	else
-		$FLY_CLI -t haiku set-pipeline -n -p $BRANCH-$ARCH -v branch=$BRANCH -v arch=$ARCH -l $SECRETS -v profile=$PROFILE -v media=$MEDIA -v bucket_image=$BUCKET_IMAGE -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
+		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -v bucket_image=$BUCKET_IMAGE -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t haiku expose-pipeline -p $BRANCH-$ARCH
 done

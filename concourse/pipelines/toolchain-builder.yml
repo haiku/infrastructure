@@ -97,6 +97,7 @@ task-build-crosstools: &task-build-crosstools
 # Jobs
 jobs:
   - name: buildtools-((branch))
+    tags: ["((worker_tag))"]
     public: true
     plan:
       - in_parallel:

@@ -95,13 +95,18 @@ jobs:
     #      message: "haiku.%PURPLE((branch))%NORMAL: %GREENbootstrap%NORMAL of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
     plan:
       - get: haiku-git
+        tags: ["((worker_tag))"]
         trigger: false
       - get: haikuporter-git
+        tags: ["((worker_tag))"]
         trigger: false
       - get: haikuports-git
+        tags: ["((worker_tag))"]
         trigger: false
       - get: haikuports-cross-git
+        tags: ["((worker_tag))"]
         trigger: false
       - task: bootstrap-((branch))-((arch))
+        tags: ["((worker_tag))"]
         config:
           << : *task-build-image

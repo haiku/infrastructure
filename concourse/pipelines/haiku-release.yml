@@ -46,10 +46,13 @@ jobs:
     public: true
     plan:
       - get: pipeline-time-trigger
+        tags: ["((worker_tag))"]
         trigger: true
       - get: haiku-git
+        tags: ["((worker_tag))"]
         trigger: false
       - task: build-((branch))-((media))
+        tags: ["((worker_tag))"]
         config:
           platform: linux
           image_resource:
@@ -123,6 +126,7 @@ jobs:
                 #jam -q build \<repository\>Haiku # not really needed
                 rm -f efi.key
       - task: package-((media))
+        tags: ["((worker_tag))"]
         config:
           platform: linux
           image_resource:
@@ -172,6 +176,7 @@ jobs:
                 echo "Resulting artifacts:"
                 find . -ls
       - task: package-repository
+        tags: ["((worker_tag))"]
         config:
           platform: linux
           image_resource:
@@ -206,6 +211,7 @@ jobs:
                 echo "Resulting artifacts:"
                 find $TARGET_REPO -ls
       - task: package-catkeys
+        tags: ["((worker_tag))"]
         config:
           platform: linux
           image_resource:
@@ -232,6 +238,7 @@ jobs:
                 rm -rf catalogs
                 sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
       - put: wasabi-east
+        tags: ["((worker_tag))"]
         params:
           source: images.((arch))
           destination:
@@ -240,6 +247,7 @@ jobs:
               - -c
               #- -vv
       - put: wasabi-east
+        tags: ["((worker_tag))"]
         params:
           source: repository.((arch))
           destination:
@@ -248,6 +256,7 @@ jobs:
               - -c
               #- -vv
       - put: wasabi-east
+        tags: ["((worker_tag))"]
         params:
           source: catkeys.((arch))
           destination:

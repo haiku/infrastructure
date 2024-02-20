@@ -79,7 +79,9 @@ jobs:
           message: "haiku.%PURPLE((branch))%NORMAL: build of %BLUE((arch))%NORMAL %REDfailed%NORMAL ${BUILD_URL}"
     plan:
       - get: haiku-git
+        tags: ["((worker_tag))"]
         trigger: true
       - task: build-((branch))-((profile))-((media))
+        tags: ["((worker_tag))"]
         config:
           << : *task-build-image
