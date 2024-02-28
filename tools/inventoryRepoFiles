@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "usage: $0 <haiku_git_repo>"
+	exit 1
+fi
+
+git -C $1 checkout master
+for i in $(git log $1/build/jam/repositories/HaikuPorts | grep -E "^commit\s[a-z0-9]{32}" | awk '{print $2}'); do
+	echo "# -----------------------------------------------"
+	echo "# hash $i - $(git -C $1 describe --tags HEAD)"
+	git -C $1 checkout $i > /dev/null 2>&1
+	sha256sum build/jam/repositories/HaikuPorts/*
+done
+git -C $1 checkout master
