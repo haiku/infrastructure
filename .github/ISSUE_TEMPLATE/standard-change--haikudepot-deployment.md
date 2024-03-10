@@ -50,10 +50,32 @@ _Please list any configuration changes, and note whether they need to be done pr
 None
 
 ### Rollback Plan
-If the update is unsuccesful, try rolling back the image with the following commands:
-```
-$ git restore deployments/haikudepotserver.yml
-$ kubectl apply -f deployments/haikudepotserver.yml
-```
+If the update is unsuccessful, the rollback can be executed as follows.
 
-If the update applied database transformations, or the database go corrupted in any other way, please also restore the database to the backup crated as part of these update steps.
+If there has been a (failed) database migration as part of the change, the backup created in step 2 must be restored. If the database has not been affected, then skip to the image rollback steps below.
+
+1. Stop all instances of haikudepotserver
+    ```
+    $ kubectl scale deploy haikudepotserver --replicas =0
+    ```
+2. Prepare the restore job in  `deployments/other/restore-pg.yml` by making sure the container args point to the haikudepotserver container
+    ```
+            args: ["restore", "haikudepotserver"]
+    ```
+3. Restore the database by executing the following commands.
+    ```
+    $ kubectl exec -it deployment/postgres -- dropdb -U postgres haikudepotserver
+    $ kubectl exec -it deployment/postgres -- createdb -U postgres -O haikudepotserver haikudepotserver
+    $ kubectl apply -f deployments/other/restore-pg.yml
+    # follow and validate the output of the following command. If the command completes, the restore is done.
+    $ kubectl logs --follow jobs/restore
+    # cleanup
+    $ kubectl delete job/restore
+    $ git checkout deployments/other/restore-pg.yml
+    ```
+4. Roll back the image with the following commands:
+    ```
+    $ git restore deployments/haikudepotserver.yml
+    $ kubectl apply -f deployments/haikudepotserver.yml
+    ```
+5. Do sense checks in the logs and by some exploratory production testing to validate that the restore has been successful.
