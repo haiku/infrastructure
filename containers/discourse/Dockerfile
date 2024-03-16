@@ -42,7 +42,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal \
 
 # Install Discourse
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
-RUN mkdir -p /apps && cd /apps && tar xvf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
+RUN mkdir -p /apps && cd /apps && tar xf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
 RUN npm install -g ember-cli terser uglify-js
 RUN cd /apps/discourse \
     && bundle install \
