@@ -1,0 +1,33 @@
+# A blocking middleware.
+# 
+# Add default-cloud-denyip@kubernetescrd to the
+# traefik.ingress.kubernetes.io/router.middlewares Ingress annotation
+# to make it take effect for an Ingress.
+#
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: cloud-denyip
+spec:
+  plugin:
+    denyip:
+      ipDenyList:
+      - 3.80.0.0/12      # aws ec2 hammering trac
+      - 3.224.0.0/12     # aws ec2 hammering trac
+      - 34.192.0.0/10    # aws ec2 hammering trac
+      - 35.152.0.0/13    # aws ec2 hammering trac
+      - 35.160.0.0/12    # aws ec2 hammering trac
+      - 35.176.0.0/13    # aws ec2 hammering trac
+      - 44.192.0.0/11    # aws ec2 hammering trac
+      - 47.74.0.0/15     # alibaba hammering trac
+      - 47.76.0.0/14     # alibaba hammering trac
+      - 47.80.0.0/13     # alibaba hammering trac
+      - 47.235.0.0/16    # alibaba hammering cgit
+      - 47.236.0.0/14    # alibaba hammering cgit
+      - 47.240.0.0/14    # alibaba hammering cgit
+      - 47.244.0.0/15    # alibaba hammering cgit
+      - 47.246.0.0/16    # alibaba hammering cgit
+      - 54.36.148.0/22   # OVH hammering trac
+      - 188.165.192.0/18 # OVH hammering trac
+      - 54.210.0.0/15    # aws ec2 hammering trac
+      - 136.243.0.0/16   # Hetzner UA hammering trac
