@@ -1,4 +1,4 @@
-VERSION = 1.6.0.3-pypy
+VERSION = 1.6.0.4-pypy
 REGISTRY = ghcr.io/haiku
 default:
 	docker build --no-cache --tag ${REGISTRY}/trac:${VERSION} .
