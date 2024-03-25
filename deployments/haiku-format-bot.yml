@@ -1,0 +1,40 @@
+### Haiku Format Bot
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haiku-format-bot
+  labels:
+    app: haiku-format-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haiku-format-bot
+  template:
+    metadata:
+      labels:
+        app: haiku-format-bot
+    spec:
+      containers:
+      - name: haiku-format-bot
+        image: ghcr.io/haiku/haiku-format-bot:0.2.0
+        command: ["python3"]
+        args: ["-m", "formatchecker.runner", "--daemon", "--submit"]
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "256Mi"
+          requests:
+            cpu: "0.15"
+            memory: "128Mi"
+        env:
+        - name: GERRIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: haiku-format-bot
+              key: username
+        - name: GERRIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: haiku-format-bot
+              key: password
