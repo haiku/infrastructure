@@ -18,8 +18,9 @@ Update HaikuDepot to version (VERSION)
 _Note: Please mark changes from the default steps below in *bold*_
 
 1. Verify that the image is available in the [package registry](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver).
-2. Start a job to backup the database:
+2. Scale down haikudepotserver and start a job to backup the database:
     ```
+    $ kubectl scale deploy haikudepotserver --replicas=0
     $ kubectl create job --from=cronjob/haikudepotserver-pgbackup haikudepotserver-pgbackup-manual-(VERSION)
     ```
 3. Monitor the job to make sure it finishes correctly:
@@ -56,7 +57,7 @@ If there has been a (failed) database migration as part of the change, the backu
 
 1. Stop all instances of haikudepotserver
     ```
-    $ kubectl scale deploy haikudepotserver --replicas =0
+    $ kubectl scale deploy haikudepotserver --replicas=0
     ```
 2. Prepare the restore job in  `deployments/other/restore-pg.yml` by making sure the container args point to the haikudepotserver container
     ```
