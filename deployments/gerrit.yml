@@ -158,7 +158,7 @@ spec:
                     - git
                 topologyKey: kubernetes.io/hostname
           containers:
-            - name: githubsync
+            - name: gitsync
               image: ghcr.io/haiku/gitsync:1.2
               env:
               - name: GIT_ORG
@@ -168,7 +168,7 @@ spec:
               - name: GIT_PREFIX
                 value: "/data/git"
               - name: GIT_REPOS
-                value: "haiku.git buildtools.git userguide.git jamfile-engine.git"
+                value: "haiku.git buildtools.git userguide.git"
               - name: SSH_IDENTITY
                 value: "/run/secrets/ssh/private"
               volumeMounts:
@@ -183,6 +183,59 @@ spec:
           - name: github-bot-secret
             secret:
               secretName: github-bot
+              defaultMode: 0400
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gerrit-codeberg-sync
+spec:
+  schedule: "30 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where gerrit is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - git
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: gitsync
+              image: ghcr.io/haiku/gitsync:1.2
+              env:
+              - name: GIT_ORG
+                value: "haiku"
+              - name: GIT_SERVER
+                value: "codeberg.org"
+              - name: GIT_PREFIX
+                value: "/data/git"
+              - name: GIT_REPOS
+                value: "haiku.git buildtools.git userguide.git"
+              - name: SSH_IDENTITY
+                value: "/run/secrets/ssh/private"
+              volumeMounts:
+              - name: gerrit-data
+                mountPath: /data
+              - name: codeberg-bot-secret
+                mountPath: /run/secrets/ssh
+          volumes:
+          - name: gerrit-data
+            persistentVolumeClaim:
+              claimName: gerrit-data-pvc
+          - name: codeberg-bot-secret
+            secret:
+              secretName: codeberg-bot
               defaultMode: 0400
           restartPolicy: Never
 #---
