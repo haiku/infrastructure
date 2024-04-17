@@ -38,6 +38,7 @@ RUN apt update && apt install -y --no-install-recommends \
   mtools \
   nasm \
   ninja-build \
+  podman \
   python3 \
   texinfo \
   u-boot-tools \
