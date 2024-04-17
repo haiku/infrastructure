@@ -1,0 +1,64 @@
+#!/bin/bash
+
+export THREADS="${THREADS:-2}"
+export BRANCH="${BRANCH:-master}"
+export BUILD_TOP=/toolchains
+export SRC_TOP=$BUILD_TOP/src
+export ARTIFACT_TOP="$BUILD_TOP/artifacts"
+export FORCE_BUILD="${FORCE_BUILD:-false}"
+export TARGET_REPO="${TARGET_REPO:-ghcr.io/haiku/toolchain-worker-${BRANCH}}"
+
+echo "Starting toolchain build of Haiku ${BRANCH} on ${THREADS} cpu cores..."
+
+mkdir -p $BUILD_TOP
+mkdir -p $SRC_TOP
+mkdir -p $ARTIFACT_TOP
+
+cd $BUILD_TOP
+
+# Grab source code
+git -C $SRC_TOP clone https://review.haiku-os.org/buildtools
+git -C $SRC_TOP/buildtools checkout --track origin/$BRANCH
+git -C $SRC_TOP/buildtools pull --tags
+git -C $SRC_TOP clone https://review.haiku-os.org/haiku
+git -C $SRC_TOP/haiku checkout --track origin/$BRANCH
+git -C $SRC_TOP/haiku pull --tags
+
+export HAIKU_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
+export BUILDTOOLS_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
+
+# Check if we already have it
+if [[ ${FORCE_BUILD} == "false" ]]; then
+	# TODO: Check for TARGET_REPO:BUILDTOOLS_SHA
+fi
+
+# Build jam
+echo "STEP: Building jam..."
+cd buildtools/jam
+make -j$THREADS
+mv bin.linuxx86/jam $ARTIFACTS/jam
+cd $BUILD_TOP
+
+# Build toolchains
+for arch in arm arm64 m68k riscv64 sparc x86 x86_64 x86_gcc2; do
+	echo "STEP: Building $arch..."
+	SCRIPT="$SRC_TOP/haiku/build/scripts/build_cross_tools"
+	MACHINE=""
+	if [ $arch != "x86_gcc2" ]; then
+		SCRIPT="${SCRIPT}_gcc4"
+		MACHINE=$(${SRC_TOP}/build/scripts/find_triplet $i)
+	fi
+	$SCRIPT $MACHINE $SRC_TOP/haiku $SRC_TOP/buildtools $BUILD_TOP/cross-tools-${arch} -j$THREADS
+done
+
+# Move resulting artifacts into build context
+mv $BUILD_TOP/cross-tools-* $ARTIFACT_TOP
+
+# Build container
+echo "FROM ghcr.io/haiku/general-worker" > $BUILD_TOP/Dockerfile
+echo "RUN mkdir -p /toolchains" >> $BUILD_TOP/Dockerfile
+echo "ADD artifacts/jam /usr/bin/jam" >> $BUILD_TOP/Dockerfile
+echo "ADD artifacts/cross-tools-* /toolchains/" >> $BUILD_TOP/Dockerfile
+podman build \
+	--annotations "org.opencontainers.image.created=$(date --rfc-3339 seconds),org.haiku.branch=$BRANCH,org.haiku.haiku-git=$HAIKU_SHA,org.haiku.buildtools-git=$BUILDTOOLS_SHA" \
+	--tag $TARGET_REPO:$BUILDTOOLS_SHA $BUILD_TOP
