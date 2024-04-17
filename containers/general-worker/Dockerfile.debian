@@ -1,0 +1,70 @@
+FROM docker.io/debian:bookworm-slim
+
+MAINTAINER Haiku, Inc. <contact@haiku-os.org>
+LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
+LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/general-worker
+LABEL org.opencontainers.image.vendor Haiku, Inc.
+
+USER root
+
+RUN apt update && apt install -y --no-install-recommends \
+  attr \
+  autoconf \
+  automake \
+  bc \
+  bison \
+  byacc \
+  build-essential \
+  bzip2 \
+  ca-certificates \
+  cmake \
+  curl \
+  device-tree-compiler \
+  diffutils \
+  file \
+  flex \
+  gcc-multilib \
+  g++ \
+  gawk \
+  genisoimage \
+  git \
+  jq \
+  less \
+  libcurl4-openssl-dev \
+  libtool \
+  libssl-dev \
+  make \
+  minisign \
+  mtools \
+  nasm \
+  ninja-build \
+  python3 \
+  texinfo \
+  u-boot-tools \
+  util-linux \
+  vim \
+  zip \
+  unzip \
+  wget \
+  xorriso \
+  xz-utils \
+  zlib1g-dev
+
+ADD https://dl.min.io/client/mc/release/linux-amd64/mc /usr/local/bin/mc
+RUN chmod 755 /usr/local/bin/mc
+
+RUN git clone --depth 1 https://github.com/viveris/llvm-project.git &&\
+    cd llvm-project &&\
+    mkdir build &&\
+    cd build &&\
+    cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm &&\
+    make -j 2 clang-format &&\
+    cp ./bin/clang-format /usr/bin &&\
+    cp ../clang/tools/clang-format/git-clang-format /usr/bin &&\
+    cd ../../ &&\
+    rm -rf llvm-project/ &&\
+    cd /tmp &&\
+    wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2020.09.tar.gz -O /tmp/v2020.09.tar.gz &&\
+    tar xvf /tmp/v2020.09.tar.gz git-tools-2020.09/git-restore-mtime &&\
+    mv git-tools-2020.09/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime &&\
+    rm -rf /tmp/*
