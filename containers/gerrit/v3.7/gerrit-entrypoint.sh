@@ -212,6 +212,9 @@ if [ "$1" = "/gerrit-start.sh" ]; then
   esac
   set_gerrit_config gitweb.type "$GITWEB_TYPE"
 
+  #Section dashboard
+  set_gerrit_config dashboard.submitRequirementColumns "Code-Review Verified"
+
   case "${DATABASE_TYPE}" in
     postgresql) wait_for_database ${DB_PORT_5432_TCP_ADDR} ${DB_PORT_5432_TCP_PORT} ;;
     mysql)      wait_for_database ${DB_PORT_3306_TCP_ADDR} ${DB_PORT_3306_TCP_PORT} ;;
