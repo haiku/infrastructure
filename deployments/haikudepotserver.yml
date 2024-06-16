@@ -20,20 +20,20 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.160
+        image: ghcr.io/haiku/haikudepotserver:1.0.161
         env:
-        - name: HDS_SMTP_HOST
+        - name: SPRING_MAIL_HOST
           value: "smtp"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
           value: "haikuinc.hds"
-        - name: HDS_JDBC_URL
+        - name: SPRING_DATASOURCE_URL
           value: "jdbc:postgresql://postgres:5432/haikudepotserver"
-        - name: HDS_JDBC_USERNAME
+        - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             secretKeyRef:
               name: haikudepotserver-pg
               key: username
-        - name: HDS_JDBC_PASSWORD
+        - name: SPRING_DATASOURCE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: haikudepotserver-pg
