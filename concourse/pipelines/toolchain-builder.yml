@@ -97,7 +97,6 @@ task-build-crosstools: &task-build-crosstools
 # Jobs
 jobs:
   - name: buildtools-((branch))
-    tags: ["((worker_tag))"]
     public: true
     plan:
       - in_parallel:
@@ -106,9 +105,11 @@ jobs:
         - get: buildtools-git
           trigger: true
       - task: compile-jam
+        tags: ["((worker_tag))"]
         config:
           << : *task-build-jam
       - task: compile-arm-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: arm
         config:
@@ -116,6 +117,7 @@ jobs:
           outputs:
             - name: crosstools.arm
       - task: compile-arm64-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: arm64
         config:
@@ -123,6 +125,7 @@ jobs:
           outputs:
             - name: crosstools.arm64
       - task: compile-m68k-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: m68k
         config:
@@ -130,6 +133,7 @@ jobs:
           outputs:
             - name: crosstools.m68k
 #      - task: compile-ppc-crosstools
+#        tags: ["((worker_tag))"]
 #        params:
 #          TOOLARCH: ppc
 #        config:
@@ -137,6 +141,7 @@ jobs:
 #          outputs:
 #            - name: crosstools.ppc
       - task: compile-riscv64-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: riscv64
         config:
@@ -144,6 +149,7 @@ jobs:
           outputs:
             - name: crosstools.riscv64
       - task: compile-sparc-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: sparc
         config:
@@ -151,6 +157,7 @@ jobs:
           outputs:
             - name: crosstools.sparc
       - task: compile-x86-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: x86
         config:
@@ -158,6 +165,7 @@ jobs:
           outputs:
             - name: crosstools.x86
       - task: compile-x86_64-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: x86_64
         config:
@@ -165,6 +173,7 @@ jobs:
           outputs:
             - name: crosstools.x86_64
       - task: compile-x86_gcc2-crosstools
+        tags: ["((worker_tag))"]
         params:
           TOOLARCH: x86_gcc2
         config:
@@ -172,6 +181,7 @@ jobs:
           outputs:
             - name: crosstools.x86_gcc2
       - task: prepare-container-context
+        tags: ["((worker_tag))"]
         config:
           platform: linux
           inputs:
