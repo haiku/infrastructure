@@ -101,8 +101,10 @@ jobs:
     plan:
       - in_parallel:
         - get: haiku-git
+          tags: ["((worker_tag))"]
           trigger: false
         - get: buildtools-git
+          tags: ["((worker_tag))"]
           trigger: true
       - task: compile-jam
         tags: ["((worker_tag))"]
@@ -230,11 +232,13 @@ jobs:
                 # Dump the context of the container for reference
                 find container-context
       - put: toolchain-container-((branch))-sha
+        tags: ["((worker_tag))"]
         params:
           tag_file: container-context/tag
           labels_file: container-context/labels.json
           build: container-context
       - put: toolchain-container-((branch))-latest
+        tags: ["((worker_tag))"]
         params:
           tag_file: container-context/latesttag
           labels_file: container-context/labels.json
