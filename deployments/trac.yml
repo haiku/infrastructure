@@ -72,8 +72,8 @@ spec:
       blockPrivate: "false"
       blockSeconds: "120"
       minScanPercent: "60"
-      minScanRequests: "20"
-      minTotalRequests: "50"
+      minScanRequests: "50"
+      minTotalRequests: "100"
       playGames: "false"
 ---
 # web frontends for trac
