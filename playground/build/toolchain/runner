@@ -6,7 +6,27 @@ export BUILD_TOP=/toolchains
 export SRC_TOP=$BUILD_TOP/src
 export ARTIFACT_TOP="$BUILD_TOP/artifacts"
 export FORCE_BUILD="${FORCE_BUILD:-false}"
-export TARGET_REPO="${TARGET_REPO:-ghcr.io/haiku/toolchain-worker-${BRANCH}}"
+export TARGET_REPO="${TARGET_REPO:-ghcr.io}"
+export TARGET_CONTAINER="${TARGET_CONTAINER:-${TARGET_REPO}/haiku/toolchain-worker-beta-${BRANCH}}"
+
+buildah login -u $CONTAINER_REGISTRY_USERNAME -p $CONTAINER_REGISTRY_PASSWORD $TARGET_REPO
+
+# Structured logging
+exec 100>&1 200>&2
+log() {
+    if [ "$1" = - ]; then
+        jq -Rsc '{"@timestamp": now|strftime("%Y-%m-%dT%H:%M:%S%z"), "branch": $BRANCH,
+			"message":.}' 1>&100 2>&200
+    else
+        jq --arg m "$*" -nc '{"@timestamp": now|strftime("%Y-%m-%dT%H:%M:%S%z"), "branch": $BRANCH,
+			"message":$m}' 1>&100 2>&200
+    fi
+}
+coproc JSON_LOGGER { jq --unbuffered -Rc \
+      '{"@timestamp": now|strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "message":.}' 1>&100 2>&200; }
+exec 1>&${JSON_LOGGER[1]} 2>&${JSON_LOGGER[1]}
+
 
 echo "Starting toolchain build of Haiku ${BRANCH} on ${THREADS} cpu cores..."
 
@@ -28,28 +48,31 @@ export HAIKU_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
 export BUILDTOOLS_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
 
 # Check if we already have it
-if [[ ${FORCE_BUILD} == "false" ]]; then
-	# TODO: Check for TARGET_REPO:BUILDTOOLS_SHA
-fi
+#if [[ ${FORCE_BUILD} == "false" ]]; then
+	# TODO: Check for TARGET_CONTAINER:BUILDTOOLS_SHA
+#fi
 
 # Build jam
 echo "STEP: Building jam..."
-cd buildtools/jam
+cd $SRC_TOP/buildtools/jam
 make -j$THREADS
-mv bin.linuxx86/jam $ARTIFACTS/jam
+mv bin.linuxx86/jam $ARTIFACT_TOP/jam
 cd $BUILD_TOP
 
 # Build toolchains
-for arch in arm arm64 m68k riscv64 sparc x86 x86_64 x86_gcc2; do
-	echo "STEP: Building $arch..."
-	SCRIPT="$SRC_TOP/haiku/build/scripts/build_cross_tools"
-	MACHINE=""
-	if [ $arch != "x86_gcc2" ]; then
-		SCRIPT="${SCRIPT}_gcc4"
-		MACHINE=$(${SRC_TOP}/build/scripts/find_triplet $i)
-	fi
-	$SCRIPT $MACHINE $SRC_TOP/haiku $SRC_TOP/buildtools $BUILD_TOP/cross-tools-${arch} -j$THREADS
-done
+#for arch in arm arm64 m68k riscv64 sparc x86 x86_64 x86_gcc2; do
+#	echo "STEP: Building $arch..."
+#	SCRIPT="${SRC_TOP}/haiku/build/scripts/build_cross_tools"
+#	MACHINE=""
+#	if [[ "$arch" != "x86_gcc2" ]]; then
+#		SCRIPT="${SCRIPT}_gcc4"
+#		MACHINE=$(${SRC_TOP}/haiku/build/scripts/find_triplet $arch)
+#	fi
+#	$SCRIPT $MACHINE $SRC_TOP/haiku $SRC_TOP/buildtools $BUILD_TOP/cross-tools-${arch} -j$THREADS
+#done
+
+mkdir $BUILD_TOP/cross-tools-x86_64
+touch $BUILD_TOP/cross-tools-x86_64/toolchain
 
 # Move resulting artifacts into build context
 mv $BUILD_TOP/cross-tools-* $ARTIFACT_TOP
@@ -59,6 +82,13 @@ echo "FROM ghcr.io/haiku/general-worker" > $BUILD_TOP/Dockerfile
 echo "RUN mkdir -p /toolchains" >> $BUILD_TOP/Dockerfile
 echo "ADD artifacts/jam /usr/bin/jam" >> $BUILD_TOP/Dockerfile
 echo "ADD artifacts/cross-tools-* /toolchains/" >> $BUILD_TOP/Dockerfile
-podman build \
-	--annotations "org.opencontainers.image.created=$(date --rfc-3339 seconds),org.haiku.branch=$BRANCH,org.haiku.haiku-git=$HAIKU_SHA,org.haiku.buildtools-git=$BUILDTOOLS_SHA" \
-	--tag $TARGET_REPO:$BUILDTOOLS_SHA $BUILD_TOP
+echo "Building ${BRANCH} toolchain container..."
+buildah build \
+	--annotation "org.opencontainers.image.created=$(date --rfc-3339 seconds),org.haiku.branch=$BRANCH,org.haiku.haiku-git=$HAIKU_SHA,org.haiku.buildtools-git=$BUILDTOOLS_SHA" \
+	--tag $TARGET_CONTAINER:$BUILDTOOLS_SHA $BUILD_TOP
+buildah tag $TARGET_CONTAINER:$BUILDTOOLS_SHA $TARGET_CONTAINER:latest
+
+echo "Pushing $TARGET_CONTAINER:$BUILDTOOLS_SHA..."
+buildah push $TARGET_CONTAINER:$BUILDTOOLS_SHA
+echo "Pushing $TARGET_CONTAINER:latest..."
+buildah push $TARGET_CONTAINER:latest
