@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: toolchain-worker-master
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: toolchain-master
+            env:
+            - name: BRANCH
+              value: master
+            - name: THREADS
+              value: 2
+            image: BLAH
+            imagePullPolicy: Always
+          restartPolicy: Never

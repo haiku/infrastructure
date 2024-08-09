@@ -10,6 +10,7 @@ export TARGET_REPO="${TARGET_REPO:-ghcr.io}"
 export TARGET_CONTAINER="${TARGET_CONTAINER:-${TARGET_REPO}/haiku/toolchain-worker-beta-${BRANCH}}"
 
 buildah login -u $CONTAINER_REGISTRY_USERNAME -p $CONTAINER_REGISTRY_PASSWORD $TARGET_REPO
+skopeo login -u $CONTAINER_REGISTRY_USERNAME -p $CONTAINER_REGISTRY_PASSWORD $TARGET_REPO
 
 # Structured logging
 exec 100>&1 200>&2
@@ -48,9 +49,13 @@ export HAIKU_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
 export BUILDTOOLS_SHA=$(git -C $SRC_TOP/buildtools rev-parse HEAD)
 
 # Check if we already have it
-#if [[ ${FORCE_BUILD} == "false" ]]; then
-	# TODO: Check for TARGET_CONTAINER:BUILDTOOLS_SHA
-#fi
+if [[ "${FORCE_BUILD}" == "false" ]]; then
+	echo "checking for remote containers"
+	if [[ $(skopeo list-tags docker://${TARGET_CONTAINER} | jq -r .Tags | grep ${BUILDTOOLS_SHA} | wc -l) -gt 0 ]]; then
+		echo "docker://${TARGET_CONTAINER}:${BUILDTOOLS_SHA} already exists in remote registry! Halting build. Use FORCE_BUILD=true to modify this check"
+		exit 0
+	fi
+fi
 
 # Build jam
 echo "STEP: Building jam..."
@@ -60,19 +65,16 @@ mv bin.linuxx86/jam $ARTIFACT_TOP/jam
 cd $BUILD_TOP
 
 # Build toolchains
-#for arch in arm arm64 m68k riscv64 sparc x86 x86_64 x86_gcc2; do
-#	echo "STEP: Building $arch..."
-#	SCRIPT="${SRC_TOP}/haiku/build/scripts/build_cross_tools"
-#	MACHINE=""
-#	if [[ "$arch" != "x86_gcc2" ]]; then
-#		SCRIPT="${SCRIPT}_gcc4"
-#		MACHINE=$(${SRC_TOP}/haiku/build/scripts/find_triplet $arch)
-#	fi
-#	$SCRIPT $MACHINE $SRC_TOP/haiku $SRC_TOP/buildtools $BUILD_TOP/cross-tools-${arch} -j$THREADS
-#done
-
-mkdir $BUILD_TOP/cross-tools-x86_64
-touch $BUILD_TOP/cross-tools-x86_64/toolchain
+for arch in arm arm64 m68k riscv64 sparc x86 x86_64 x86_gcc2; do
+	echo "STEP: Building $arch..."
+	SCRIPT="${SRC_TOP}/haiku/build/scripts/build_cross_tools"
+	MACHINE=""
+	if [[ "$arch" != "x86_gcc2" ]]; then
+		SCRIPT="${SCRIPT}_gcc4"
+		MACHINE=$(${SRC_TOP}/haiku/build/scripts/find_triplet $arch)
+	fi
+	$SCRIPT $MACHINE $SRC_TOP/haiku $SRC_TOP/buildtools $BUILD_TOP/cross-tools-${arch} -j$THREADS
+done
 
 # Move resulting artifacts into build context
 mv $BUILD_TOP/cross-tools-* $ARTIFACT_TOP
