@@ -13,6 +13,7 @@ RUN dnf install -y \
   automake \
   bc \
   bison \
+  buildah \
   byacc \
   bzip2 \
   cmake \
@@ -42,6 +43,7 @@ RUN dnf install -y \
   python3-devel \
   sbsigntools \
   swig \
+  skopeo \
   texinfo \
   vim \
   uboot-tools \
