@@ -1,0 +1,185 @@
+### Haiku Metrics
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umami
+  labels:
+    app: umami
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: umami
+  template:
+    metadata:
+      labels:
+        app: umami
+    spec:
+      containers:
+      - name: umami
+        image: ghcr.io/umami-software/umami:postgresql-latest
+        env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: umami-secrets
+                key: umami_db_uri
+          - name: APP_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: umami-secrets
+                key: umami_secret
+          - name: DATABASE_TYPE
+            value: postgresql
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.15"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: umami
+spec:
+  selector:
+    app: umami
+  ports:
+  - name: www
+    port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fathom
+  labels:
+    app: fathom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fathom
+  template:
+    metadata:
+      labels:
+        app: fathom
+    spec:
+      containers:
+      - name: fathom
+        #image: docker.io/usefathom/fathom:latest
+        image: docker.io/haiku/fathom:c9d08a
+        command: ["/app/fathom"]
+        args: ["--config", "/secrets/.env", "server"]
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.15"
+            memory: "256Mi"
+        volumeMounts:
+        - name: dot-env
+          mountPath: /secrets
+      volumes:
+      - name: dot-env
+        secret:
+          secretName: fathom-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fathom
+spec:
+  selector:
+    app: fathom
+  ports:
+  - name: www
+    port: 8080
+    targetPort: 8080
+---
+# web frontends for umami
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fathom
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - metrics.haiku-os.org
+    secretName: tls-cert-metrics
+  rules:
+  - host: metrics.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: umami
+            port:
+              name: www
+      - path: /old
+        pathType: Prefix
+        backend:
+          service:
+            name: fathom
+            port:
+              name: www
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fathom-pgbackup
+spec:
+  schedule: "0 0 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pgbackup
+              image: docker.io/haiku/pgbackup:1.0
+              args: ["backup", "fathom"]
+              env:
+              - name: S3_HOST
+                value: "https://s3.eu-west-1.wasabisys.com"
+              - name: S3_BUCKET
+                value: haiku-backups
+              - name: S3_MAX_AGE
+                value: 15d
+              - name: S3_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_key
+              - name: S3_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: s3_secret
+              - name: TWOSECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-backup
+                    key: twosecret
+              - name: PG_HOSTNAME
+                value: postgres
+              - name: PG_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: username
+              - name: PG_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-admin
+                    key: password
