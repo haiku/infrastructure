@@ -23,8 +23,8 @@ spec:
         image: ghcr.io/haiku/pootle:2.7.6-1
         resources:
           limits:
-            cpu: "1.0"
-            memory: "512Mi"
+            cpu: "2.0"
+            memory: "1Gi"
           requests:
             cpu: "0.25"
             memory: "48Mi"
