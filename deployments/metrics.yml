@@ -17,6 +17,7 @@ spec:
     spec:
       containers:
       - name: umami
+        imagePullPolicy: Always
         #image: ghcr.io/umami-software/umami:postgresql-latest
         image: ghcr.io/haiku/umami:postgresql-latest
         env:
