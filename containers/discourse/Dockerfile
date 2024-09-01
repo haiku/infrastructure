@@ -1,20 +1,20 @@
 #
 # A sane discourse container without the "meta-build" and "launcher"
 #
-FROM docker.io/ruby:3.2-bullseye
+FROM docker.io/ruby:3.3-bookworm
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=3.2.0
+ARG VERSION=3.3.1
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
 # See: https://www.postgresql.org/download/linux/debian/
 
-RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # Add the Node and Yarn software repositories
@@ -24,10 +24,9 @@ RUN wget --quiet -O - https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
 
 RUN apt-get update \
-    && apt-get install -y git bash build-essential postgresql-client-14 postgresql-13-pgvector \
+    && apt-get install -y git bash build-essential postgresql-client-14 postgresql-14-pgvector \
 		python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli nodejs \
-		yarn ripgrep \
-	&& pip3 install supervisor
+		yarn ripgrep supervisor imagemagick
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Install a rust compiler and install oxipng
@@ -40,14 +39,23 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal \
 	&& mv $HOME/.cargo/bin/oxipng /usr/local/bin/ \
 	&& rustup self uninstall -y
 
+# Imagemagick: the discourse/lib/letter_avatar.rb expects there to be a `magick` command
+# Link the installed imagemagick convert
+RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
+
 # Install Discourse
+# See: https://github.com/discourse/discourse_docker/blob/225c3d03896c0573363183118ce58622f039083b/image/base/release.Dockerfile
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
 RUN mkdir -p /apps && cd /apps && tar xf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
 RUN npm install -g ember-cli terser uglify-js
 RUN cd /apps/discourse \
+	&& bundle config --local deployment true \
+	&& bundle config --local path ./vendor/bundle \
+	&& bundle config --local without test development \
     && bundle install \
 	&& yarn install --frozen-lockfile \
-	&& yarn cache clean
+	&& yarn cache clean \
+	&& find /apps/discourse/vendor/bundle -name tmp -type d -exec rm -rf {} +
 
 # Set up Supervisor and nginx
 COPY supervisord.conf /etc/supervisord.conf
