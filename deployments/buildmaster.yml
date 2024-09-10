@@ -58,7 +58,7 @@ spec:
           readOnly: true
         env:
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta5_5"
+            value: "r1beta5_111"
           - name: BUILD_TARGET_ARCH
             value: "x86_64"
           - name: REPOSITORY_TRIGGER_URL
@@ -79,7 +79,7 @@ spec:
           readOnly: true
         env:
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta5_5"
+            value: "r1beta5_111"
           - name: BUILD_TARGET_ARCH
             value: "x86_gcc2"
           - name: REPOSITORY_TRIGGER_URL
