@@ -17,7 +17,14 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: ghcr.io/haiku/hpkgbouncer:0.3.1
+        image: ghcr.io/haiku/hpkgbouncer:0.4.0
+        env:
+        - name: ROCKET_LOG_LEVEL
+          value: "normal"
+        - name: ROCKET_ADDRESS
+          value: "0.0.0.0"
+        - name: ROCKET_PORT
+          value: "8000"
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
