@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.162
+        image: ghcr.io/haiku/haikudepotserver:1.0.163
         env:
         - name: SPRING_MAIL_HOST
           value: "smtp"
