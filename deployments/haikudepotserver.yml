@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.164
+        image: ghcr.io/haiku/haikudepotserver:1.0.165
         env:
         - name: SPRING_MAIL_HOST
           value: "smtp"
@@ -38,6 +38,11 @@ spec:
             secretKeyRef:
               name: haikudepotserver-pg
               key: password
+        - name: HDS_ALERTS_REPOSITORY_ABSENT-UPDATES_TO
+          valueFrom:
+            secretKeyRef:
+              name: haikudepotserver-notify
+              key: emails
         resources:
           limits:
             cpu: "1.0"
