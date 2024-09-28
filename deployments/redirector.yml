@@ -74,7 +74,7 @@ spec:
     spec:
       containers:
       - name: redirector
-        image: docker.io/haiku/redirector:0.3.1
+        image: ghcr.io/haiku/redirector:0.3.1
         ports:
         - name: www 
           containerPort: 80

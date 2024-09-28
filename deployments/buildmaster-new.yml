@@ -134,7 +134,7 @@ spec:
 #    spec:
 #      containers:
 #      - name: www-build-new
-#        image: docker.io/haiku/www-build:latest
+#        image: ghcr.io/haiku/www-build:latest
 #---
 #apiVersion: v1
 #kind: Service

@@ -149,7 +149,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: pgbackup
-              image: docker.io/haiku/pgbackup:1.0
+              image: ghcr.io/haiku/pgbackup:1.0
               args: ["backup", "fathom"]
               env:
               - name: S3_HOST

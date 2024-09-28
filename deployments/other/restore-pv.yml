@@ -23,7 +23,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: pvbackup
-        image: docker.io/haiku/pvbackup:0.2
+        image: ghcr.io/haiku/pvbackup:0.2
         args: ["restore", "gerrit-data"]
         env:
         - name: S3_HOST
