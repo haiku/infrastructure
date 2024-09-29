@@ -33,6 +33,6 @@ Request for a database dump for debugging and testing purposes.
     ```
 5. Dump, compress and encrypt the masked database. _Note: if this is the first time for this requester, make sure to import their public gpg key._
     ```bash
-    kubectl exec -it deployment/postgres -- pg_dump -U postgres haikudepotserver_masked | xz -z | gpg -r <email@recipient.com> --encrypt -o haikudepotserver.sql.xz.gpg
+    kubectl exec -it deployment/postgres -- pg_dump --inserts -U postgres haikudepotserver_masked | xz -z | gpg -r <email@recipient.com> --encrypt -o haikudepotserver.sql.xz.gpg
     ```
 6. Upload the database to a location, and inform the recipient.
