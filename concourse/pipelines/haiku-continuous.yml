@@ -2,6 +2,7 @@
 resource_types:
   - name: irccat-resource
     type: docker-image
+    tags: ["((worker_tag))"]
     source:
       repository: haiku/irccat-resource
 roles:
@@ -15,12 +16,14 @@ roles:
 resources:
   - name: haiku-git
     type: git
+    tags: ["((worker_tag))"]
     icon: git
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
   - name: irc
     type: irccat-resource
+    tags: ["((worker_tag))"]
     icon: bullhorn
     source:
       uri: https://build.haiku-os.org/irccat/send

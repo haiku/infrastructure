@@ -10,12 +10,14 @@ roles:
 resource_types:
 - name: rclone
   type: registry-image
+  tags: ["((worker_tag))"]
   source:
     repository: docker.io/kallisti5/concourse-rclone-resource
     #repository: sothr/concourse-rclone-resource
     tag: 1.60.1-0
 resources:
   - name: pipeline-time-trigger
+    tags: ["((worker_tag))"]
     type: time
     icon: alarm
     source:
@@ -24,12 +26,14 @@ resources:
       location: America/Chicago
       days: ((days))
   - name: haiku-git
+    tags: ["((worker_tag))"]
     type: git
     icon: git
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
   - name: wasabi-east
+    tags: ["((worker_tag))"]
     type: rclone
     source:
       config: |
