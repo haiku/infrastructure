@@ -37,19 +37,19 @@ fi
 
 if [ $BRANCH == "r1beta4" ]; then
 	BUCKET_IMAGE="haiku-release-candidates"
-	BUCKET_REPO="haiku-repositories-us"
+	BUCKET_REPO="haiku-central-repositories"
 	BRANCH_PROFILE="release"
 	ARCHES="x86_64 x86_gcc2h"
 	DAYS="Sunday"
 elif [ $BRANCH == "r1beta5" ]; then
 	BUCKET_IMAGE="haiku-release-candidates"
-	BUCKET_REPO="haiku-repositories-us"
+	BUCKET_REPO="haiku-central-repositories"
 	BRANCH_PROFILE="release"
 	ARCHES="x86_64 x86_gcc2h"
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 else
 	BUCKET_IMAGE="haiku-nightly-us"
-	BUCKET_REPO="haiku-repositories-us"
+	BUCKET_REPO="haiku-central-repositories"
 	BRANCH_PROFILE="nightly"
 	#ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
 	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 m68k"

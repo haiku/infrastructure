@@ -32,6 +32,16 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+  - name: backblaze
+    tags: ["((worker_tag))"]
+    type: rclone
+    source:
+      config: |
+        [remote]
+        type = b2
+        hard_delete = true
+        account = ((b2account))
+        key = ((b2secret))
   - name: wasabi-east
     tags: ["((worker_tag))"]
     type: rclone
@@ -253,18 +263,18 @@ jobs:
       - put: wasabi-east
         tags: ["((worker_tag))"]
         params:
-          source: repository.((arch))
-          destination:
-          - dir: "remote:((bucket_repo))/((branch))/"
-            args:
-              - -c
-              #- -vv
-      - put: wasabi-east
-        tags: ["((worker_tag))"]
-        params:
           source: catkeys.((arch))
           destination:
           - dir: "remote:haiku-translations/"
+            args:
+              - -c
+              #- -vv
+      - put: backblaze
+        tags: ["((worker_tag))"]
+        params:
+          source: repository.((arch))
+          destination:
+          - dir: "remote:((bucket_repo))/haiku/((branch))/"
             args:
               - -c
               #- -vv
