@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: ghcr.io/haiku/hpkgbouncer:0.4.0
+        image: ghcr.io/haiku/hpkgbouncer:0.4.2
         env:
         - name: ROCKET_LOG_LEVEL
           value: "normal"
@@ -25,6 +25,12 @@ spec:
           value: "0.0.0.0"
         - name: ROCKET_PORT
           value: "8000"
+        - name: CACHE_TTL
+          value: "900"
+        - name: S3_PUBLIC
+          value: "https://cdn.hpkg.haiku-os.org/haiku/"
+        - name: S3_PREFIX
+          value: "haiku"
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
@@ -32,7 +38,7 @@ spec:
       volumes:
       - name: secrets
         secret:
-          secretName: s3-repo
+          secretName: s3-backblaze
           items:
           - key: s3_endpoint
             path: s3_endpoint
