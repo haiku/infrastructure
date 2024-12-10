@@ -12,9 +12,8 @@ resource_types:
   type: registry-image
   tags: ["((worker_tag))"]
   source:
-    repository: docker.io/kallisti5/concourse-rclone-resource
-    #repository: sothr/concourse-rclone-resource
-    tag: 1.60.1-0
+    repository: ghcr.io/kallisti5/concourse-rclone-resource
+    tag: 1.68.1-1
 resources:
   - name: pipeline-time-trigger
     tags: ["((worker_tag))"]
@@ -278,3 +277,33 @@ jobs:
             args:
               - -c
               #- -vv
+      - task: purge-caches
+        tags: ["((worker_tag))"]
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: ((container-registry))/general-worker }
+          inputs:
+            - name: repository.((arch))
+          run:
+            path: /bin/bash
+            args:
+              - -e
+              - -c
+              - |
+                PRI_ARCH="((arch))"
+                case "((arch))" in
+                    "x86_gcc2h" | "x86_64h")
+                        PRI_ARCH=$(echo "((arch))" | sed 's/h$//')
+                        ;;
+                esac
+                TARGET_REPO="repository.((arch))/$PRI_ARCH"
+                cd $TARGET_REPO;
+                date;
+                for i in $(find . -type f -print); do
+                    URI=https://cdn.hpkg.haiku-os.org/haiku/((branch))/$PRI_ARCH/$(echo "$i" | sed 's/^\.\///')
+                    date; echo -n "$URI ";
+                    curl -o /dev/null -s -w "%{http_code}\n" --url "https://api.bunny.net/purge?url=$URI" \
+                        --header "AccessKey: ((cdn-secret))";
+                done;
