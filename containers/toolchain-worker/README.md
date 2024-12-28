@@ -4,7 +4,7 @@ This Dockerfile pre-compiles all of our toolchains into a Docker container ready
 compile Haiku (or whatever) from source *without* needing to build the toolchains.
 
 > This is a big container.  Any help to shrink it further (while still retaining compatibility)
-> is apprecerated.
+> is appreciated.
 
 ## Building
 

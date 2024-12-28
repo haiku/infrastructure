@@ -1,2 +1,3 @@
+BRANCH?=master
 default:
-	docker build --pull --build-arg THREADS=16 -t haiku/toolchain-worker:latest .
+	podman build --pull --no-cache --build-arg HAIKU_CHECKOUT=${BRANCH} --build-arg BUILDTOOLS_CHECKOUT=${BRANCH} -t haiku/toolchain-worker-${BRANCH}:latest .
