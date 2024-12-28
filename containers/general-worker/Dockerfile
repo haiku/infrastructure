@@ -1,78 +1,75 @@
-FROM docker.io/fedora:34
+FROM docker.io/debian:bookworm-slim
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/general-worker
 LABEL org.opencontainers.image.vendor Haiku, Inc.
+LABEL org.opencontainers.image.description Base container for Haiku build automation.
 
 USER root
 
-RUN dnf install -y \
+RUN apt update && apt install -y --no-install-recommends \
   attr \
   autoconf \
   automake \
   bc \
   bison \
-  buildah \
   byacc \
+  build-essential \
+  buildah \
   bzip2 \
+  ca-certificates \
   cmake \
   curl \
-  curl-devel \
-  cpio \
+  device-tree-compiler \
   diffutils \
+  file \
   flex \
-  gcc \
-  gcc-c++ \
+  g++ \
+  gawk \
+  genisoimage \
   git \
-  glibc-devel \
-  glibc-devel.i686 \
   jq \
-  libstdc++ \
-  libstdc++-static \
-  libstdc++-devel.x86_64 \
-  libstdc++-devel.i686 \
+  less \
+  libcurl4-openssl-dev \
   libtool \
-  libfdt \
+  libssl-dev \
   make \
   minisign \
   mtools \
   nasm \
   ninja-build \
   python3 \
-  python3-devel \
-  sbsigntools \
-  swig \
+  sbsigntool \
   skopeo \
   texinfo \
+  u-boot-tools \
+  util-linux \
   vim \
-  uboot-tools \
+  zip \
   unzip \
   wget \
-  zip \
   xorriso \
-  xz \
-  libzstd \
-  libzstd-devel \
-  libzstd-static \
-  zlib \
-  zlib-devel
+  xz-utils \
+  zlib1g-dev; \
+  if [ "$(uname -m)" = "x86_64" ]; then apt install -y gcc-multilib; fi; \
+  if [ "$(uname -m)" = "x86_64"]; then wget https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc; fi; \
+  if [ "$(uname -m)" = "aarch64"]; then  wget https://dl.min.io/client/mc/release/linux-arm64/mc -O /usr/local/bin/mc; fi; \
+  chmod 755 /usr/local/bin/mc; \
+  cd /tmp && \
+  wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz -O /tmp/v2022.12.tar.gz && \
+  tar xvf /tmp/v2022.12.tar.gz git-tools-2022.12/git-restore-mtime && \
+  mv git-tools-2022.12/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime && \
+  rm -rf /tmp/*
 
-ADD https://dl.min.io/client/mc/release/linux-amd64/mc /usr/local/bin/mc
-RUN chmod 755 /usr/local/bin/mc
-
-RUN git clone --depth 1 https://github.com/viveris/llvm-project.git &&\
-    cd llvm-project &&\
-    mkdir build &&\
-    cd build &&\
-    cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm &&\
-    make -j 2 clang-format &&\
-    cp ./bin/clang-format /usr/bin &&\
-    cp ../clang/tools/clang-format/git-clang-format /usr/bin &&\
-    cd ../../ &&\
-    rm -rf llvm-project/ &&\
-    cd /tmp &&\
-    wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2020.09.tar.gz -O /tmp/v2020.09.tar.gz &&\
-    tar xvf /tmp/v2020.09.tar.gz git-tools-2020.09/git-restore-mtime &&\
-    mv git-tools-2020.09/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime &&\
-    rm -rf /tmp/*
+# We don't use this in our build pipelines. It's kinda big too.
+#RUN git clone --depth 1 https://github.com/viveris/llvm-project.git &&\
+#    cd llvm-project &&\
+#    mkdir build &&\
+#    cd build &&\
+#    cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm &&\
+#    make -j 2 clang-format &&\
+#    cp ./bin/clang-format /usr/bin &&\
+#    cp ../clang/tools/clang-format/git-clang-format /usr/bin &&\
+#    cd ../../ &&\
+#    rm -rf llvm-project/
