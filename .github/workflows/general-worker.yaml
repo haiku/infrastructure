@@ -40,8 +40,8 @@ jobs:
     - uses: int128/docker-manifest-create-action@v2
       with:
         tags: ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}
-      sources: |
-        ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
-        ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
+        sources: |
+          ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
+          ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
 
 
