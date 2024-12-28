@@ -53,8 +53,8 @@ RUN apt update && apt install -y --no-install-recommends \
   xz-utils \
   zlib1g-dev; \
   if [ "$(uname -m)" = "x86_64" ]; then apt install -y gcc-multilib; fi; \
-  if [ "$(uname -m)" = "x86_64"]; then wget https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc; fi; \
-  if [ "$(uname -m)" = "aarch64"]; then  wget https://dl.min.io/client/mc/release/linux-arm64/mc -O /usr/local/bin/mc; fi; \
+  if [ "$(uname -m)" = "x86_64" ]; then wget https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc; fi; \
+  if [ "$(uname -m)" = "aarch64" ]; then wget https://dl.min.io/client/mc/release/linux-arm64/mc -O /usr/local/bin/mc; fi; \
   chmod 755 /usr/local/bin/mc; \
   cd /tmp && \
   wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz -O /tmp/v2022.12.tar.gz && \
