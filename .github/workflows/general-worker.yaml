@@ -34,6 +34,6 @@ jobs:
         context: containers/general-worker
         push: true
         tags: |
-          ghcr.io/haiku/general-worker:${ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
-          ghcr.io/haiku/general-worker:${ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
+          ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
+          ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
         platforms: linux/amd64,linux/arm64
