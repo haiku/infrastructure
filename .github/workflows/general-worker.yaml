@@ -37,3 +37,11 @@ jobs:
           ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
           ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
         platforms: linux/amd64,linux/arm64
+    - uses: int128/docker-manifest-create-action@v2
+      with:
+        tags: ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}
+      sources: |
+        ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
+        ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
+
+
