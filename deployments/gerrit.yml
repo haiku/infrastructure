@@ -333,7 +333,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-cloud-denyip@kubernetescrd
+    #traefik.ingress.kubernetes.io/router.middlewares: default-cloud-denyip@kubernetescrd
 spec:
   tls:
   - hosts:

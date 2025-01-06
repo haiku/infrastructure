@@ -31,7 +31,7 @@ jobs:
     - name: Build and push multi-architecture image
       uses: docker/build-push-action@v5
       with:
-        context: containers/general-worker
+        context: containers/ci/general-worker
         push: true
         tags: |
           ghcr.io/haiku/general-worker:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
