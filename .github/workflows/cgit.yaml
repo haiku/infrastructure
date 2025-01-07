@@ -1,15 +1,15 @@
-name: Build general-worker
+name: Build cgit
 on:
   push:
     paths:
-      - containers/ci/general-worker/VERSION
+      - containers/services/cgit/VERSION
 jobs:
   build:
     env:
       REPOSITORY: "ghcr.io/haiku"
-      CLASS: "ci"
-      NAME: "general-worker"
-    name: Build general-worker container
+      CLASS: "services"
+      NAME: "cgit"
+    name: Build cgit container
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
