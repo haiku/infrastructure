@@ -1,6 +1,4 @@
-VERSION = 1.2.3-5
+VERSION = $(shell cat VERSION | grep -Ev "^#" | tail -1)-development
 REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag ${REGISTRY}/cgit:${VERSION} .
-push:
-	docker push ${REGISTRY}/cgit:${VERSION}
+	podman build --no-cache --tag ${REGISTRY}/cgit:${VERSION} .
