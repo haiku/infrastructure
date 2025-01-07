@@ -53,7 +53,7 @@ spec:
           periodSeconds: 5
           failureThreshold: 5
       - name: cgit
-        image: ghcr.io/haiku/cgit:1.2.3-5
+        image: ghcr.io/haiku/cgit:1.2.3-7
         env:
           - name: CGIT_TITLE
             value: "Haiku's repositories"
