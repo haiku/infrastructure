@@ -1,11 +1,8 @@
-VERSION=20230910
+VERSION = $(shell cat VERSION | grep -Ev "^#" | tail -1)-development
 REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag ${REGISTRY}/download:$(VERSION) .
+	podman build --no-cache --tag ${REGISTRY}/download:${VERSION} .
 test:
-	docker run -d --name download-test -P ${REGISTRY}/download:$(VERSION)
-clean:
-	docker stop download-test
-	docker rm download-test
-push:
-	docker push ${REGISTRY}/download:$(VERSION)
+	docker kill download-test || true
+	podman run -d --replace --name download-test -v ./config.toml:/config.toml -e CONFIG_PATH=/config.toml -P ${REGISTRY}/download:$(VERSION)
+	@echo "http://`podman port download-test 8080 | sed 's/0.0.0.0/127.0.0.1/'`"

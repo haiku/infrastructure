@@ -1,4 +1,4 @@
 # packages required for the download generator script
-boto
+boto3
 Mako
 toml
