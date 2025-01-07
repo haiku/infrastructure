@@ -1,0 +1,79 @@
+### Haiku Error handler
+#
+# A small apologetic webserver
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: errorku
+  labels:
+    app: errorku
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: errorku 
+  template:
+    metadata:
+      labels:
+        app: errorku
+    spec:
+      containers:
+      - name: errorku
+        image: ghcr.io/haiku/errorku:20250108
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "256Mi"
+          requests:
+            cpu: "0.15"
+            memory: "128Mi"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 1
+        livenessProbe:
+          httpGet:
+            port: 80
+            path: /
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: errorku-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: errorku
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: errorku
+spec:
+  selector:
+    app: errorku
+  ports:
+  - name: www
+    port: 80
+    targetPort: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: errorku
+spec:
+  errors:
+    status:
+      - "404"
+    query: /{status}.html
+    service:
+      name: errorku
+      port: www
