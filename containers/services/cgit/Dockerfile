@@ -6,10 +6,10 @@ LABEL org.opencontainers.image.authors="Haiku, Inc."
 LABEL org.opencontainers.image.vendor="Haiku, Inc."
 LABEL org.opencontainers.image.description="cgit Interface for Haiku"
 
-ENV CGIT_TITLE "cgit interface"
-ENV CGIT_DESC "cgit under docker"
-ENV CGIT_VROOT "/"
-ENV CGIT_SECTION_FROM_STARTPATH 0
+ENV CGIT_TITLE="cgit interface"
+ENV CGIT_DESC="cgit under docker"
+ENV CGIT_VROOT="/"
+ENV CGIT_SECTION_FROM_STARTPATH=0
 
 RUN apk add --update \
     tini gettext curl fcgiwrap spawn-fcgi git cgit highlight perl nginx discount groff py-pip \
