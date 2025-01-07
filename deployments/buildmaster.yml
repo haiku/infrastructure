@@ -192,7 +192,7 @@ spec:
     spec:
       containers:
       - name: www-build
-        image: ghcr.io/haiku/www-build:latest
+        image: ghcr.io/haiku/www-build:20250107
 ---
 apiVersion: v1
 kind: Service
@@ -224,7 +224,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-strip-bm-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-strip-bm-prefix@kubernetescrd
 spec:
   tls:
   - hosts:
