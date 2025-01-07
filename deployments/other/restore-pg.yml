@@ -21,7 +21,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: pgbackup
-        image: ghcr.io/haiku/pgbackup:0.9
+        image: ghcr.io/haiku/pgbackup:1.1
         args: ["restore", "trac"]
         env:
         - name: S3_HOST
