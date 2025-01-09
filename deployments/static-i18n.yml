@@ -2,22 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: i18n-static
+  name: static-i18n
   labels:
-    app: i18n-static
+    app: static-i18n
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: i18n-static
+      app: static-i18n
   template:
     metadata:
       labels:
-        app: i18n-static
+        app: static-i18n
     spec:
       containers:
-      - name: i18n-static
-        image: ghcr.io/haiku/i18n-static:1
+      - name: static-i18n
+        image: ghcr.io/haiku/static-i18n:20250109
         resources:
           limits:
             cpu: "0.50"
@@ -43,20 +43,20 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: i18n-static-pdb
+  name: static-i18n-pdb
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: i18n-static
+      app: static-i18n
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: i18n-static
+  name: static-i18n
 spec:
   selector:
-    app: i18n-static
+    app: static-i18n
   ports:
   - name: web
     port: 80
@@ -66,7 +66,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: i18n-static-web
+  name: static-i18n-web
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
@@ -83,6 +83,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: i18n-static
+            name: static-i18n
             port:
               name: web
