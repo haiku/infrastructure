@@ -34,6 +34,14 @@ spec:
         volumeMounts:
         - name: trac-data
           mountPath: /var/trac
+        livenessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 5
+          httpGet:
+            path: /ticket/1
+            port: 80
       volumes:
       - name: trac-data
         persistentVolumeClaim:
