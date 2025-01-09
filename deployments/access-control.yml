@@ -28,6 +28,7 @@ spec:
       - 47.244.0.0/15    # alibaba hammering cgit
       - 47.246.0.0/16    # alibaba hammering cgit
       - 54.36.148.0/22   # OVH hammering trac
+      - 89.116.24.0/21   # Lithuania hammering trac?
       - 188.165.192.0/18 # OVH hammering trac
       - 54.210.0.0/15    # aws ec2 hammering trac
       - 136.243.0.0/16   # Hetzner UA hammering trac
