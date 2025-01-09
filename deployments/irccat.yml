@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: irccat
-        image: ghcr.io/irccloud/irccat:latest #https://github.com/irccloud/irccat/issues/37
+        image: ghcr.io/irccloud/irccat:0.4.9
         resources:
           limits:
             cpu: "0.25"
