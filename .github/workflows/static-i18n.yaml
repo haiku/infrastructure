@@ -1,15 +1,15 @@
-name: Build www-build
+name: Build static-i18n
 on:
   push:
     paths:
-      - containers/services/www-build/VERSION
+      - containers/services/static-i18n/VERSION
 jobs:
   build:
     env:
       REPOSITORY: "ghcr.io/haiku"
       CLASS: "services"
-      NAME: "www-build"
-    name: Build www-build container
+      NAME: "static-i18n"
+    name: Build static-i18n container
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository

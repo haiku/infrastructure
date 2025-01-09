@@ -1,0 +1,48 @@
+name: Build static-build
+on:
+  push:
+    paths:
+      - containers/services/static-build/VERSION
+jobs:
+  build:
+    env:
+      REPOSITORY: "ghcr.io/haiku"
+      CLASS: "services"
+      NAME: "static-build"
+    name: Build static-build container
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Detect version
+      id: detect-version
+      run: echo "RELEASE_VERSION=$(cat containers/${{env.CLASS}}/${{env.NAME}}/VERSION | grep -Ev "^#" | tail -1)" >> "$GITHUB_OUTPUT"
+    - name: List version
+      run: echo "Building ${{ steps.detect-version.outputs.RELEASE_VERSION }}..."
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Login to Github Container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push multi-architecture image
+      uses: docker/build-push-action@v5
+      with:
+        context: containers/${{env.CLASS}}/${{env.NAME}}
+        push: true
+        tags: |
+          ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
+          ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
+        platforms: linux/amd64,linux/arm64
+    - uses: int128/docker-manifest-create-action@v2
+      with:
+        tags: ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}
+        sources: |
+          ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
+          ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
+
+
