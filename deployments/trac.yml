@@ -84,7 +84,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-cloud-denyip@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-cloud-denyip@kubernetescrd,default-errorku@kubernetescrd
 spec:
   tls:
   - hosts:
