@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: static-i18n
-        image: ghcr.io/haiku/static-i18n:20250109
+        image: ghcr.io/haiku/static-i18n:20250110
         resources:
           limits:
             cpu: "0.50"
