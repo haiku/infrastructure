@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: errorku
-        image: ghcr.io/haiku/errorku:20250108
+        image: ghcr.io/haiku/errorku:20250109
         resources:
           limits:
             cpu: "0.50"
@@ -72,7 +72,11 @@ metadata:
 spec:
   errors:
     status:
+      - "401"
+      - "403"
       - "404"
+      - "410"
+      - "429"
     query: /{status}.html
     service:
       name: errorku
