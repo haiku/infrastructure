@@ -1,0 +1,9 @@
+# ONLY UPDATE ONCE READY TO BUILD NEW RELEASE
+#
+# HEY YOU. TEST THIS CONTAINER BEFORE GOING LIVE WITH IT.
+# KEYCLOAK UPGRADES ARE PAINFUL INVOLVING THEME CHANGES
+# AND MIGRATION STEPS.
+# 
+# SEE https://www.keycloak.org/docs/latest/upgrading/index.html
+# #############################################################
+23.0.7-1
