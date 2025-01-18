@@ -18,12 +18,12 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: ghcr.io/haiku/keycloak:24.0.5-1
+        image: ghcr.io/haiku/keycloak:25.0.6-1
         args: ["start", "--optimized"]
         env:
-        - name: KC_HOSTNAME_URL
+        - name: KC_HOSTNAME
           value: https://sso.haiku-os.org/
-        - name: KC_HOSTNAME_ADMIN_URL
+        - name: KC_HOSTNAME_ADMIN
           value: https://sso.haiku-os.org/
         - name: KC_SPI_THEME_WELCOME_THEME
           value: "haiku"
