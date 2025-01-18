@@ -1,5 +1,5 @@
 # Stage 1
-FROM quay.io/keycloak/keycloak:24.0.5 as builder
+FROM quay.io/keycloak/keycloak:25.0.6 as builder
 
 # Enable health and metrics support
 ENV KC_HEALTH_ENABLED=true
@@ -18,7 +18,7 @@ RUN keytool -genkeypair -storepass password -storetype PKCS12 -keyalg RSA -keysi
 RUN /opt/keycloak/bin/kc.sh build
 
 # Stage 2
-FROM quay.io/keycloak/keycloak:24.0.5
+FROM quay.io/keycloak/keycloak:25.0.6
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
