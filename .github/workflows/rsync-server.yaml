@@ -1,15 +1,15 @@
-name: Build rsync-mirror
+name: Build rsync-server
 on:
   push:
     paths:
-      - containers/services/rsync-mirror/VERSION
+      - containers/services/rsync-server/VERSION
 jobs:
   build:
     env:
       REPOSITORY: "ghcr.io/haiku"
       CLASS: "services"
-      NAME: "rsync-mirror"
-    name: Build rsync-mirror container
+      NAME: "rsync-server"
+    name: Build rsync-server container
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository

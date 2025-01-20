@@ -1,10 +1,10 @@
-# repo-mirror
+# rsync-server
 
 Exposes haiku package repositories via read-only rsync for mirrors.
 
 ## Environment variables
 
-  * VOLUMES - List of attached persistant volumes containing shares to expose
+  * VOLUMES - List of attached persistent volumes containing shares to expose
 
 ## Files
 
