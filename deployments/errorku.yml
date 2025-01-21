@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: errorku
-        image: ghcr.io/haiku/errorku:20250117
+        image: ghcr.io/haiku/errorku:20250121
         resources:
           limits:
             cpu: "0.50"
