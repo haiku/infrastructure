@@ -8,6 +8,15 @@ data:
   api.haiku-os.org: https://www.haiku-os.org/docs/api;true
   lofi.haiku-os.org: https://www.haiku-os.org;false
 ---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-error-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /errors/
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -15,6 +24,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-error-prefix@kubernetescrd
 spec:
   tls:
   - hosts:
@@ -29,6 +39,13 @@ spec:
         backend:
           service:
             name: redirector
+            port:
+              number: 80
+      - path: /errors
+        pathType: Prefix
+        backend:
+          service:
+            name: errorku
             port:
               number: 80
 ---
