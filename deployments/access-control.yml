@@ -13,6 +13,7 @@ spec:
     denyip:
       ipDenyList:
       - 3.80.0.0/12      # aws ec2 hammering trac
+      - 3.128.0.0/9      # aws ec2 hammering trac
       - 3.224.0.0/12     # aws ec2 hammering trac
       - 34.192.0.0/10    # aws ec2 hammering trac
       - 35.152.0.0/13    # aws ec2 hammering trac
@@ -28,7 +29,9 @@ spec:
       - 47.244.0.0/15    # alibaba hammering cgit
       - 47.246.0.0/16    # alibaba hammering cgit
       - 54.36.148.0/22   # OVH hammering trac
+      - 85.208.96.0/24   # Semrush marketing
       - 89.116.24.0/21   # Lithuania hammering trac?
+      - 98.80.0.0/12     # Amazon Data Services NoVa. Train your AI on someone else
       - 188.165.192.0/18 # OVH hammering trac
       - 54.210.0.0/15    # aws ec2 hammering trac
       - 136.243.0.0/16   # Hetzner UA hammering trac
