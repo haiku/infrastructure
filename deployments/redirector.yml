@@ -63,7 +63,18 @@ spec:
     - api.haiku-os.org
     secretName: tls-cert-redirector
   rules:
-  - http:
+  - host: lofi.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: redirector
+            port:
+              number: 80
+  - host: api.haiku-os.org
+    http:
       paths:
       - path: /
         pathType: Prefix
