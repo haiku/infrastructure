@@ -1,4 +1,4 @@
-FROM docker.io/pypy:3.10-slim
+FROM docker.io/pypy:3.11-slim
 
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/trac/pypy
