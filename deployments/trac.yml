@@ -82,7 +82,7 @@ spec:
       minScanPercent: "60"
       minScanRequests: "50"
       minTotalRequests: "100"
-      playGames: "false"
+      playGames: "true"
 ---
 # web frontends for trac
 apiVersion: networking.k8s.io/v1
