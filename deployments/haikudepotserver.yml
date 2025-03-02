@@ -46,10 +46,10 @@ spec:
         resources:
           limits:
             cpu: "1.0"
-            memory: "2Gi"
+            memory: "750Mi"
           requests:
             cpu: "0.50"
-            memory: "512Mi"
+            memory: "750Mi"
         startupProbe:
           httpGet:
             path: /actuator/health
@@ -65,6 +65,50 @@ spec:
           periodSeconds: 30
           failureThreshold: 2
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haikudepotserver-server-graphics
+  labels:
+    app: haikudepotserver-server-graphics
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: haikudepotserver-server-graphics
+  template:
+    metadata:
+      labels:
+        app: haikudepotserver-server-graphics
+    spec:
+      containers:
+        - name: haikudepotserver-server-graphics
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.169
+          env:
+            - name: HDS_GFX_QUANTIZE
+              value: "false"
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: "320Mi"
+            requests:
+              cpu: "0.50"
+              memory: "320Mi"
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 2
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -76,6 +120,18 @@ spec:
   - name: www
     port: 80
     targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: haikudepotserver-server-graphics
+spec:
+  selector:
+    app: haikudepotserver-server-graphics
+  ports:
+    - name: www
+      port: 80
+      targetPort: 8085
 ---
 # web frontends for haikudepotserver
 apiVersion: networking.k8s.io/v1
