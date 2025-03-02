@@ -46,10 +46,10 @@ spec:
         resources:
           limits:
             cpu: "1.0"
-            memory: "2Gi"
+            memory: "750Mi"
           requests:
             cpu: "0.50"
-            memory: "512Mi"
+            memory: "750Mi"
         startupProbe:
           httpGet:
             path: /actuator/health
@@ -90,10 +90,10 @@ spec:
           resources:
             limits:
               cpu: "1.0"
-              memory: "512Mi"
+              memory: "320Mi"
             requests:
               cpu: "0.50"
-              memory: "512Mi"
+              memory: "320Mi"
           startupProbe:
             httpGet:
               path: /actuator/health
