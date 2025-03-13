@@ -17,8 +17,10 @@ Update HaikuDepot to version (VERSION)
 ### Steps to implement the change
 _Note: Please mark changes from the default steps below in *bold*_
 
-1. Verify that the image is available in the [package registry](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver).
-2. Scale down haikudepotserver and start a job to backup the database:
+1. Verify that the images are available in the package repositories;
+   - [haikudepotserver](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver).
+   - [haikudepotserver](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver-server-graphics).
+2. Scale down `haikudepotserver` Deployment and start a job to back up the database:
     ```
     $ kubectl scale deploy haikudepotserver --replicas=0
     $ kubectl create job --from=cronjob/haikudepotserver-pgbackup haikudepotserver-pgbackup-manual-(VERSION)
@@ -35,7 +37,9 @@ _Note: Please mark changes from the default steps below in *bold*_
     Snapshot of haikudepotserver completed successfully! (haiku-backups/pg-haikudepotserver/haikudepotserver_2023-08-06.sql.xz.gpg)
     ```
 4. Apply any pre-deployment configuration changes (see section Configuration Changes)
-5. Update the version in the infrastructure repository in `deployments/haikudepotserver.yml`.
+5. Update the version in the infrastructure repository in `deployments/haikudepotserver.yml` for;
+   - `Deployment` with name `haikudepotserver`
+   - `Deployment` with name `haikudepotserver-server-graphics`
 6. Apply the update to the server:
     ```
     $ kubectl apply -f deployments/haikudepotserver.yml
