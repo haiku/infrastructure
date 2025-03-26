@@ -27,7 +27,7 @@ spec:
         - name: HDS_AUTHENTICATION_JWS_ISSUER
           value: "haikuinc.hds"
         - name: HDS_GRAPHICS_SERVER_BASE_URI
-          value: "http://haikudepotserver-server-graphics:8085"
+          value: "http://haikudepotserver-server-graphics:80"
         - name: SPRING_DATASOURCE_URL
           value: "jdbc:postgresql://postgres:5432/haikudepotserver"
         - name: SPRING_DATASOURCE_USERNAME
