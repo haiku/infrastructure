@@ -1,7 +1,7 @@
 resource "digitalocean_kubernetes_cluster" "haiku-prod-ams3" {
   name           = "haiku-prod-ams3"
   region         = "ams3"
-  version        = "1.27.10-do.0"
+  version        = "1.30.10-do.0"
   auto_upgrade   = true
   ha             = true
 

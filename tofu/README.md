@@ -4,10 +4,11 @@ This contains the [OpenTofu](https://opentofu.org) code for our Kubernetes clust
 
 ## Usage
 
-> There's currently no state file stored anywhere, given the simple infra for now we can just
-> import "the one cluster"
+> There's currently no state file stored anywhere (DO s3 costs money at any size).
+> For now, we can just import the existing infrastructure.
 
-  1. tofu init
-  2. tofu import -var "do_token=SECRET_PAT" digitalocean_kubernetes_cluster.haiku-prod-ams3 (CLUSTER UUID)
-  3. tofu plan -var "do_token=SECRET_PAT"
-
+  1. export TF_VAR_do_token=dop_personal_access_token...
+  2. tofu init
+  3. tofu import digitalocean_kubernetes_cluster.haiku-prod-ams3 e1331baa-1a37-4779-a2f4-22e138a3613e
+  4. tofu import digitalocean_droplet.mail 288993384
+  5. tofu plan
