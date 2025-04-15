@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.15
+FROM docker.io/alpine:3.21
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure

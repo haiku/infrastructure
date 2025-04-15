@@ -1,6 +1,6 @@
-VERSION = 1.2
+VERSION = 1.3
 REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag ${REGISTRY}/gitsync:${VERSION} .
+	podman build --no-cache --tag ${REGISTRY}/gitsync:${VERSION} .
 push:
-	docker push ${REGISTRY}/gitsync:${VERSION}
+	podman push ${REGISTRY}/gitsync:${VERSION}
