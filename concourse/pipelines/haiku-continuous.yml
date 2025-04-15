@@ -5,6 +5,12 @@ resource_types:
     tags: ["((worker_tag))"]
     source:
       repository: haiku/irccat-resource
+  - name: rclone
+    type: registry-image
+    tags: ["((worker_tag))"]
+    source:
+      repository: ghcr.io/kallisti5/concourse-rclone-resource
+      tag: 1.68.1-1
 roles:
   - name: owner
     oauth:
@@ -21,6 +27,18 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+  - name: wasabi-east
+    tags: ["((worker_tag))"]
+    type: rclone
+    source:
+      config: |
+        [remote]
+        type = s3
+        provider = Wasabi
+        access_key_id = ((s3key))
+        secret_access_key = ((s3secret))
+        endpoint = s3.us-east-1.wasabisys.com
+        acl = public-read
   - name: irc
     type: irccat-resource
     tags: ["((worker_tag))"]
@@ -37,6 +55,7 @@ task-build-image: &task-build-image
     - name: haiku-git
   outputs:
     - name: generated.((arch))
+    - name: compile_commands.((arch))
   run:
     path: /bin/bash
     args:
@@ -65,7 +84,13 @@ task-build-image: &task-build-image
                 ;;
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
-        jam -j4 -q @((profile))-((media))
+        jam -j4 -c -q @((profile))-((media))
+        # Generate compile_commands.json and normalize it to be functonal in an IDE
+        cp compile_commands.json ../compile_commands.((arch))/compile_commands_((arch)).json
+        sed -i 's/..\/haiku-git\///g' ../compile_commands.((arch))/compile_commands_((arch)).json
+        sed -i 's/\/tmp\/build\/[a-z0-9]*\/generated\.[a-z0-9_]*/%%HAIKU_SRC_TOP%%/g' ../compile_commands.((arch))/compile_commands_((arch)).json
+        sed -i "s/objects\//generated\/objects\//g" ../compile_commands.((arch))/compile_commands_((arch)).json
+        sed -i "s/\/toolchains\/cross-tools\-/generated\/cross\-tools\-/g" ../compile_commands.((arch))/compile_commands_((arch)).json
 # Jobs
 jobs:
   - name: haiku-((branch))-((arch))
@@ -88,4 +113,13 @@ jobs:
       - task: build-((branch))-((profile))-((media))
         tags: ["((worker_tag))"]
         config:
-          << : *task-build-image
+          <<: *task-build-image
+      - put: wasabi-east
+        tags: ["((worker_tag))"]
+        params:
+          source: compile_commands.((arch))
+          destination:
+            - dir: "remote:haiku-extra/"
+              args:
+                - -c
+                #- -vv
