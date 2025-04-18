@@ -66,6 +66,41 @@ spec:
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/git
+      - name: anubis
+        image: ghcr.io/techarohq/anubis:latest
+        imagePullPolicy: Always
+        env:
+          - name: "BIND"
+            value: ":6969"
+          - name: "DIFFICULTY"
+            value: "4"
+          - name: "METRICS_BIND"
+            value: ":9090"
+          - name: "SERVE_ROBOTS_TXT"
+            value: "true"
+          - name: "TARGET"
+            value: "http://localhost:80"
+          - name: "OG_PASSTHROUGH"
+            value: "true"
+          - name: "OG_EXPIRY_TIME"
+            value: "24h"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 250m
+            memory: 128Mi
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
       volumes:
       - name: gerrit-data
         persistentVolumeClaim:
@@ -276,6 +311,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: cgit-anubis
+spec:
+  selector:
+    app: git
+  ports:
+  - name: web
+    port: 6969
+    targetPort: 6969
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: review
 spec:
   selector:
@@ -334,7 +381,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
     traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd
-    traefik.ingress.kubernetes.io/router.middlewares: default-cloud-denyip@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-badip-denyip@kubernetescrd
 spec:
   tls:
   - hosts:
@@ -360,7 +407,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: cgit
+            name: cgit-anubis
             port:
               name: web
   - host: review.haiku-os.org
