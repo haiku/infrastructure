@@ -52,6 +52,8 @@ clone-url=https://review.haiku-os.org/$CGIT_REPO_URL ssh://git.haiku-os.org/$CGI
 cache-root=/var/cache/cgit
 cache-size=1000
 
+enable-html-serving=1
+
 enable-git-config=0
 
 # Show extra links for each repository on the index page
@@ -76,7 +78,7 @@ enable-follow-links=1
 enable-http-clone=0
 
 # Enable blame page and create links to it from tree page
-enable-blame=1
+enable-blame=0
 
 # Sort branches by date
 branch-sort=age
