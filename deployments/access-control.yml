@@ -428,3 +428,178 @@ spec:
       - 94.159.102.167
       - 192.42.116.213
       - 192.42.116.214
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: cloud-denyip
+spec:
+  plugin:
+    denyip:
+      ipDenyList:
+        - 47.74.0.0/15     # alibaba hammering trac
+        - 47.76.0.0/14     # alibaba hammering trac
+        - 47.80.0.0/13     # alibaba hammering trac
+        - 47.235.0.0/16    # alibaba hammering cgit
+        - 47.236.0.0/14    # alibaba hammering cgit
+        - 47.240.0.0/14    # alibaba hammering cgit
+        - 47.244.0.0/15    # alibaba hammering cgit
+        - 47.246.0.0/16    # alibaba hammering cgit
+        - 101.44.0.0/20    # Huawei Cloud hammering cgit
+        - 101.44.144.0/20  # Huawei Cloud hammering cgit
+        - 101.44.16.0/20   # Huawei Cloud hammering cgit
+        - 101.44.176.0/20  # Huawei Cloud hammering cgit
+        - 101.44.192.0/20  # Huawei Cloud hammering cgit
+        - 101.44.224.0/22  # Huawei Cloud hammering cgit
+        - 101.44.232.0/22  # Huawei Cloud hammering cgit
+        - 101.44.248.0/22  # Huawei Cloud hammering cgit
+        - 101.44.254.0/24  # Huawei Cloud hammering cgit
+        - 101.44.255.0/24  # Huawei Cloud hammering cgit
+        - 101.44.48.0/20   # Huawei Cloud hammering cgit
+        - 101.46.112.0/20  # Huawei Cloud hammering cgit
+        - 101.46.208.0/21  # Huawei Cloud hammering cgit
+        - 101.46.216.0/21  # Huawei Cloud hammering cgit
+        - 101.46.240.0/22  # Huawei Cloud hammering cgit
+        - 101.46.244.0/22  # Huawei Cloud hammering cgit
+        - 101.46.255.0/24  # Huawei Cloud hammering cgit
+        - 101.46.96.0/20   # Huawei Cloud hammering cgit
+        - 110.239.96.0/19  # Huawei Cloud hammering cgit
+        - 111.119.208.0/20 # Huawei Cloud hammering cgit
+        - 111.119.224.0/20 # Huawei Cloud hammering cgit
+        - 111.119.240.0/20 # Huawei Cloud hammering cgit
+        - 111.91.0.0/18    # Huawei Cloud hammering cgit
+        - 111.91.64.0/18   # Huawei Cloud hammering cgit
+        - 114.119.128.0/19 # Huawei Cloud hammering cgit
+        - 114.119.160.0/21 # Huawei Cloud hammering cgit
+        - 114.119.168.0/23 # Huawei Cloud hammering cgit
+        - 114.119.170.0/24 # Huawei Cloud hammering cgit
+        - 114.119.176.0/20 # Huawei Cloud hammering cgit
+        - 119.13.248.0/22  # Huawei Cloud hammering cgit
+        - 119.13.252.0/22  # Huawei Cloud hammering cgit
+        - 119.13.32.0/21   # Huawei Cloud hammering cgit
+        - 119.13.40.0/21   # Huawei Cloud hammering cgit
+        - 124.243.128.0/20 # Huawei Cloud hammering cgit
+        - 124.243.144.0/20 # Huawei Cloud hammering cgit
+        - 124.243.160.0/19 # Huawei Cloud hammering cgit
+        - 124.81.0.0/19    # Huawei Cloud hammering cgit
+        - 124.81.160.0/19  # Huawei Cloud hammering cgit
+        - 124.81.32.0/19   # Huawei Cloud hammering cgit
+        - 124.81.64.0/18   # Huawei Cloud hammering cgit
+        - 124.81.90.16/28  # Huawei Cloud hammering cgit
+        - 146.174.128.0/19 # Huawei Cloud hammering cgit
+        - 146.174.160.0/19 # Huawei Cloud hammering cgit
+        - 148.145.176.0/20 # Huawei Cloud hammering cgit
+        - 148.145.240.0/22 # Huawei Cloud hammering cgit
+        - 149.232.128.0/20 # Huawei Cloud hammering cgit
+        - 149.232.144.0/20 # Huawei Cloud hammering cgit
+        - 159.138.125.0/24 # Huawei Cloud hammering cgit
+        - 159.138.96.0/20  # Huawei Cloud hammering cgit
+        - 166.108.192.0/19 # Huawei Cloud hammering cgit
+        - 166.108.224.0/19 # Huawei Cloud hammering cgit
+        - 176.52.128.0/20  # Huawei Cloud hammering cgit
+        - 176.52.144.0/20  # Huawei Cloud hammering cgit
+        - 188.239.0.0/19   # Huawei Cloud hammering cgit
+        - 188.239.32.0/19  # Huawei Cloud hammering cgit
+        - 189.28.112.0/20  # Huawei Cloud hammering cgit
+        - 189.28.96.0/20   # Huawei Cloud hammering cgit
+        - 201.77.32.0/21   # Huawei Cloud hammering cgit
+        - 201.77.40.0/21   # Huawei Cloud hammering cgit
+        - 202.76.128.0/19  # Huawei Cloud hammering cgit
+        - 202.76.160.0/19  # Huawei Cloud hammering cgit
+        - 219.83.120.0/24  # Huawei Cloud hammering cgit
+        - 219.83.121.0/24  # Huawei Cloud hammering cgit
+        - 219.83.48.0/20   # Huawei Cloud hammering cgit
+        - 219.83.64.0/20   # Huawei Cloud hammering cgit
+        - 219.83.80.0/20   # Huawei Cloud hammering cgit
+        - 219.83.96.0/20   # Huawei Cloud hammering cgit
+        - 27.255.0.0/22    # Huawei Cloud hammering cgit
+        - 27.255.0.0/23    # Huawei Cloud hammering cgit
+        - 27.255.16.0/22   # Huawei Cloud hammering cgit
+        - 27.255.20.0/22   # Huawei Cloud hammering cgit
+        - 27.255.26.0/23   # Huawei Cloud hammering cgit
+        - 27.255.32.0/22   # Huawei Cloud hammering cgit
+        - 27.255.32.0/23   # Huawei Cloud hammering cgit
+        - 27.255.48.0/22   # Huawei Cloud hammering cgit
+        - 27.255.52.0/22   # Huawei Cloud hammering cgit
+        - 27.255.58.0/23   # Huawei Cloud hammering cgit
+        - 43.225.140.0/23  # Huawei Cloud hammering cgit
+        - 43.225.142.0/23  # Huawei Cloud hammering cgit
+        - 43.255.104.0/23  # Huawei Cloud hammering cgit
+        - 43.255.106.0/23  # Huawei Cloud hammering cgit
+        - 46.250.160.0/21  # Huawei Cloud hammering cgit
+        - 46.250.168.0/21  # Huawei Cloud hammering cgit
+        - 46.250.176.0/21  # Huawei Cloud hammering cgit
+        - 46.250.184.0/21  # Huawei Cloud hammering cgit
+        - 62.245.0.0/20    # Huawei Cloud hammering cgit
+        - 62.245.16.0/20   # Huawei Cloud hammering cgit
+        - 80.238.132.0/22  # Huawei Cloud hammering cgit
+        - 80.238.144.0/22  # Huawei Cloud hammering cgit
+        - 80.238.156.0/22  # Huawei Cloud hammering cgit
+        - 80.238.168.0/22  # Huawei Cloud hammering cgit
+        - 80.238.191.0/24  # Huawei Cloud hammering cgit
+        - 83.101.0.0/21    # Huawei Cloud hammering cgit
+        - 83.101.16.0/20   # Huawei Cloud hammering cgit
+        - 83.101.16.0/21   # Huawei Cloud hammering cgit
+        - 83.101.40.0/21   # Huawei Cloud hammering cgit
+        - 54.36.148.0/22   # OVH hammering trac
+        - 57.141.0.0/16    # Meta hammering trac
+        - 66.249.64.0/19   # Google hammering trac
+        - 85.208.96.0/24   # Semrush marketing
+        - 89.116.24.0/21   # Lithuania hammering trac?
+        - 98.80.0.0/12     # Amazon Data Services NoVa. Train your AI on someone else
+        - 101.32.242.0/24  # Tencent hammering trac
+        - 14.160.0.0/11    # Vietnam Telco hitting cgit (i'm blocking all of AS45899. Reduced their stupid 3900
+        - 14.224.0.0/16    # Vietnam Telco hitting cgit  subnets to 55 via ip-aggregator)
+        - 14.226.0.0/15    # Vietnam Telco hitting cgit
+        - 14.228.0.0/14    # Vietnam Telco hitting cgit
+        - 14.232.0.0/13    # Vietnam Telco hitting cgit
+        - 14.240.0.0/12    # Vietnam Telco hitting cgit
+        - 23.32.249.0/24   # Vietnam Telco hitting cgit
+        - 23.48.52.0/22    # Vietnam Telco hitting cgit
+        - 23.48.56.0/22    # Vietnam Telco hitting cgit
+        - 23.53.208.0/21   # Vietnam Telco hitting cgit
+        - 43.239.220.0/23  # Vietnam Telco hitting cgit
+        - 45.124.92.0/22   # Vietnam Telco hitting cgit
+        - 45.254.32.0/22   # Vietnam Telco hitting cgit
+        - 103.9.76.0/22    # Vietnam Telco hitting cgit
+        - 103.10.44.0/22   # Vietnam Telco hitting cgit
+        - 103.15.90.0/23   # Vietnam Telco hitting cgit
+        - 103.42.56.0/22   # Vietnam Telco hitting cgit
+        - 103.48.191.0/24  # Vietnam Telco hitting cgit
+        - 103.53.168.0/23  # Vietnam Telco hitting cgit
+        - 103.56.156.0/22  # Vietnam Telco hitting cgit
+        - 103.68.252.0/22  # Vietnam Telco hitting cgit
+        - 103.69.192.0/23  # Vietnam Telco hitting cgit
+        - 103.89.92.0/22   # Vietnam Telco hitting cgit
+        - 103.107.180.0/22 # Vietnam Telco hitting cgit
+        - 103.120.242.0/23 # Vietnam Telco hitting cgit
+        - 103.131.68.0/22  # Vietnam Telco hitting cgit
+        - 103.148.56.0/23  # Vietnam Telco hitting cgit
+        - 103.154.244.0/23 # Vietnam Telco hitting cgit
+        - 103.171.92.0/24  # Vietnam Telco hitting cgit
+        - 103.197.184.0/23 # Vietnam Telco hitting cgit
+        - 103.237.96.0/22  # Vietnam Telco hitting cgit
+        - 103.238.214.0/23 # Vietnam Telco hitting cgit
+        - 103.255.239.0/24 # Vietnam Telco hitting cgit
+        - 113.160.0.0/11   # Vietnam Telco hitting cgit
+        - 123.16.0.0/12    # Vietnam Telco hitting cgit
+        - 146.196.64.0/22  # Vietnam Telco hitting cgit
+        - 157.66.13.0/24   # Vietnam Telco hitting cgit
+        - 157.119.246.0/23 # Vietnam Telco hitting cgit
+        - 160.19.78.0/23   # Vietnam Telco hitting cgit
+        - 160.22.2.0/23    # Vietnam Telco hitting cgit
+        - 160.22.16.0/23   # Vietnam Telco hitting cgit
+        - 160.25.74.0/23   # Vietnam Telco hitting cgit
+        - 160.30.54.0/23   # Vietnam Telco hitting cgit
+        - 160.191.52.0/23  # Vietnam Telco hitting cgit
+        - 160.250.216.0/23 # Vietnam Telco hitting cgit
+        - 161.248.30.0/23  # Vietnam Telco hitting cgit
+        - 163.61.74.0/23   # Vietnam Telco hitting cgit
+        - 203.160.0.0/23   # Vietnam Telco hitting cgit
+        - 203.160.132.0/22 # Vietnam Telco hitting cgit
+        - 203.162.0.0/16   # Vietnam Telco hitting cgit
+        - 203.210.128.0/17 # Vietnam Telco hitting cgit
+        - 221.132.0.0/19   # Vietnam Telco hitting cgit
+        - 221.132.32.0/21  # Vietnam Telco hitting cgit
+        - 221.132.52.0/22  # Vietnam Telco hitting cgit
+        - 222.252.0.0/14   # Vietnam Telco hitting cgit
