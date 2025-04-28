@@ -397,7 +397,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: cgit
+            name: cgit-anubis
             port:
               name: web
   - host: cgit.haiku-os.org
