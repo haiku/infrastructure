@@ -27,7 +27,7 @@ spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
       containers:
-      - image: docker.io/traefik:2.11.20
+      - image: docker.io/traefik:2.11.24
         name: traefik-ingress-lb
         resources:
           limits:
@@ -76,6 +76,7 @@ spec:
         args:
         - --accesslog=true
         - --accesslog.filepath=/var/log/access.log
+        - --accesslog.fields.headers.names.User-Agent=keep
         - --log.level=DEBUG
         - --providers.kubernetescrd=true
         - --providers.kubernetesingress=true
