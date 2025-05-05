@@ -1,0 +1,13 @@
+#!/bin/bash
+cat <<EOF > block-badasn.yaml
+# THIS IS AUTOMATICALLY GENERATED. SEE generatebadactors
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: badasn-denyip
+spec:
+  plugin:
+    denyip:
+      ipDenyList:
+EOF
+curl -s https://ipbl.herrbischoff.com/badasn.txt | grep -v : | grep -vE "^#" | sed 's/^/        - /g'  >> block-badasn.yaml
