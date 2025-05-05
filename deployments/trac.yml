@@ -57,16 +57,16 @@ spec:
             - name: "TARGET"
               value: "http://localhost:80"
             - name: "OG_PASSTHROUGH"
-              value: "true"
+              value: "false"
             - name: "OG_EXPIRY_TIME"
               value: "24h"
           resources:
             limits:
-              cpu: 500m
-              memory: 128Mi
+              cpu: 750m
+              memory: 256Mi
             requests:
               cpu: 250m
-              memory: 128Mi
+              memory: 256Mi
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -139,7 +139,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-badip-denyip@kubernetescrd,default-errorku@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-errorku@kubernetescrd
 spec:
   tls:
     - hosts:
