@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.170
+        image: ghcr.io/haiku/haikudepotserver:1.0.171
         env:
         - name: SPRING_MAIL_HOST
           value: "smtp"
@@ -85,7 +85,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.170
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.171
           env:
             - name: HDS_GFX_QUANTIZE
               value: "false"
