@@ -24,6 +24,8 @@ spec:
         env:
         - name: SPRING_MAIL_HOST
           value: "smtp"
+        - name: HDS_MAINTENANCE_ON_SCHEDULE
+          value: "false"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
           value: "haikuinc.hds"
         - name: HDS_GRAPHICS_SERVER_BASE_URI
@@ -122,6 +124,11 @@ spec:
   - name: www
     port: 80
     targetPort: 8080
+  - name: actuator
+    # This exposes a maintenance / prob port from the main Application server. This port
+    # should not be exposed externally.
+    port: 81
+    targetPort: 8081
 ---
 apiVersion: v1
 kind: Service
@@ -211,3 +218,63 @@ spec:
                   secretKeyRef:
                     name: postgres-admin
                     key: password
+---
+# This CronJob runs every hour hitting one of the HDS application server instances
+# to run some maintenance logic.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-maintenance-hourly
+spec:
+  schedule: "14 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: haikudepotserver-maintenance-hourly
+              image: curlimages/curl:8.13.0
+              args:
+                - curl
+                - -X
+                - POST
+                - -H
+                - Content-Type:application/json
+                - --data
+                - '{"type":"HOURLY"}'
+                - http://haikudepotserver:81/actuator/hdsmaintenance
+          restartPolicy: Never
+---
+# This CronJob runs every day hitting one of the HDS application server instances
+# to run some logic.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-maintenance-daily
+spec:
+  schedule: "47 5 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: haikudepotserver-maintenance-daily
+              image: curlimages/curl:8.13.0
+              args:
+                - curl
+                - -X
+                - POST
+                - -H
+                - Content-Type:application/json
+                - --data
+                - '{"type":"DAILY"}'
+                - http://haikudepotserver:81/actuator/hdsmaintenance
+          restartPolicy: Never
