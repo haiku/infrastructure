@@ -168,6 +168,70 @@ spec:
     port: 80
     targetPort: 80
 ---
+# Serves haiku and haikuports repositories
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hpkg-haikuports-bouncer
+  labels:
+    app: hpkg-haikuports-bouncer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hpkg-haikuports-bouncer
+  template:
+    metadata:
+      labels:
+        app: hpkg-haikuports-bouncer
+    spec:
+      containers:
+      - name: hpkgbouncer
+        image: ghcr.io/haiku/hpkgbouncer:0.4.2
+        env:
+        - name: ROCKET_LOG_LEVEL
+          value: "normal"
+        - name: ROCKET_ADDRESS
+          value: "0.0.0.0"
+        - name: ROCKET_PORT
+          value: "8000"
+        - name: CACHE_TTL
+          value: "900"
+        - name: S3_PUBLIC
+          value: "https://haikuports-repository.cdn.haiku-os.org/"
+        volumeMounts:
+        - name: secrets
+          mountPath: "/var/run/secrets"
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: s3-garage-haikuports
+          items:
+          - key: s3_endpoint
+            path: s3_endpoint
+          - key: s3_bucket
+            path: s3_bucket
+          - key: s3_key
+            path: s3_key
+          - key: s3_secret
+            path: s3_secret
+          - key: s3_region
+            path: s3_region
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hpkg-haikuports-bouncer
+spec:
+  selector:
+    app: hpkg-haikuports-bouncer
+  ports:
+  - name: hpkg-bouncer-www
+    port: 80
+    targetPort: 8000
+---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -176,6 +240,7 @@ spec:
   stripPrefix:
     prefixes:
       - /haiku/
+      - /haikuports-test/
 ---
 # web frontends for package repos
 apiVersion: networking.k8s.io/v1
@@ -200,6 +265,13 @@ spec:
         backend:
           service:
             name: hpkg-haiku
+            port:
+              number: 80
+      - path: /haikuports-test/
+        pathType: Prefix
+        backend:
+          service:
+            name: hpkg-haikuports-bouncer
             port:
               number: 80
       - path: /
