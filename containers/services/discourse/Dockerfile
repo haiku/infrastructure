@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=3.3.1
+ARG VERSION=3.4.4
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
@@ -17,16 +17,14 @@ ENV DISCOURSE_VERSION $VERSION
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-# Add the Node and Yarn software repositories
+# Add the Node software repositories
 # See https://github.com/discourse/discourse_docker/blob/225c3d03896c0573363183118ce58622f039083b/image/base/slim.Dockerfile 32-35
-RUN wget --quiet -O - https://deb.nodesource.com/setup_18.x | bash -
-RUN wget --quiet -O - https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
+RUN wget --quiet -O - https://deb.nodesource.com/setup_22.x | bash -
 
 RUN apt-get update \
-    && apt-get install -y git bash build-essential postgresql-client-14 postgresql-14-pgvector \
+    && apt-get install -y git bash build-essential postgresql-client-15 postgresql-15-pgvector \
 		python3 python3-pip cron nginx pngquant optipng gifsicle jpegoptim jhead brotli nodejs \
-		yarn ripgrep supervisor imagemagick
+		ripgrep supervisor imagemagick
 RUN rm /etc/nginx/sites-enabled/default && mkdir -p /var/nginx && chown www-data:www-data /var/nginx && echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # Install a rust compiler and install oxipng
@@ -47,14 +45,13 @@ RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
 # See: https://github.com/discourse/discourse_docker/blob/225c3d03896c0573363183118ce58622f039083b/image/base/release.Dockerfile
 ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
 RUN mkdir -p /apps && cd /apps && tar xf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
-RUN npm install -g ember-cli terser uglify-js
+RUN npm install -g ember-cli terser uglify-js pnpm@9
 RUN cd /apps/discourse \
 	&& bundle config --local deployment true \
 	&& bundle config --local path ./vendor/bundle \
 	&& bundle config --local without test development \
     && bundle install \
-	&& yarn install --frozen-lockfile \
-	&& yarn cache clean \
+	&& pnpm install --frozen-lockfile \
 	&& find /apps/discourse/vendor/bundle -name tmp -type d -exec rm -rf {} +
 
 # Set up Supervisor and nginx

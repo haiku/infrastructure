@@ -1,4 +1,4 @@
-VERSION = 3.3.2
+VERSION = 3.4.4
 REGISTRY = ghcr.io/haiku
 
 default:
@@ -18,7 +18,7 @@ test:
 	sleep 20
 	docker rm discourse || true
 	docker run --rm --network discourse --env-file test.env ${REGISTRY}/discourse:${VERSION} bundle exec rake db:create
-	docker run -d --name discourse --network discourse -P --env-file test.env ${REGISTRY}/discourse:${VERSION}
+	docker run -d --name discourse --network discourse -p 8080:80 --env-file test.env ${REGISTRY}/discourse:${VERSION}
 clean:
 	docker kill redis || true
 	docker kill discourse || true
