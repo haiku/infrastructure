@@ -213,6 +213,7 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
+      - /buildmaster-new/
       - /buildmaster/
       - /irccat/
 ---
@@ -246,6 +247,13 @@ spec:
         backend:
           service:
             name: buildmaster
+            port:
+              name: www
+      - path: /buildmaster-new
+        pathType: Prefix
+        backend:
+          service:
+            name: buildmaster-new
             port:
               name: www
       - path: /irccat

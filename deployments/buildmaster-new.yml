@@ -23,14 +23,14 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: ghcr.io/haikuports/haikuporter/frontend:1.3.0-2
+        image: ghcr.io/haikuports/haikuporter/frontend:1.3.0-4
         volumeMounts:
         - name: buildmaster-data-riscv64
           mountPath: /var/instances/master/riscv64
         - name: buildmaster-packages-new
           mountPath: /var/instances/haikuports
       - name: buildmaster-riscv64
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.3.0-2
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.3.0-9rc0
         #command: ["bootstrap", "riscv64"]
         command: ["loop"]
         volumeMounts:
@@ -38,16 +38,16 @@ spec:
           mountPath: /var/packages
         - name: buildmaster-data-riscv64
           mountPath: /var/buildmaster
-        - name: storage-secrets-riscv64
+        - name: storage-secrets-master
           mountPath: "/run/secrets/storage_config"
         - name: signing-secrets
           mountPath: "/run/secrets/repo_signing"
           readOnly: true
         env:
           - name: STORAGE_BACKEND_CONFIG
-            value: "/run/secrets/storage_config/storage-config.json"
+            value: "/run/secrets/storage_config/storage-config-riscv64.json"
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta5_72"
+            value: "hrev58870"
           - name: BUILD_TARGET_ARCH
             value: "riscv64"
           - name: REPOSITORY_TRIGGER_URL
@@ -59,11 +59,11 @@ spec:
         - name: buildmaster-packages-new
           persistentVolumeClaim:
             claimName: buildmaster-packages-new-pvc
-        - name: storage-secrets-riscv64
+        - name: storage-secrets-master
           projected:
             sources:
             - secret:
-                name: buildmaster-storage-riscv64
+                name: buildmaster-storage-master
         - name: signing-secrets
           projected:
             sources:
