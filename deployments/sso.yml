@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: ghcr.io/haiku/keycloak:26.0.8-1
+        image: ghcr.io/haiku/keycloak:26.1.5-1
         args: ["start", "--optimized"]
         env:
         - name: KC_HOSTNAME
