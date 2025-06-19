@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: ghcr.io/haiku/keycloak:25.0.6-1
+        image: ghcr.io/haiku/keycloak:26.0.8-1
         args: ["start", "--optimized"]
         env:
         - name: KC_HOSTNAME
@@ -29,8 +29,8 @@ spec:
           value: "haiku"
         - name: KC_HTTP_ENABLED
           value: "true"
-        - name: KC_PROXY
-          value: "edge"
+        - name: KC_PROXY_HEADERS
+          value: "xforwarded"
         - name: KC_DB_URL_HOST
           value: "postgres"
         - name: KC_DB_URL_DATABASE
