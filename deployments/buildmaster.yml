@@ -5,23 +5,12 @@
 # at various remote locations over ssh with verifie
 # host keys.
 #
-# TODO: buildmaster-packages-pvc is a strain on our
-# infrastructure. We really need to get it to
-# S3,Storj,etc "somehow". Given the difficulty of RWX
-# mixed with the size of these volumes, all of these
-# have to run on the same node reducing redundancy.
-#
-# We choose do-block-storage-retain as a storage class
-# to "retain" PV's if this deployment is accidently
-# deleted. In theory we could create a volume snapshot
-# of the unattached volume and restore it to a new
-# PVC via kubernetes.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: haikuporter
+  name: buildmaster-main
   labels:
-    app: haikuporter
+    app: buildmaster
 spec:
   replicas: 1
   selector:
@@ -34,29 +23,33 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: ghcr.io/haikuports/haikuporter/frontend:1.2.8-5
+        image: ghcr.io/haikuports/haikuporter/frontend:1.3.1-28-gd668
         volumeMounts:
-        - name: buildmaster-data-x86-gcc2
-          mountPath: /var/instances/master/x86_gcc2
         - name: buildmaster-data-x86-64
           mountPath: /var/instances/master/x86_64
-        - name: buildmaster-packages
+        - name: buildmaster-data-x86-gcc2
+          mountPath: /var/instances/master/x86_gcc2
+        - name: buildmaster-data-riscv64
+          mountPath: /var/instances/master/riscv64
+        - name: buildmaster-package-buffer
           mountPath: /var/instances/haikuports
       - name: buildmaster-x86-64
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.2.8-6p1
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.3.1-28-gd668
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
-        - name: buildmaster-packages
+        - name: buildmaster-package-buffer
           mountPath: /var/packages
-        - name: buildmaster-sources
-          mountPath: /var/sources
         - name: buildmaster-data-x86-64
           mountPath: /var/buildmaster
+        - name: storage-secrets-master
+          mountPath: "/run/secrets/storage_config"
         - name: signing-secrets
           mountPath: "/run/secrets/repo_signing"
           readOnly: true
         env:
+          - name: STORAGE_BACKEND_CONFIG
+            value: "/run/secrets/storage_config/storage-config-x86-64.json"
           - name: SYSTEM_PACKAGE_BRANCH
             value: "r1beta5_111"
           - name: BUILD_TARGET_ARCH
@@ -64,39 +57,69 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.2.8-6p1
-        #command: ["bootstrap", "x86_gcc2", "x86"]
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.3.1-28-gd668
+        #command: ["bootstrap", "x86_gcc2"]
         command: ["loop"]
         volumeMounts:
-        - name: buildmaster-sources
-          mountPath: /var/sources
-        - name: buildmaster-packages
+        - name: buildmaster-package-buffer
           mountPath: /var/packages
         - name: buildmaster-data-x86-gcc2
           mountPath: /var/buildmaster
+        - name: storage-secrets-master
+          mountPath: "/run/secrets/storage_config"
         - name: signing-secrets
           mountPath: "/run/secrets/repo_signing"
           readOnly: true
         env:
+          - name: STORAGE_BACKEND_CONFIG
+            value: "/run/secrets/storage_config/storage-config-x86-gcc2.json"
           - name: SYSTEM_PACKAGE_BRANCH
             value: "r1beta5_111"
           - name: BUILD_TARGET_ARCH
             value: "x86_gcc2"
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
+      - name: buildmaster-riscv64
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.3.1-28-gd668
+        #command: ["bootstrap", "riscv64"]
+        command: ["loop"]
+        volumeMounts:
+        - name: buildmaster-package-buffer
+          mountPath: /var/packages
+        - name: buildmaster-data-riscv64
+          mountPath: /var/buildmaster
+        - name: storage-secrets-master
+          mountPath: "/run/secrets/storage_config"
+        - name: signing-secrets
+          mountPath: "/run/secrets/repo_signing"
+          readOnly: true
+        env:
+          - name: STORAGE_BACKEND_CONFIG
+            value: "/run/secrets/storage_config/storage-config-riscv64.json"
+          - name: SYSTEM_PACKAGE_BRANCH
+            value: "hrev58907"
+          - name: BUILD_TARGET_ARCH
+            value: "riscv64"
+          - name: REPOSITORY_TRIGGER_URL
+            value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_riscv64/import"
       volumes:
-        - name: buildmaster-data-x86-64
-          persistentVolumeClaim:
-            claimName: buildmaster-data-x86-64-pvc
         - name: buildmaster-data-x86-gcc2
           persistentVolumeClaim:
             claimName: buildmaster-data-x86-gcc2-pvc
-        - name: buildmaster-packages
+        - name: buildmaster-data-x86-64
           persistentVolumeClaim:
-            claimName: buildmaster-packages-pvc
-        - name: buildmaster-sources
+            claimName: buildmaster-data-x86-64-pvc
+        - name: buildmaster-data-riscv64
           persistentVolumeClaim:
-            claimName: buildmaster-sources-pvc
+            claimName: buildmaster-data-riscv64-pvc
+        - name: buildmaster-package-buffer
+          persistentVolumeClaim:
+            claimName: buildmaster-package-buffer-pvc
+        - name: storage-secrets-master
+          projected:
+            sources:
+            - secret:
+                name: buildmaster-storage-master
         - name: signing-secrets
           projected:
             sources:
@@ -136,31 +159,32 @@ spec:
     requests:
       storage: 20Gi
 ---
+# state data for builds like logs of buildruns, buildrun id
+# tracking, builder connection information.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildmaster-data-riscv64-pvc
+spec:
+  storageClassName: do-block-storage
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
 # all of the packages for Haikuports
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: buildmaster-packages-pvc
+  name: buildmaster-package-buffer-pvc
 spec:
   storageClassName: do-block-storage-retain
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 250Gi
----
-# pretty much just Haiku sources at this point
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: buildmaster-sources-pvc
-spec:
-  storageClassName: do-block-storage-retain
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
@@ -213,7 +237,6 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /buildmaster-new/
       - /buildmaster/
       - /irccat/
 ---
@@ -247,13 +270,6 @@ spec:
         backend:
           service:
             name: buildmaster
-            port:
-              name: www
-      - path: /buildmaster-new
-        pathType: Prefix
-        backend:
-          service:
-            name: buildmaster-new
             port:
               name: www
       - path: /irccat

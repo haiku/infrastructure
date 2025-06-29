@@ -28,9 +28,7 @@ spec:
         - name: CACHE_TTL
           value: "900"
         - name: S3_PUBLIC
-          value: "https://cdn.hpkg.haiku-os.org/haiku/"
-        - name: S3_PREFIX
-          value: "haiku"
+          value: "https://haiku-repository.cdn.haiku-os.org/"
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
@@ -38,7 +36,7 @@ spec:
       volumes:
       - name: secrets
         secret:
-          secretName: s3-backblaze
+          secretName: s3-garage-haiku
           items:
           - key: s3_endpoint
             path: s3_endpoint
@@ -48,6 +46,8 @@ spec:
             path: s3_key
           - key: s3_secret
             path: s3_secret
+          - key: s3_region
+            path: s3_region
 ---
 apiVersion: v1
 kind: Service
@@ -219,7 +219,6 @@ spec:
           - key: s3_region
             path: s3_region
 ---
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -240,7 +239,7 @@ spec:
   stripPrefix:
     prefixes:
       - /haiku/
-      - /haikuports-test/
+      - /haikuports/
 ---
 # web frontends for package repos
 apiVersion: networking.k8s.io/v1
@@ -267,7 +266,7 @@ spec:
             name: hpkg-haiku
             port:
               number: 80
-      - path: /haikuports-test/
+      - path: /haikuports/
         pathType: Prefix
         backend:
           service:
