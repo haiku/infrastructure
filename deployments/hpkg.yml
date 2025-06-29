@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: ghcr.io/haiku/hpkgbouncer:0.4.4
+        image: ghcr.io/haiku/hpkgbouncer:0.4.5
         env:
         - name: ROCKET_LOG_LEVEL
           value: "normal"
@@ -184,7 +184,7 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: ghcr.io/haiku/hpkgbouncer:0.4.4
+        image: ghcr.io/haiku/hpkgbouncer:0.4.5
         env:
         - name: ROCKET_LOG_LEVEL
           value: "normal"
@@ -196,8 +196,8 @@ spec:
           value: "900"
         - name: S3_PUBLIC
           value: "https://haikuports-repository.cdn.haiku-os.org/"
-        - name: VERSION_ALIASES
-          value: "current:r1beta5,r1beta4,r1beta3"
+        - name: BRANCH_ALIASES
+          value: "master:r1beta5,r1beta4,r1beta3"
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
