@@ -31,27 +31,20 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-  - name: backblaze
-    tags: ["((worker_tag))"]
-    type: rclone
-    source:
-      config: |
-        [remote]
-        type = b2
-        hard_delete = true
-        account = ((b2account))
-        key = ((b2secret))
-  - name: wasabi-east
+  - name: garage
     tags: ["((worker_tag))"]
     type: rclone
     source:
       config: |
         [remote]
         type = s3
-        provider = Wasabi
+        provider = Other
+        env_auth = false
+        force_path_style = false
+        region = fin-hel-1
         access_key_id = ((s3key))
         secret_access_key = ((s3secret))
-        endpoint = s3.us-east-1.wasabisys.com
+        endpoint = s3.haiku-os.org
         acl = public-read
 # Jobs
 jobs:
@@ -250,16 +243,16 @@ jobs:
                 zip -9 -r ${ARTIFACT} catalogs/
                 rm -rf catalogs
                 sha256sum --tag ${ARTIFACT} > ${ARTIFACT}.sha256
-      - put: wasabi-east
+      - put: garage
         tags: ["((worker_tag))"]
         params:
           source: images.((arch))
           destination:
-          - dir: "remote:((bucket_image))/((arch))/"
+          - dir: "remote:((bucket_image_prefix))/((arch))/"
             args:
               - -c
               #- -vv
-      - put: wasabi-east
+      - put: garage
         tags: ["((worker_tag))"]
         params:
           source: catkeys.((arch))
@@ -268,42 +261,12 @@ jobs:
             args:
               - -c
               #- -vv
-      - put: backblaze
+      - put: garage
         tags: ["((worker_tag))"]
         params:
           source: repository.((arch))
           destination:
-          - dir: "remote:((bucket_repo))/haiku/((branch))/"
+          - dir: "remote:((bucket_repo))/((branch))/"
             args:
               - -c
               #- -vv
-      - task: purge-caches
-        tags: ["((worker_tag))"]
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source: { repository: ((container-registry))/general-worker }
-          inputs:
-            - name: repository.((arch))
-          run:
-            path: /bin/bash
-            args:
-              - -e
-              - -c
-              - |
-                PRI_ARCH="((arch))"
-                case "((arch))" in
-                    "x86_gcc2h" | "x86_64h")
-                        PRI_ARCH=$(echo "((arch))" | sed 's/h$//')
-                        ;;
-                esac
-                TARGET_REPO="repository.((arch))/$PRI_ARCH"
-                cd $TARGET_REPO;
-                date;
-                for i in $(find . -type f -print); do
-                    URI=https://cdn.hpkg.haiku-os.org/haiku/((branch))/$PRI_ARCH/$(echo "$i" | sed 's/^\.\///')
-                    date; echo -n "$URI ";
-                    curl -o /dev/null -s -w "%{http_code}\n" --url "https://api.bunny.net/purge?url=$URI" \
-                        --header "AccessKey: ((cdn-secret))";
-                done;

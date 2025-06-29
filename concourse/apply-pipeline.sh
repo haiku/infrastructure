@@ -35,25 +35,24 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-if [ $BRANCH == "r1beta4" ]; then
-	BUCKET_IMAGE="haiku-release-candidates"
-	BUCKET_REPO="haiku-central-repositories"
-	BRANCH_PROFILE="release"
-	ARCHES="x86_64 x86_gcc2h"
-	DAYS="Sunday"
-elif [ $BRANCH == "r1beta5" ]; then
-	BUCKET_IMAGE="haiku-release-candidates"
-	BUCKET_REPO="haiku-central-repositories"
-	BRANCH_PROFILE="release"
-	ARCHES="x86_64 x86_gcc2h"
-	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
-else
-	BUCKET_IMAGE="haiku-nightly-us"
-	BUCKET_REPO="haiku-central-repositories"
+# BUCKET_IMAGE_PREFIX is the s3 bucket followed by any prefix
+# BUCKET_REPO is the s3 bucket
+# non-master (release) builds go in to their respective "testing"
+# repository.  Once they're stable for release they get manually
+# moved into the release path.
+if [ $BRANCH == "master" ]; then
+	BUCKET_IMAGE_PREFIX="haiku-nightly"
+	BUCKET_REPO="haiku-repository"
 	BRANCH_PROFILE="nightly"
 	#ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
 	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 m68k"
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
+else
+	BUCKET_IMAGE_PREFIX="haiku-release/testing/$BRANCH"
+	BUCKET_REPO="haiku-repository"
+	BRANCH_PROFILE="release"
+	ARCHES="x86_64 x86_gcc2h"
+	DAYS="Sunday"
 fi
 
 if [ "$TEAM" == "continuous" ]; then
@@ -98,7 +97,7 @@ for ARCH in $ARCHES; do
 	elif [ "$TEAM" == "bootstrap" ]; then
 		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
 	else
-		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -v bucket_image=$BUCKET_IMAGE -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
+		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -v bucket_image_prefix=$BUCKET_IMAGE_PREFIX -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
 	$FLY_CLI -t haiku expose-pipeline -p $BRANCH-$ARCH
 done
