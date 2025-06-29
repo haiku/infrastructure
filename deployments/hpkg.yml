@@ -78,12 +78,9 @@ data:
       server {
         listen 80;
         server_name _;
-        location /haikuports/master/build-packages {
+        location /master/build-packages {
+          #return 302 https://haiku-buildpackages.cdn.haiku-os.org/master$request_uri;
           alias /usr/share/nginx/html/build-packages/master;
-          autoindex off;
-        }
-        location /haikuports {
-          alias /usr/share/nginx/html/repository;
           autoindex off;
         }
         location /healthz {
@@ -264,6 +261,13 @@ spec:
         backend:
           service:
             name: hpkg-haiku
+            port:
+              number: 80
+      - path: /haikuports/master/build-packages/
+        pathType: Prefix
+        backend:
+          service:
+            name: hpkg-haikuports
             port:
               number: 80
       - path: /haikuports/
