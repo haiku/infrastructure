@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: download
-        image: ghcr.io/haiku/download:20250107
+        image: ghcr.io/haiku/download:20250628
         env:
         - name: CONFIG_PATH
           value: "/secrets/config.toml"
