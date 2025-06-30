@@ -27,17 +27,20 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-  - name: wasabi-east
+  - name: garage
     tags: ["((worker_tag))"]
     type: rclone
     source:
       config: |
         [remote]
         type = s3
-        provider = Wasabi
+        provider = Other
+        env_auth = false
+        force_path_style = false
+        region = fin-hel-1
         access_key_id = ((s3key))
         secret_access_key = ((s3secret))
-        endpoint = s3.us-east-1.wasabisys.com
+        endpoint = s3.haiku-os.org
         acl = public-read
   - name: irc
     type: irccat-resource
@@ -114,7 +117,7 @@ jobs:
         tags: ["((worker_tag))"]
         config:
           <<: *task-build-image
-      - put: wasabi-east
+      - put: garage
         tags: ["((worker_tag))"]
         params:
           source: compile_commands.((arch))
