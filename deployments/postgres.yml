@@ -1,4 +1,4 @@
-### Haiku Redis
+### Haiku Postgres
 #
 # Private postgres database
 apiVersion: apps/v1
@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: docker.io/postgres:14.2-alpine
+        image: docker.io/postgres:14.18-alpine
         env:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdb
