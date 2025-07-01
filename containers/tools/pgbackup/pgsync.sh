@@ -6,46 +6,44 @@ if [[ $# -ne 2 ]]; then
 	exit 1
 fi
 
-if ! [ -x "$(command -v mc)" ]; then
-  echo 'Error: mc is not installed.' >&2
-  exit 1
+if ! [ -x "$(command -v rclone)" ]; then
+	echo 'Error: rclone is not installed.' >&2
+	exit 1
 fi
 
 if ! [ -x "$(command -v gpg)" ]; then
-  echo 'Error: gpg is not installed.' >&2
-  exit 1
+	echo 'Error: gpg is not installed.' >&2
+	exit 1
 fi
-
 
 ACTION="$1"
 PG_DBNAME="$2"
 
-S3_NAME="s3remote"
+RCLONE_CONFIG_PATH="$HOME/.config/rclone/rclone.conf"
+TWOSECRET_PATH="$HOME/.config/twosecret"
 
-#S3_HOST="http://s3.wasabisys.com"
-#S3_BUCKET=""
-#S3_KEY=""
-#S3_SECRET=""
-#TWOSECRET=""
+if [ ! -f $TWOSECRET_PATH ]; then
+	echo "Missing twosecret key at $TWOSECRET_PATH"
+	exit 1
+fi
 
-if [ -z "$S3_HOST" ]; then
-	echo "Please set S3_HOST!"
+if [ ! -f $RCLONE_CONFIG_PATH ]; then
+	echo "Missing rclone configuration at $RCLONE_CONFIG_PATH"
 	exit 1
 fi
-if [ -z "$S3_BUCKET" ]; then
-	echo "Please set S3_BUCKET!"
+
+if [ -z "$REMOTE_PREFIX" ] ;then
+	echo "REMOTE_PREFIX is not defined!  This is the bucket name for s3 or other prefix path"
 	exit 1
 fi
-if [ -z "$S3_KEY" ]; then
-	echo "Please set S3_KEY!"
-	exit 1
+
+if [ -z "$REMOTE_NAME" ] ;then
+	echo "REMOTE_NAME is not defined. Defaulting to 'backup' (make sure this matches config file)"
+	REMOTE_NAME="backup"
 fi
-if [ -z "$S3_SECRET" ]; then
-	echo "Please set S3_SECRET!"
-	exit 1
-fi
-if [ -z "$TWOSECRET" ]; then
-	echo "Please set TWOBUCKET!"
+
+if [[ ! -d "$BASE/$VOLUME" ]]; then
+	echo "Error: '$BASE/$VOLUME' isn't present on local container! (pvc not mounted?)"
 	exit 1
 fi
 
@@ -70,6 +68,13 @@ if [ -z "$PG_PASSWORD" ]; then
 	exit 1
 fi
 
+REMOTE="$REMOTE_NAME:$REMOTE_PREFIX/pg-$PG_DBNAME"
+rclone ls $REMOTE > /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: Unable to see within configured storage provider!"
+    exit 1
+fi
+
 # Write out our secrets
 echo "$PG_HOSTNAME:$PG_PORT:*:$PG_USERNAME:$PG_PASSWORD" > ~/.pgpass
 chmod 600 ~/.pgpass
@@ -77,8 +82,9 @@ chmod 600 ~/.pgpass
 case $ACTION in
 	backup)
 		SNAPSHOT_NAME=${PG_DBNAME}_$(date +"%Y-%m-%d").sql.xz
-		echo "Backup ${PG_DBNAME}..."
+		echo "Backup ${PG_DBNAME} to ${REMOTE}/$SNAPSHOT_NAME..."
 		cd /tmp
+		export XZ_DEFAULTS="-2"
 		pg_dump -C -h $PG_HOSTNAME -p $PG_PORT -d $PG_DBNAME -U $PG_USERNAME | xz > /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
@@ -86,42 +92,30 @@ case $ACTION in
 			exit 1
 		fi
 		rm -f ~/.pgpass
-		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
+		cat $TWOSECRET_PATH | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing encryption! (gpg)"
 			rm /tmp/$SNAPSHOT_NAME
 			exit 1
 		fi
 		rm /tmp/$SNAPSHOT_NAME
-		mc config host add $S3_NAME $S3_HOST $S3_KEY $S3_SECRET --api "s3v4"
+		rclone copy /tmp/$SNAPSHOT_NAME.gpg $REMOTE/
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted configuring s3! (mc)"
+			echo "Error: Problem encounted during upload! (rclone)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
-		mc cp /tmp/$SNAPSHOT_NAME.gpg $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/$SNAPSHOT_NAME.gpg
-		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted during upload! (mc)"
-			rm /tmp/$SNAPSHOT_NAME.gpg
-			exit 1
+		if [[ ! -z "$REMOTE_MAX_AGE" ]]; then
+			echo "Cleaning up old backups for database $PG_DBNAME over $REMOTE_MAX_AGE old..."
+			rclone delete --min-age "$REMOTE_MAX_AGE" $REMOTE/
 		fi
-		if [[ -z "$S3_MAX_AGE" ]]; then
-			echo "Cleaning up old backups for database $PG_DBNAME over $S3_MAX_AGE old..."
-			mc find $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ --older-than "$S3_MAX_AGE" --exec "mc rm {}"
-		fi
-		echo "Snapshot of ${PG_DBNAME} completed successfully! ($S3_BUCKET/pg-$PG_DBNAME/$SNAPSHOT_NAME.gpg)"
+		echo "Snapshot of ${PG_DBNAME} completed successfully! ($REMOTE_PREFIX/pg-$PG_DBNAME/$SNAPSHOT_NAME.gpg)"
 		;;
 
 	restore)
-		mc config host add $S3_NAME $S3_HOST $S3_KEY $S3_SECRET --api "s3v4"
-		if [[ $? -ne 0 ]]; then
-			rm -f ~/.pgpass
-			echo "Error: Problem encounted configuring s3! (mc)"
-			exit 1
-		fi
-		LATEST=$(mc ls --json -q $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/ | jq -r -c .key | sort | tail -1)
+		LATEST=$(rclone lsjson $REMOTE | jq '. |= sort_by(.ModTime) | last.Name')
 		echo "Found $LATEST to be the latest snapshot..."
-		mc cp $S3_NAME/$S3_BUCKET/pg-$PG_DBNAME/$LATEST /tmp/$LATEST
+		rclone copy $REMOTE/$LATEST /tmp/
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
 			echo "Error: Problem encounted getting snapshot from s3! (mc)"
