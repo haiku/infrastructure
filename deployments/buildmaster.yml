@@ -294,58 +294,51 @@ spec:
       template:
         spec:
           # volumes are attached to a single physical node (RWO), this ensures the backup
-          # job always starts on the same physical node where trac is running
+          # job always starts on the same physical node where buildmaster is running
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                          - buildmaster
-                  topologyKey: kubernetes.io/hostname
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - buildmaster
+                topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: ghcr.io/haiku/pvbackup:1.4
+              image: ghcr.io/haiku/pvbackup:3.0.2
               args: ["backup", "buildmaster-data"]
               env:
-                - name: S3_HOST
-                  value: "https://s3.eu-west-1.wasabisys.com"
-                - name: S3_BUCKET
-                  value: haiku-backups
-                - name: S3_MAX_AGE
-                  value: 15d
-                - name: S3_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: s3_key
-                - name: S3_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: s3_secret
-                - name: TWOSECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: twosecret
+              - name: REMOTE_PREFIX
+                value: haiku-backups
+              - name: REMOTE_MAX_AGE
+                value: 15d
               volumeMounts:
-                - name: buildmaster-data-x86-64
-                  mountPath: /pvs/buildmaster-data/x86_64
-                - name: buildmaster-data-x86-gcc2
-                  mountPath: /pvs/buildmaster-data/x86_gcc2
-                - name: buildmaster-data-riscv64
-                  mountPath: /pvs/buildmaster-data/riscv64
+              - name: rclone-config
+                mountPath: /root/.config
+              - name: buildmaster-data-x86-64
+                mountPath: /pvs/buildmaster-data/x86_64
+              - name: buildmaster-data-x86-gcc2
+                mountPath: /pvs/buildmaster-data/x86_gcc2
+              - name: buildmaster-data-riscv64
+                mountPath: /pvs/buildmaster-data/riscv64
           volumes:
-            - name: buildmaster-data-x86-64
-              persistentVolumeClaim:
-                claimName: buildmaster-data-x86-64-pvc
-            - name: buildmaster-data-x86-gcc2
-              persistentVolumeClaim:
-                claimName: buildmaster-data-x86-gcc2-pvc
-            - name: buildmaster-data-riscv64
-              persistentVolumeClaim:
-                claimName: buildmaster-data-riscv64-pvc
+          - name: buildmaster-data-x86-64
+            persistentVolumeClaim:
+              claimName: buildmaster-data-x86-64-pvc
+          - name: buildmaster-data-x86-gcc2
+            persistentVolumeClaim:
+              claimName: buildmaster-data-x86-gcc2-pvc
+          - name: buildmaster-data-riscv64
+            persistentVolumeClaim:
+              claimName: buildmaster-data-riscv64-pvc
+          - name: rclone-config
+            secret:
+              secretName: s3-backup
+              items:
+              - key: rclone.conf
+                path: rclone/rclone.conf
+              - key: twosecret
+                path: twosecret
           restartPolicy: Never

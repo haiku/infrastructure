@@ -181,6 +181,8 @@ spec:
                   value: haiku-backups
                 - name: S3_MAX_AGE
                   value: 15d
+                - name: S3_REGION
+                  value: eu-west-1
                 - name: S3_KEY
                   valueFrom:
                     secretKeyRef:
@@ -226,44 +228,37 @@ spec:
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                          - trac
-                  topologyKey: kubernetes.io/hostname
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - trac
+                topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: ghcr.io/haiku/pvbackup:1.3
+              image: ghcr.io/haiku/pvbackup:3.0.2
               args: ["backup", "trac-data"]
               env:
-                - name: S3_HOST
-                  value: "https://s3.eu-west-1.wasabisys.com"
-                - name: S3_BUCKET
-                  value: haiku-backups
-                - name: S3_MAX_AGE
-                  value: 15d
-                - name: S3_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: s3_key
-                - name: S3_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: s3_secret
-                - name: TWOSECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: s3-backup
-                      key: twosecret
+              - name: REMOTE_PREFIX
+                value: haiku-backups
+              - name: REMOTE_MAX_AGE
+                value: 15d
               volumeMounts:
-                - name: trac-data
-                  mountPath: /pvs/trac-data
+              - name: rclone-config
+                mountPath: /root/.config
+              - name: trac-data
+                mountPath: /pvs/trac-data
           volumes:
-            - name: trac-data
-              persistentVolumeClaim:
-                claimName: trac-data-pvc
+          - name: trac-data
+            persistentVolumeClaim:
+              claimName: trac-data-pvc
+          - name: rclone-config
+            secret:
+              secretName: s3-backup
+              items:
+              - key: rclone.conf
+                path: rclone/rclone.conf
+              - key: twosecret
+                path: twosecret
           restartPolicy: Never

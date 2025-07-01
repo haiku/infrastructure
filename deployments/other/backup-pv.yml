@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: APP-pvbackup
+spec:
+  schedule: "0 1 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where APP is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - APP
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: pvbackup
+              image: ghcr.io/haiku/pvbackup:3.0.2
+              args: ["backup", "APP-data"]
+              env:
+              - name: REMOTE_PREFIX
+                value: haiku-backups
+              - name: REMOTE_MAX_AGE
+                value: 15d
+              volumeMounts:
+              - name: rclone-config
+                mountPath: /root/.config
+              - name: APP-data
+                mountPath: /pvs/APP-data
+          volumes:
+          - name: APP-data
+            persistentVolumeClaim:
+              claimName: APP-data-pvc
+          - name: rclone-config
+            secret:
+              secretName: s3-backup
+              items:
+              - key: rclone.conf
+                path: rclone/rclone.conf
+              - key: twosecret
+                path: twosecret
+          restartPolicy: Never

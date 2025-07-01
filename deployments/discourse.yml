@@ -127,66 +127,6 @@ spec:
             port:
               name: www
 ---
-# Backup Persistent Volume
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: discourse-pvbackup
-spec:
-  schedule: "0 3 * * 3"
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          # volumes are attached to a single physical node (RWO), this ensures the backup
-          # job always starts on the same physical node where discourse is running
-          affinity:
-            podAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                    - discourse
-                topologyKey: kubernetes.io/hostname
-          containers:
-            - name: pvbackup
-              image: ghcr.io/haiku/pvbackup:1.3
-              args: ["backup", "discourse-data"]
-              env:
-              - name: S3_HOST
-                value: "https://s3.eu-west-1.wasabisys.com"
-              - name: S3_BUCKET
-                value: haiku-backups
-              - name: S3_MAX_AGE
-                value: 14d
-              - name: S3_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_key
-              - name: S3_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_secret
-              - name: TWOSECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: twosecret
-              volumeMounts:
-              - name: discourse-data
-                mountPath: /pvs/discourse-data
-          volumes:
-          - name: discourse-data
-            persistentVolumeClaim:
-              claimName: discourse-data-pvc
-          restartPolicy: Never
----
 # Backup postgresql
 apiVersion: batch/v1
 kind: CronJob
@@ -239,3 +179,55 @@ spec:
                   secretKeyRef:
                     name: postgres-admin
                     key: password
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discourse-pvbackup
+spec:
+  schedule: "0 0 * * 1,4"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          # volumes are attached to a single physical node (RWO), this ensures the backup
+          # job always starts on the same physical node where discourse is running
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - discourse
+                topologyKey: kubernetes.io/hostname
+          containers:
+            - name: pvbackup
+              image: ghcr.io/haiku/pvbackup:3.0.2
+              args: ["backup", "discourse-data"]
+              env:
+              - name: REMOTE_PREFIX
+                value: haiku-backups
+              - name: REMOTE_MAX_AGE
+                value: 15d
+              volumeMounts:
+              - name: rclone-config
+                mountPath: /root/.config
+              - name: discourse-data
+                mountPath: /pvs/discourse-data
+          volumes:
+          - name: discourse-data
+            persistentVolumeClaim:
+              claimName: discourse-data-pvc
+          - name: rclone-config
+            secret:
+              secretName: s3-backup
+              items:
+              - key: rclone.conf
+                path: rclone/rclone.conf
+              - key: twosecret
+                path: twosecret
+          restartPolicy: Never

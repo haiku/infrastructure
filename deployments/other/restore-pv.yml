@@ -23,35 +23,28 @@ spec:
       restartPolicy: Never
       containers:
       - name: pvbackup
-        image: ghcr.io/haiku/pvbackup:1.3
+        image: ghcr.io/haiku/pvbackup:3.0.2
         args: ["restore", "gerrit-data"]
         env:
-        - name: S3_HOST
-          value: "https://s3.eu-west-1.wasabisys.com"
-        - name: S3_BUCKET
+        - name: REMOTE_PREFIX
           value: haiku-backups
-        - name: S3_MAX_AGE
-          value: 60d
-        - name: S3_KEY
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: s3_key
-        - name: S3_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: s3_secret
-        - name: TWOSECRET
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: twosecret
+        - name: REMOTE_MAX_AGE
+          value: 15d
         volumeMounts:
+        - name: rclone-config
+          mountPath: /root/.config
         - name: gerrit-data
           mountPath: /pvs/gerrit-data
       volumes:
-      - name: gerrit-data
-        persistentVolumeClaim:
-          claimName: gerrit-data-pvc
-      restartPolicy: Never
+        - name: gerrit-data
+          persistentVolumeClaim:
+            claimName: gerrit-data-pvc
+        - name: rclone-config
+          secret:
+            secretName: s3-backup
+            items:
+            - key: rclone.conf
+              path: rclone/rclone.conf
+            - key: twosecret
+              path: twosecret
+          restartPolicy: Never

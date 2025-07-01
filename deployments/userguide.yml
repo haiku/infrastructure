@@ -189,35 +189,28 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: ghcr.io/haiku/pvbackup:1.3
+              image: ghcr.io/haiku/pvbackup:3.0.2
               args: ["backup", "userguide-data"]
               env:
-              - name: S3_HOST
-                value: "https://s3.eu-west-1.wasabisys.com"
-              - name: S3_BUCKET
+              - name: REMOTE_PREFIX
                 value: haiku-backups
-              - name: S3_MAX_AGE
+              - name: REMOTE_MAX_AGE
                 value: 15d
-              - name: S3_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_key
-              - name: S3_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: s3_secret
-              - name: TWOSECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: s3-backup
-                    key: twosecret
               volumeMounts:
+              - name: rclone-config
+                mountPath: /root/.config
               - name: userguide-data
                 mountPath: /pvs/userguide-data
           volumes:
           - name: userguide-data
             persistentVolumeClaim:
               claimName: userguide-data-pvc
+          - name: rclone-config
+            secret:
+              secretName: s3-backup
+              items:
+              - key: rclone.conf
+                path: rclone/rclone.conf
+              - key: twosecret
+                path: twosecret
           restartPolicy: Never
