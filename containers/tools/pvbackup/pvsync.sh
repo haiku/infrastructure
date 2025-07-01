@@ -48,7 +48,9 @@ if [[ ! -d "$BASE/$VOLUME" ]]; then
 	exit 1
 fi
 
-rclone ls $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME > /dev/null
+REMOTE="$REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME"
+
+rclone ls $REMOTE > /dev/null
 if [ $? -ne 0 ]; then
 	echo "Error: Unable to see within configured storage provider!"
 	exit 1
@@ -57,7 +59,7 @@ fi
 case $ACTION in
 	backup)
 		SNAPSHOT_NAME=${VOLUME}_$(date +"%Y-%m-%d").tar.xz
-		echo "Snapshot ${VOLUME}..."
+		echo "Snapshot ${VOLUME} to ${REMOTE}/$SNAPSHOT_NAME..."
 		cd $BASE/$VOLUME
 		# 2 to try and save some memory / cpu time. Bigger backups are ok.
 		export XZ_DEFAULTS="-2"
@@ -77,7 +79,7 @@ case $ACTION in
 			exit 1
 		fi
 		rm /tmp/$SNAPSHOT_NAME
-		rclone copy /tmp/$SNAPSHOT_NAME.gpg $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/
+		rclone copy /tmp/$SNAPSHOT_NAME.gpg $REMOTE/
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted during upload! (rclone)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
@@ -85,17 +87,15 @@ case $ACTION in
 		fi
 		if [[ ! -z "$REMOTE_MAX_AGE" ]]; then
 			echo "Cleaning up old backups for $VOLUME over $REMOTE_MAX_AGE old..."
-			rclone delete --min-age "$REMOTE_MAX_AGE" $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/
+			rclone delete --min-age "$REMOTE_MAX_AGE" $REMOTE/
 		fi
 		echo "Snapshot of ${VOLUME} completed successfully! ($REMOTE_PREFIX/pv-$VOLUME/$SNAPSHOT_NAME.gpg)"
 		;;
 
 	restore)
-		# We assume the latest is at the bottom of the rclone ls.
-		# It seems to be true in my testing so far... but this feels sketch
-		LATEST=$(rclone ls $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/ | tail -1 | awk '{print $2}')
+		LATEST=$(rclone lsjson $REMOTE | jq '. |= sort_by(.ModTime) | last.Name')
 		echo "Found $LATEST to be the latest snapshot..."
-		rclone copy $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/$LATEST /tmp/$LATEST
+		rclone copy $REMOTE/$LATEST /tmp/
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted getting snapshot from s3! (rclone)"
 			rm /tmp/$LATEST
