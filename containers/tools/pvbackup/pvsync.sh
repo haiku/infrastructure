@@ -97,7 +97,7 @@ case $ACTION in
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
-		if [[ -z "$S3_MAX_AGE" ]]; then
+		if [[ ! -z "$S3_MAX_AGE" ]]; then
 			echo "Cleaning up old backups for $VOLUME over $S3_MAX_AGE old..."
 			rclone delete --min-age "$S3_MAX_AGE" $S3_NAME:$S3_BUCKET/pv-$VOLUME/
 		fi
