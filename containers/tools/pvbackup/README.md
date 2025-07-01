@@ -20,4 +20,5 @@ I'm a simple container to backup/restore encrypted persistant volume data to an 
 #### Optional
 
 * REMOTE_NAME - name of remote specified in configuration file (defaults to "backup")
-* REMOTE_MAX_AGE - maximum backup age in bucket. ex: 30d,1y,etc
+* REMOTE_MAX_AGE - maximum backup age in bucket. example: 30d,1y,etc
+

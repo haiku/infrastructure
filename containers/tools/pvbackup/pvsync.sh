@@ -33,12 +33,12 @@ if [ ! -f $RCLONE_CONFIG_PATH ]; then
 	exit 1
 fi
 
-if [ ! -z "$REMOTE_PREFIX" ] ;then
+if [ -z "$REMOTE_PREFIX" ] ;then
 	echo "REMOTE_PREFIX is not defined!  This is the bucket name for s3 or other prefix path"
 	exit 1
 fi
 
-if [ ! -z "$REMOTE_NAME" ] ;then
+if [ -z "$REMOTE_NAME" ] ;then
 	echo "REMOTE_NAME is not defined. Defaulting to 'backup' (make sure this matches config file)"
 	REMOTE_NAME="backup"
 fi
