@@ -59,7 +59,7 @@ rclone config create $S3_NAME s3 \
 	provider=other env_auth=false access_key_id=$S3_KEY \
 	secret_access_key=$S3_SECRET region=$S3_REGION \
 	endpoint=$S3_HOST force_path_style=false \
-	acl=private bucket_acl=private --no-output --obscure
+	acl=private bucket_acl=private --obscure
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: Problem encounted configuring s3! (rclone)"
