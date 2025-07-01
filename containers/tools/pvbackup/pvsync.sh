@@ -16,42 +16,31 @@ if ! [ -x "$(command -v gpg)" ]; then
   exit 1
 fi
 
-
 BASE="/pvs"
 ACTION="$1"
 VOLUME="$2"
 
-S3_NAME="s3remote"
+RCLONE_CONFIG_PATH="$HOME/.config/rclone/rclone.conf"
+TWOSECRET_PATH="$HOME/.config/twosecret"
 
-#S3_HOST="http://s3.wasabisys.com"
-#S3_BUCKET=""
-#S3_KEY=""
-#S3_SECRET=""
-#TWOSECRET=""
+if [ ! -f $TWOSECRET_PATH ]; then
+	echo "Missing twosecret key at $TWOSECRET_PATH"
+	exit 1
+fi
 
-if [ -z "$S3_HOST" ]; then
-	echo "Please set S3_HOST!"
+if [ ! -f $RCLONE_CONFIG_PATH ]; then
+	echo "Missing rclone configuration at $RCLONE_CONFIG_PATH"
 	exit 1
 fi
-if [ -z "$S3_BUCKET" ]; then
-	echo "Please set S3_BUCKET!"
+
+if [ ! -z "$REMOTE_PREFIX" ] ;then
+	echo "REMOTE_PREFIX is not defined!  This is the bucket name for s3 or other prefix path"
 	exit 1
 fi
-if [ -z "$S3_KEY" ]; then
-	echo "Please set S3_KEY!"
-	exit 1
-fi
-if [ -z "$S3_SECRET" ]; then
-	echo "Please set S3_SECRET!"
-	exit 1
-fi
-if [ -z "$TWOSECRET" ]; then
-	echo "Please set TWOBUCKET!"
-	exit 1
-fi
-if [ -z "$S3_PROVIDER" ]; then
-	echo "Assuming S3 provider Other"
-	S3_PROVIDER="Other"
+
+if [ ! -z "$REMOTE_NAME" ] ;then
+	echo "REMOTE_NAME is not defined. Defaulting to 'backup' (make sure this matches config file)"
+	REMOTE_NAME="backup"
 fi
 
 if [[ ! -d "$BASE/$VOLUME" ]]; then
@@ -59,14 +48,9 @@ if [[ ! -d "$BASE/$VOLUME" ]]; then
 	exit 1
 fi
 
-rclone config create $S3_NAME s3 \
-	provider=$S3_PROVIDER env_auth=false access_key_id=$S3_KEY \
-	secret_access_key=$S3_SECRET region=$S3_REGION \
-	endpoint=$S3_HOST no_check_bucket=true \
-	acl=private > /dev/null
-
-if [[ $? -ne 0 ]]; then
-	echo "Error: Problem encounted configuring s3! (rclone)"
+rclone ls $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME > /dev/null
+if [ $? -ne 0 ]; then
+	echo "Error: Unable to see within configured storage provider!"
 	exit 1
 fi
 
@@ -91,25 +75,25 @@ case $ACTION in
 			exit 1
 		fi
 		rm /tmp/$SNAPSHOT_NAME
-		rclone copy /tmp/$SNAPSHOT_NAME.gpg $S3_NAME:$S3_BUCKET/pv-$VOLUME/
+		rclone copy /tmp/$SNAPSHOT_NAME.gpg $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted during upload! (rclone)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
-		if [[ ! -z "$S3_MAX_AGE" ]]; then
-			echo "Cleaning up old backups for $VOLUME over $S3_MAX_AGE old..."
-			rclone delete --min-age "$S3_MAX_AGE" $S3_NAME:$S3_BUCKET/pv-$VOLUME/
+		if [[ ! -z "$REMOTE_MAX_AGE" ]]; then
+			echo "Cleaning up old backups for $VOLUME over $REMOTE_MAX_AGE old..."
+			rclone delete --min-age "$REMOTE_MAX_AGE" $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/
 		fi
-		echo "Snapshot of ${VOLUME} completed successfully! ($S3_BUCKET/pv-$VOLUME/$SNAPSHOT_NAME.gpg)"
+		echo "Snapshot of ${VOLUME} completed successfully! ($REMOTE_PREFIX/pv-$VOLUME/$SNAPSHOT_NAME.gpg)"
 		;;
 
 	restore)
 		# We assume the latest is at the bottom of the rclone ls.
 		# It seems to be true in my testing so far... but this feels sketch
-		LATEST=$(rclone ls $S3_NAME:$S3_BUCKET/pv-$VOLUME/ | tail -1 | awk '{print $2}')
+		LATEST=$(rclone ls $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/ | tail -1 | awk '{print $2}')
 		echo "Found $LATEST to be the latest snapshot..."
-		rclone copy $S3_NAME:$S3_BUCKET/pv-$VOLUME/$LATEST /tmp/$LATEST
+		rclone copy $REMOTE_NAME:$REMOTE_PREFIX/pv-$VOLUME/$LATEST /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted getting snapshot from s3! (rclone)"
 			rm /tmp/$LATEST

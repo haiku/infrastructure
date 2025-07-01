@@ -4,27 +4,20 @@ I'm a simple container to backup/restore encrypted persistant volume data to an 
 
 ## Usage
 
-### Docker
-**Backup**
-```
-docker run -it -e S3_BUCKET="" -e S3_KEY="" -e S3_SECRET="" -e TWOSECRET="" -V volume:/pvs/volume docker.io/haiku/persistsync backup volume
-```
+### Volumes
 
-**Restore**
-```
-docker run -it -e S3_BUCKET="" -e S3_KEY="" -e S3_SECRET="" -e TWOSECRET="" -V volume:/pvs/volume docker.io/haiku/persistsync restore volume
-```
+#### Required
+
+* /root/.config/rclone/rclone.conf containing the rclone configuration
+* /root/.config/twosecret containing the encryption key for the backups
 
 ### Environment Flags
 
 #### Required
 
-* S3_ENDPOINT - s3 endpoint
-* S3_BUCKET - s3 bucket name
-* S3_KEY - s3 bucket access key
-* S3_SECRET - s3 bucket secret key
-* TWOSECRET - encryption password for backup
+* REMOTE_PREFIX - prefix path on remote. Likely bucket name for S3
 
 #### Optional
 
-* S3_MAX_AGE - maximum backup age in bucket. ex: 30d,1y,etc
+* REMOTE_NAME - name of remote specified in configuration file (defaults to "backup")
+* REMOTE_MAX_AGE - maximum backup age in bucket. ex: 30d,1y,etc
