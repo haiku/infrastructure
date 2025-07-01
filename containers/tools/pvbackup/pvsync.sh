@@ -6,8 +6,8 @@ if [[ $# -ne 2 ]]; then
 	exit 1
 fi
 
-if ! [ -x "$(command -v mc)" ]; then
-  echo 'Error: mc is not installed.' >&2
+if ! [ -x "$(command -v rclone)" ]; then
+  echo 'Error: rclone is not installed.' >&2
   exit 1
 fi
 
@@ -55,6 +55,17 @@ if [[ ! -d "$BASE/$VOLUME" ]]; then
 	exit 1
 fi
 
+rclone config create $S3_NAME s3 \
+	provider=other env_auth=false access_key_id=$S3_KEY \
+	secret_access_key=$S3_SECRET region=$S3_REGION \
+	endpoint=$S3_HOST force_path_style=false \
+	acl=private bucket_acl=private --no-output --obscure
+
+if [[ $? -ne 0 ]]; then
+	echo "Error: Problem encounted configuring s3! (rclone)"
+	exit 1
+fi
+
 case $ACTION in
 	backup)
 		SNAPSHOT_NAME=${VOLUME}_$(date +"%Y-%m-%d").tar.xz
@@ -76,38 +87,27 @@ case $ACTION in
 			exit 1
 		fi
 		rm /tmp/$SNAPSHOT_NAME
-		mc config host add $S3_NAME $S3_HOST $S3_KEY $S3_SECRET --api "s3v4"
+		rclone copy /tmp/$SNAPSHOT_NAME.gpg $S3_NAME:$S3_BUCKET/pv-$VOLUME/$SNAPSHOT_NAME.gpg
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted configuring s3! (mc)"
-			rm /tmp/$SNAPSHOT_NAME.gpg
-			exit 1
-		fi
-		mc cp /tmp/$SNAPSHOT_NAME.gpg $S3_NAME/$S3_BUCKET/pv-$VOLUME/$SNAPSHOT_NAME.gpg
-		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted during upload! (mc)"
+			echo "Error: Problem encounted during upload! (rclone)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
 			exit 1
 		fi
 		if [[ -z "$S3_MAX_AGE" ]]; then
 			echo "Cleaning up old backups for $VOLUME over $S3_MAX_AGE old..."
-			mc find $S3_NAME/$S3_BUCKET/pv-$VOLUME/ --older-than "$S3_MAX_AGE" --exec "mc rm {}"
+			rclone delete --min-age "$S3_MAX_AGE" $S3_NAME:$S3_BUCKET/pv-$VOLUME/
 		fi
 		echo "Snapshot of ${VOLUME} completed successfully! ($S3_BUCKET/pv-$VOLUME/$SNAPSHOT_NAME.gpg)"
 		;;
 
 	restore)
-		mc config host add $S3_NAME $S3_HOST $S3_KEY $S3_SECRET --api "s3v4"
-		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted configuring s3! (mc)"
-			exit 1
-		fi
-		# We assume the latest is at the bottom of the mc ls.
+		# We assume the latest is at the bottom of the rclone ls.
 		# It seems to be true in my testing so far... but this feels sketch
-		LATEST=$(mc ls -q $S3_NAME/$S3_BUCKET/pv-$VOLUME/ | tail -1 | awk '{ print $5 }')
+		LATEST=$(rclone ls $S3_NAME:$S3_BUCKET/pv-$VOLUME/ | tail -1 | awk '{print $2}')
 		echo "Found $LATEST to be the latest snapshot..."
-		mc cp $S3_NAME/$S3_BUCKET/pv-$VOLUME/$LATEST /tmp/$LATEST
+		rclone copy $S3_NAME:$S3_BUCKET/pv-$VOLUME/$LATEST /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted getting snapshot from s3! (mc)"
+			echo "Error: Problem encounted getting snapshot from s3! (rclone)"
 			rm /tmp/$LATEST
 			exit 1
 		fi
