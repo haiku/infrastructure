@@ -63,7 +63,7 @@ case $ACTION in
 		# We omit some things we universally don't want to backup
 		tar -cvJf /tmp/$SNAPSHOT_NAME \
 			--exclude 'tmp/*' --exclude 'backups/*' --exclude 'logs/*' \
-			--exclude 'log/*' *
+			--exclude 'log/*' --exclude 'output/*' *
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing snapshot! (tar)"
 			exit 1
