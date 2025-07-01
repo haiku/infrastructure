@@ -68,7 +68,7 @@ case $ACTION in
 			exit 1
 		fi
 		cd /tmp
-		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
+		cat $TWOSECRET_PATH | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted performing encryption! (gpg)"
 			rm /tmp/$SNAPSHOT_NAME
@@ -99,7 +99,7 @@ case $ACTION in
 			rm /tmp/$LATEST
 			exit 1
 		fi
-		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 -o /tmp/$VOLUME-restore.tar.xz -d /tmp/$LATEST
+		cat $TWOSECRET_PATH | gpg --batch --yes --passphrase-fd 0 -o /tmp/$VOLUME-restore.tar.xz -d /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted decrypting snapshot! (gpg)"
 			rm /tmp/$LATEST
