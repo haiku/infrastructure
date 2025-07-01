@@ -91,7 +91,7 @@ case $ACTION in
 			exit 1
 		fi
 		rm /tmp/$SNAPSHOT_NAME
-		rclone copy /tmp/$SNAPSHOT_NAME.gpg $S3_NAME:$S3_BUCKET/pv-$VOLUME/$SNAPSHOT_NAME.gpg
+		rclone copy /tmp/$SNAPSHOT_NAME.gpg $S3_NAME:$S3_BUCKET/pv-$VOLUME/
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Problem encounted during upload! (rclone)"
 			rm /tmp/$SNAPSHOT_NAME.gpg
