@@ -395,7 +395,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
           containers:
             - name: pvbackup
-              image: ghcr.io/haiku/pvbackup:3.0.2
+              image: ghcr.io/haiku/pvbackup:3.0.4
               args: ["backup", "gerrit-data"]
               env:
               - name: REMOTE_PREFIX

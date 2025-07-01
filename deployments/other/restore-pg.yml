@@ -21,30 +21,11 @@ spec:
       restartPolicy: Never
       containers:
       - name: pgbackup
-        image: ghcr.io/haiku/pgbackup:1.1
+        image: ghcr.io/haiku/pgbackup:3.0.4
         args: ["restore", "trac"]
         env:
-        - name: S3_HOST
-          value: "https://s3.eu-west-1.wasabisys.com"
-        - name: S3_BUCKET
+        - name: REMOTE_PREFIX
           value: haiku-backups
-        - name: S3_MAX_AGE
-          value: 60d
-        - name: S3_KEY
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: s3_key
-        - name: S3_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: s3_secret
-        - name: TWOSECRET
-          valueFrom:
-            secretKeyRef:
-              name: s3-backup
-              key: twosecret
         - name: PG_HOSTNAME
           value: postgres
         - name: PG_USERNAME
@@ -57,3 +38,15 @@ spec:
             secretKeyRef:
               name: postgres-admin
               key: password
+        volumeMounts:
+        - name: rclone-config
+          mountPath: /root/.config
+      volumes:
+      - name: rclone-config
+        secret:
+          secretName: s3-backup
+          items:
+          - key: rclone.conf
+            path: rclone/rclone.conf
+          - key: twosecret
+            path: twosecret
