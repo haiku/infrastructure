@@ -49,6 +49,10 @@ if [ -z "$TWOSECRET" ]; then
 	echo "Please set TWOBUCKET!"
 	exit 1
 fi
+if [ -z "$S3_PROVIDER" ]; then
+	echo "Assuming S3 provider Other"
+	S3_PROVIDER="Other"
+fi
 
 if [[ ! -d "$BASE/$VOLUME" ]]; then
 	echo "Error: '$BASE/$VOLUME' isn't present on local container! (pvc not mounted?)"
@@ -56,10 +60,10 @@ if [[ ! -d "$BASE/$VOLUME" ]]; then
 fi
 
 rclone config create $S3_NAME s3 \
-	provider=Other env_auth=false access_key_id=$S3_KEY \
+	provider=$S3_PROVIDER env_auth=false access_key_id=$S3_KEY \
 	secret_access_key=$S3_SECRET region=$S3_REGION \
-	endpoint=$S3_HOST force_path_style=false \
-	acl=private --obscure
+	endpoint=$S3_HOST v2_auth=true \
+	acl=private > /dev/null
 
 if [[ $? -ne 0 ]]; then
 	echo "Error: Problem encounted configuring s3! (rclone)"
