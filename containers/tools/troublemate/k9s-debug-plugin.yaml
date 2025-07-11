@@ -1,0 +1,16 @@
+plugins:
+  #--- Create debug container for selected pod in current namespace
+  # Install: Place me in $HOME/.config/k9s/plugins
+  debug:
+    shortCut: Shift-D
+    description: Add debug container
+    dangerous: true
+    scopes:
+      - containers
+    command: bash
+    background: false
+    confirm: true
+    args:
+      - -c
+      - "kubectl --kubeconfig=$KUBECONFIG debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=ghcr.io/haiku/troublemate:20250711 --share-processes -- bash"
+
