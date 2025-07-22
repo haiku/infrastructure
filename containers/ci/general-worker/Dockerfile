@@ -19,6 +19,7 @@ RUN apt update && apt install -y --no-install-recommends \
   buildah \
   bzip2 \
   ca-certificates \
+  coreutils \
   cmake \
   curl \
   device-tree-compiler \
@@ -27,6 +28,7 @@ RUN apt update && apt install -y --no-install-recommends \
   flex \
   g++ \
   gawk \
+  gcc \
   genisoimage \
   git \
   jq \
@@ -42,6 +44,7 @@ RUN apt update && apt install -y --no-install-recommends \
   python3 \
   sbsigntool \
   skopeo \
+  tar \
   texinfo \
   u-boot-tools \
   util-linux \
