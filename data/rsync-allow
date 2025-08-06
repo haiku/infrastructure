@@ -2,18 +2,21 @@
 # This defines hosts which can rsync into our repository
 # mirrors.
 #
-# Mnually pull and rebuild the config with rsyncd-rebuild
+# Manually pull and rebuild the config with rsyncd-rebuild
 # on our s3 server
 #
+## Haiku, Inc.
 # cdn.haiku.nz (jessicah)
 101.100.139.54
+# Backup mirroring (kallisti5)
+2603:808e:a40:110::1/64
+#
+## Mirror providers
 # mirror.fsmg.org.nz
 163.7.134.123
 163.7.134.121
 2404:138:134:120::2
 2404:138:134:122::2
-# Backup mirroring (kallisti5)
-70.112.0.0/12
 # rit.edu
 129.21.171.72
 129.21.171.98
