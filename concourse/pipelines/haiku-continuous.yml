@@ -62,6 +62,7 @@ task-build-image: &task-build-image
   run:
     path: /bin/bash
     args:
+      - -e
       - -c
       - |
         cd generated.((arch))
