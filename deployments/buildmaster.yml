@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: ghcr.io/haikuports/haikuporter/frontend:1.3.3
+        image: ghcr.io/haikuports/haikuporter/frontend:1.3.3-5-gac55
         volumeMounts:
         - name: buildmaster-data-x86-64
           mountPath: /var/instances/master/x86_64
