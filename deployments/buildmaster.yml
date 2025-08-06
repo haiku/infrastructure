@@ -113,9 +113,6 @@ spec:
         - name: buildmaster-data-riscv64
           persistentVolumeClaim:
             claimName: buildmaster-data-riscv64-pvc
-        - name: buildmaster-old-packages
-          persistentVolumeClaim:
-            claimName: buildmaster-packages-pvc
         - name: storage-secrets-master
           projected:
             sources:
