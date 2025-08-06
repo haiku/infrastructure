@@ -171,19 +171,6 @@ spec:
     requests:
       storage: 10Gi
 ---
-# all of the packages for Haikuports
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: buildmaster-package-buffer-pvc
-spec:
-  storageClassName: do-block-storage-retain
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
 apiVersion: v1
 kind: Service
 metadata:
