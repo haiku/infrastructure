@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ALLOW_URI="https://raw.githubusercontent.com/haiku/infrastructure/refs/heads/main/data/rsync-allow"
+
+ALLOW=""
+for i in $(curl -s -o- $ALLOW_URI | sed -e '/^#/d'); do
+        ALLOW="${ALLOW} $i"
+done
+
+echo "# AUTOMATICALLY GENERATED. DO NOT UPDATE. See rsyncd-template.conf and rsyncd-rebuild" > /etc/rsyncd.conf
+cat /etc/rsyncd-template.conf >> /etc/rsyncd.conf
+sed -i "s~\%\%HOSTS_ALLOW\%\%~$ALLOW~g" /etc/rsyncd.conf
+
+echo "rsyncd.conf has been rebuilt"
+
+pkill -HUP rsync
+echo "rsyncd has been restarted"
