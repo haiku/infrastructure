@@ -1,0 +1,176 @@
+# A simple Traefik v3.5 ingress controller
+# CRD's are for the birds
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+---
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      containers:
+      - image: docker.io/traefik:3.5
+        name: traefik-ingress-lb
+        resources:
+          limits:
+            cpu: "2.0"
+            memory: "768Mi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 80
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 80
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        ports:
+        - name: ssh
+          containerPort: 22
+        - name: smtp
+          containerPort: 25
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: rsync
+          containerPort: 12000
+        - name: sshatc
+          containerPort: 8022
+        - name: sftp
+          containerPort: 1099
+        - name: gemini
+          containerPort: 1965
+        - name: private
+          containerPort: 8080
+        args:
+        - --accesslog=true
+        - --accesslog.filepath=/var/log/access.log
+        - --accesslog.fields.headers.names.User-Agent=keep
+        - --log.level=DEBUG
+        - --providers.kubernetescrd=true
+        - --providers.kubernetesingress=true
+        - --providers.kubernetesingress.ingressclass=default
+        - --experimental.plugins.scanblock.modulename=github.com/safing/scanblock
+        - --experimental.plugins.scanblock.version=v1.0.0
+        - --experimental.plugins.denyip.modulename=github.com/kvncrw/denyip
+        - --experimental.plugins.denyip.version=v1.1.0
+        - --entrypoints.web.address=:80
+        - --entrypoints.web.http.redirections.entryPoint.to=webs
+        - --entrypoints.web.http.redirections.entryPoint.permanent=false
+        - --entrypoints.web.http.redirections.entryPoint.scheme=https
+        - --entrypoints.web.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.webs.address=:443
+        - --entrypoints.webs.http.tls
+        - --entrypoints.webs.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.rsync.address=:12000
+        - --entrypoints.rsync.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.sftp.address=:1099
+        - --entrypoints.sftp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.smtp.address=:25
+        - --entrypoints.smtp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.ssh.address=:22
+        - --entrypoints.ssh.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.sshatc.address=:8022
+        - --entrypoints.sshatc.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --entrypoints.gemini.address=:1965
+        - --entrypoints.gemini.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
+        - --ping.entryPoint=web
+        - --api
+        - --api.dashboard=true
+        - --api.insecure=true
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: traefik-pdb
+  namespace: kube-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-ingress-service
+  namespace: kube-system
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+    - protocol: TCP
+      port: 22
+      name: ssh
+    - protocol: TCP
+      port: 25
+      name: smtp
+    - protocol: TCP
+      port: 80
+      name: http
+    - protocol: TCP
+      port: 443
+      name: https
+    - protocol: TCP
+      port: 12000
+      name: rsync
+    - protocol: TCP
+      port: 8022
+      name: sshatc
+    - protocol: TCP
+      port: 1099
+      name: sftp
+    - protocol: TCP
+      port: 1965
+      name: gemini
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: default
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: traefik.io/ingress-controller
+#---
+#apiVersion: cert-manager.io/v1
+#kind: ClusterIssuer
+#metadata:
+#  name: selfsigned
+#spec:
+#  selfSigned: {}
