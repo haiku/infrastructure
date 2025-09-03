@@ -63,8 +63,6 @@ spec:
           containerPort: 80
         - name: https
           containerPort: 443
-        - name: rsync
-          containerPort: 12000
         - name: sshatc
           containerPort: 8022
         - name: sftp
@@ -93,8 +91,6 @@ spec:
         - --entrypoints.webs.address=:443
         - --entrypoints.webs.http.tls
         - --entrypoints.webs.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
-        - --entrypoints.rsync.address=:12000
-        - --entrypoints.rsync.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.sftp.address=:1099
         - --entrypoints.sftp.proxyProtocol.trustedIPs=127.0.0.1/32,10.133.0.0/16
         - --entrypoints.smtp.address=:25
@@ -146,9 +142,6 @@ spec:
     - protocol: TCP
       port: 443
       name: https
-    - protocol: TCP
-      port: 12000
-      name: rsync
     - protocol: TCP
       port: 8022
       name: sshatc
