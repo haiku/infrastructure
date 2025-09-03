@@ -93,7 +93,6 @@ spec:
     - name: loadingdock
       port: 22
       weight: 10
-      terminationDelay: 900000
       # breaks sshd, didn't see a config option either
       #proxyProtocol:
       #  version: 1

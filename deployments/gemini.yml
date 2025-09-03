@@ -70,7 +70,6 @@ spec:
     - name: gemini
       port: 1965
       weight: 10
-      terminationDelay: 30
 #      proxyProtocol:
 #        version: 1
     middlewares:

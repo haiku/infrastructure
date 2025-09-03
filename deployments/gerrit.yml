@@ -314,7 +314,6 @@ spec:
     - name: git-ssh
       port: 22
       weight: 10
-      terminationDelay: 900000
 #     unsupported by Gerrit
 #     proxyProtocol:
 #       version: 1

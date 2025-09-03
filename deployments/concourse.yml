@@ -181,6 +181,5 @@ spec:
     - name: concourse-atc
       port: 8022
       weight: 10
-      terminationDelay: 900000
     middlewares:
     - name: concourse-atcmiddle
