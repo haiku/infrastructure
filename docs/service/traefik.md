@@ -37,3 +37,7 @@ This instructs Traefik that:
 
 We have some static paths configured in our [traefik configuration](https://github.com/haiku/infrastructure/blob/master/data/traefik/traefik.toml) file which redirects some core things like haiku-os.org to www.haiku-os.org
 
+## Quick Commands
+
+* Live logs from all ingress controllers
+  * ```kubectl -n kube-system logs -l name=traefik-ingress-lb --follow```
