@@ -42,7 +42,7 @@ spec:
             secretKeyRef:
               name: haikudepotserver-pg
               key: password
-        - name: HDS_ALERTS_REPOSITORY_ABSENT-UPDATES_TO
+        - name: HDS_ALERTS_REPOSITORY_ABSENT_UPDATES_TO
           valueFrom:
             secretKeyRef:
               name: haikudepotserver-notify
