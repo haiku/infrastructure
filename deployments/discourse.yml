@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: ghcr.io/haiku/discourse:3.4.4
+        image: ghcr.io/haiku/discourse:3.4.7
         resources:
           limits:
             cpu: "2.0"

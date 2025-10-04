@@ -1,4 +1,4 @@
-VERSION = 3.4.4
+VERSION = 3.4.7
 REGISTRY = ghcr.io/haiku
 
 default:
