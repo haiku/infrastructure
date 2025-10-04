@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=3.4.4
+ARG VERSION=3.5.1
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
@@ -18,7 +18,7 @@ RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main"
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # Add the Node software repositories
-# See https://github.com/discourse/discourse_docker/blob/225c3d03896c0573363183118ce58622f039083b/image/base/slim.Dockerfile 32-35
+# See https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L85-L86
 RUN wget --quiet -O - https://deb.nodesource.com/setup_22.x | bash -
 
 RUN apt-get update \
@@ -42,10 +42,16 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal \
 RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
 
 # Install Discourse
-# See: https://github.com/discourse/discourse_docker/blob/225c3d03896c0573363183118ce58622f039083b/image/base/release.Dockerfile
-ADD https://github.com/discourse/discourse/archive/v$DISCOURSE_VERSION.tar.gz /release.tar.gz
-RUN mkdir -p /apps && cd /apps && tar xf /release.tar.gz && rm /release.tar.gz && mv /apps/discourse-$DISCOURSE_VERSION /apps/discourse
+# Starting with Discourse 3.5, a lot of plugins are bundled, including the discourse-ai plugin. This plugin requires the vector
+# plugin on PostgreSQL, which we do not have in our standard deployment, so remove that plugin to disable it.
+# See: https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L157-L159
+RUN mkdir -p /apps \
+	&& git clone --branch v$VERSION --filter=tree:0 https://github.com/discourse/discourse.git /apps/discourse \
+	&& rm -rf /apps/discourse/plugins/discourse-ai \
+	&& gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' /apps/discourse/Gemfile.lock)
+
 RUN npm install -g ember-cli terser uglify-js pnpm@9
+# See: https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L164-L170
 RUN cd /apps/discourse \
 	&& bundle config --local deployment true \
 	&& bundle config --local path ./vendor/bundle \
