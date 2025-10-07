@@ -24,8 +24,8 @@ spec:
         env:
         - name: SPRING_MAIL_HOST
           value: "smtp"
-        - name: HDS_STORAGE_TYPE
-          value: "pg"
+        - name: HDS_JOBSERVICE_TYPE
+          value: "db"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
           value: "haikuinc.hds"
         - name: HDS_GRAPHICS_SERVER_BASE_URI
