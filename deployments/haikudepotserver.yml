@@ -22,10 +22,14 @@ spec:
       - name: haikudepotserver
         image: ghcr.io/haiku/haikudepotserver:1.0.177
         env:
+        - name: HDS_BASE_URL
+          value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
           value: "smtp"
         - name: HDS_JOBSERVICE_TYPE
           value: "db"
+        - name: HDS_IS_PRODUCTION
+          value: "true"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
           value: "haikuinc.hds"
         - name: HDS_GRAPHICS_SERVER_BASE_URI
@@ -47,6 +51,11 @@ spec:
             secretKeyRef:
               name: haikudepotserver-notify
               key: emails
+        - name: HDS_AUTHENTICATION_JWS_SHARED_KEY
+          valueFrom:
+            secretKeyRef:
+              name: haikudepotserver-jws
+              key: shared-key
         resources:
           limits:
             cpu: "1.0"
