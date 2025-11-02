@@ -16,6 +16,21 @@ if ! [ -x "$(command -v gpg)" ]; then
 	exit 1
 fi
 
+# This function will expect the `PG_EXCLUDE_TABLE_DATA_TABLES` argument to carry a
+# comma-separated list of tables. These are then split up into arguments for use
+# with `pg_dump`.
+
+function pg_exclude_table_data_args()
+{
+  local table_patterns
+
+  IFS=',' read -r -a table_patterns <<< "${PG_EXCLUDE_TABLE_DATA_TABLES}"
+
+  for table in "${table_patterns[@]}"; do
+      echo -n " --exclude-table-data ${table}"
+  done
+}
+
 ACTION="$1"
 PG_DBNAME="$2"
 
@@ -49,7 +64,7 @@ fi
 
 # Database config
 if [ -z "$PG_HOSTNAME" ]; then
-	echo "Please set TWOBUCKET!"
+	echo "Please set PG_HOSTNAME!"
 	exit 1
 fi
 if [ -z "$PG_PORT" ]; then
@@ -85,16 +100,16 @@ case $ACTION in
 		echo "Backup ${PG_DBNAME} to ${REMOTE}/$SNAPSHOT_NAME..."
 		cd /tmp
 		export XZ_DEFAULTS="-2"
-		pg_dump -C -h $PG_HOSTNAME -p $PG_PORT -d $PG_DBNAME -U $PG_USERNAME | xz > /tmp/$SNAPSHOT_NAME
+		pg_dump -C -h "${PG_HOSTNAME}" -p "${PG_PORT}" -d "${PG_DBNAME}" -U "${PG_USERNAME}" $(pg_exclude_table_data_args) | xz > "/tmp/${SNAPSHOT_NAME}"
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
-			echo "Error: Problem encounted performing snapshot!"
+			echo "Error: Problem encountered performing snapshot!"
 			exit 1
 		fi
 		rm -f ~/.pgpass
 		cat $TWOSECRET_PATH | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo TWOFISH /tmp/$SNAPSHOT_NAME
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted performing encryption! (gpg)"
+			echo "Error: Problem encountered performing encryption! (gpg)"
 			rm /tmp/$SNAPSHOT_NAME
 			exit 1
 		fi
@@ -118,13 +133,13 @@ case $ACTION in
 		rclone copy $REMOTE/$LATEST /tmp/
 		if [[ $? -ne 0 ]]; then
 			rm -f ~/.pgpass
-			echo "Error: Problem encounted getting snapshot from s3! (mc)"
+			echo "Error: Problem encountered getting snapshot from s3! (mc)"
 			rm /tmp/$LATEST
 			exit 1
 		fi
 		echo $TWOSECRET | gpg --batch --yes --passphrase-fd 0 -o /tmp/$PG_DBNAME-restore.sql.xz -d /tmp/$LATEST
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted decrypting snapshot! (gpg)"
+			echo "Error: Problem encountered decrypting snapshot! (gpg)"
 			rm -f ~/.pgpass
 			rm /tmp/$LATEST
 			exit 1
@@ -132,7 +147,7 @@ case $ACTION in
 		rm /tmp/$LATEST
 		xz -cd /tmp/$PG_DBNAME-restore.sql.xz | psql -h $PG_HOSTNAME -U $PG_USERNAME
 		if [[ $? -ne 0 ]]; then
-			echo "Error: Problem encounted extracting snapshot! (sql)"
+			echo "Error: Problem encountered extracting snapshot! (sql)"
 			rm -f ~/.pgpass
 			rm /tmp/$PG_DBNAME-restore.sql.xz
 			exit 1

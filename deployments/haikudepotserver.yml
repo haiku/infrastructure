@@ -210,6 +210,10 @@ spec:
                   secretKeyRef:
                     name: postgres-admin
                     key: password
+              # Some tables' data is transient and so in a recovery situation does not need to be
+              # recovered. To save on backup overhead these tables are skipped.
+              - name: PG_EXCLUDE_TABLE_DATA_TABLES
+                value: "job.job*data,job.job_state,job.job_specification,job.job,datastore.*"
               volumeMounts:
               - name: rclone-config
                 mountPath: /root/.config
