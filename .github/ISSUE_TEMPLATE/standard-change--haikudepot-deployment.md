@@ -19,7 +19,7 @@ _Note: Please mark changes from the default steps below in *bold*_
 
 1. Verify that the images are available in the package repositories;
    - [haikudepotserver](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver).
-   - [haikudepotserver](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver-server-graphics).
+   - [haikudepotserver-server-graphics](https://github.com/haiku/haikudepotserver/pkgs/container/haikudepotserver-server-graphics).
 2. Scale down `haikudepotserver` Deployment and start a job to back up the database:
     ```
     $ kubectl scale deploy haikudepotserver --replicas=0
