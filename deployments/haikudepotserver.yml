@@ -191,7 +191,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: pgbackup
-              image: ghcr.io/haiku/pgbackup:3.0.4
+              image: ghcr.io/haiku/pgbackup:3.1.0
               args: ["backup", "haikudepotserver"]
               env:
               - name: REMOTE_PREFIX
