@@ -1,4 +1,4 @@
-VERSION = 3.11.4-1
+VERSION = 3.11.7-1
 REGISTRY = ghcr.io/haiku
 default:
 	podman build --no-cache --tag ${REGISTRY}/gerrit:${VERSION} .
