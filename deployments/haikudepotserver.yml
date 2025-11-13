@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.180
+        image: ghcr.io/haiku/haikudepotserver:1.0.181
         env:
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.180
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.181
           env:
             - name: HDS_GFX_QUANTIZE
               value: "false"
