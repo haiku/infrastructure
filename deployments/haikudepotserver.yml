@@ -6,7 +6,7 @@ metadata:
   labels:
     app: haikudepotserver
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: haikudepotserver
@@ -26,8 +26,6 @@ spec:
           value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
           value: "smtp"
-        - name: HDS_JOBSERVICE_TYPE
-          value: "db"
         - name: HDS_IS_PRODUCTION
           value: "true"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
