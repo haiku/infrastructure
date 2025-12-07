@@ -20,14 +20,12 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.181
+        image: ghcr.io/haiku/haikudepotserver:1.0.182
         env:
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
           value: "smtp"
-        - name: HDS_JOBSERVICE_TYPE
-          value: "db"
         - name: HDS_IS_PRODUCTION
           value: "true"
         - name: HDS_AUTHENTICATION_JWS_ISSUER
@@ -96,29 +94,26 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.181
-          env:
-            - name: HDS_GFX_QUANTIZE
-              value: "false"
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.182
           resources:
             limits:
               cpu: "1.0"
-              memory: "320Mi"
+              memory: "128Mi"
             requests:
               cpu: "0.50"
-              memory: "320Mi"
+              memory: "128Mi"
           startupProbe:
             httpGet:
-              path: /actuator/health
-              port: 8086
-            initialDelaySeconds: 30
+              path: /health/readiness
+              port: 8085
+            initialDelaySeconds: 3
             periodSeconds: 10
             failureThreshold: 60
           livenessProbe:
             httpGet:
-              path: /actuator/health
-              port: 8086
-            initialDelaySeconds: 10
+              path: /health/liveness
+              port: 8085
+            initialDelaySeconds: 4
             periodSeconds: 30
             failureThreshold: 2
 ---
