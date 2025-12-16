@@ -1,4 +1,4 @@
-FROM ghcr.io/haiku/general-worker:20241228 AS build
+FROM ghcr.io/haiku/general-worker:20251216 AS build
 
 LABEL org.opencontainers.image.source="https://github.com/haiku/infrastructure"
 LABEL org.opencontainers.image.url="https://github.com/haiku/infrastructure/tree/master/containers/ci/toolchain-worker"
@@ -28,19 +28,20 @@ RUN mkdir /tmp/src && \
 
 # Build each of our toolchains (get some coffee)
 WORKDIR /toolchains
-RUN for i in ${ARCHITECTURES}; do \
-	  THREADS=$(nproc); \
-	  if [ $THREADS -gt 8 ]; THREADS=8; fi; \
+RUN THREADS=$(nproc); \
+	if [ $THREADS -gt 8 ]; then THREADS=8; fi; \
+	for i in ${ARCHITECTURES}; do \
+	  echo "=== Building $i..." ; \
 	  SCRIPT="/tmp/src/haiku/build/scripts/build_cross_tools"; \
 	  MACHINE=$(/tmp/src/haiku/build/scripts/find_triplet $i); \
-	  if [ "$i" != "x86_gcc2" ]; then SCRIPT="${SCRIPT}_gcc4"; fi \
+	  if [ "$i" != "x86_gcc2" ]; then SCRIPT="${SCRIPT}_gcc4"; fi; \
 	  $SCRIPT $MACHINE /tmp/src/haiku /tmp/src/buildtools /toolchains/cross-tools-$i -j$THREADS ; \
 	  find /toolchains/cross-tools-$i -type f -and -executable -and -regex ".*\/bin\/.*" -exec strip {} \; ; \
 	done; \
 	rm -rf /toolchains/build && rm -f /toolchains/Jamfile
 
 # Build our final container, patch gcc2 stuff
-FROM haiku/general-worker:20241228
+FROM ghcr.io/haiku/general-worker:20251216
 COPY --from=build /toolchains /toolchains
 RUN echo "export ARCHITECTURES=\"${ARCHITECTURES}\"" >> ~/.profile && \
     echo "export PATH=$(for i in ${ARCHITECTURES}; do echo -n /toolchains/cross-tools-$i/bin:; done | sed 's/:$//g'):$PATH" >> ~/.profile && \
