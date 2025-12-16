@@ -1,4 +1,4 @@
-FROM docker.io/debian:bookworm-slim
+FROM docker.io/debian:trixie-slim
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
@@ -60,9 +60,9 @@ RUN apt update && apt install -y --no-install-recommends \
   if [ "$(uname -m)" = "aarch64" ]; then wget https://dl.min.io/client/mc/release/linux-arm64/mc -O /usr/local/bin/mc; fi; \
   chmod 755 /usr/local/bin/mc; \
   cd /tmp && \
-  wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2022.12.tar.gz -O /tmp/v2022.12.tar.gz && \
-  tar xvf /tmp/v2022.12.tar.gz git-tools-2022.12/git-restore-mtime && \
-  mv git-tools-2022.12/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime && \
+  wget https://github.com/MestreLion/git-tools/archive/refs/tags/v2025.08.tar.gz -O /tmp/v2025.08.tar.gz && \
+  tar xvf /tmp/v2025.08.tar.gz git-tools-2025.08/git-restore-mtime && \
+  mv git-tools-2025.08/git-restore-mtime /usr/local/bin/ && chmod 755 /usr/local/bin/git-restore-mtime && \
   rm -rf /tmp/*
 
 # We don't use this in our build pipelines. It's kinda big too.
