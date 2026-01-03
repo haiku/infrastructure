@@ -60,7 +60,7 @@ spec:
           periodSeconds: 5
           failureThreshold: 5
       - name: gitore
-        image: codeberg.org/kallisti5/gitore:v0.2.2
+        image: codeberg.org/kallisti5/gitore:v0.2.3
         env:
         - name: BIND_ADDRESS
           value: "0.0.0.0:3333"
