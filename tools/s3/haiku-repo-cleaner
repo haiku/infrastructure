@@ -1,0 +1,41 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+	echo "usage: $0 <BUCKET_PATH>"
+	echo " where: BUCKET_PATH is the bucket directory containing hrev repos"
+	echo " example:  $0 cdn haiku-repository/master/x86_64"
+	echo ""
+	echo " I parse through Haiku repositories and groom them down if they are over 6 months old."
+	exit 1
+fi
+
+REMOTE=$1
+REMOTE_PATH=$2
+KEEP=0
+ERASE=0
+
+for i in $(rclone --no-check-certificate lsjson $REMOTE:$REMOTE_PATH | jq -r ".[].Name"); do
+	HREV=$(echo "$i" | sed -rn 's/.*hrev([0-9]*)$/\1/p')
+	if [ -z $HREV ]; then
+		continue
+	fi
+	MODIFIED=$(rclone --no-check-certificate lsjson $REMOTE:$REMOTE_PATH/$i/repo | jq -r ".[].ModTime")
+	AGE=$(( ( $(date +%s) - $(date -d "$MODIFIED" +%s) ) / 86400 ))
+	if [ $AGE -lt 182 ]; then
+		let "KEEP=KEEP+1"
+		echo "Keep $i since it's FRESH ($AGE days old)"
+		continue
+	fi
+
+	if (( $HREV % 3 )); then
+		let "ERASE=ERASE+1"
+		echo "ERASE $i which is $AGE days old!"
+		rclone --no-check-certificate delete $REMOTE:$REMOTE_PATH/$i
+	else
+		let "KEEP=KEEP+1"
+		echo "Keep $i! which is $AGE days old but divisible by 3!"
+	fi
+done
+
+echo "Kept $KEEPS"
+echo "Erased $ERASE"
