@@ -20,8 +20,10 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.182
+        image: ghcr.io/haiku/haikudepotserver:1.0.183
         env:
+        - name: HDS_JOBSERVICE_TYPE
+          value: "db2"
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
@@ -94,7 +96,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.182
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.183
           resources:
             limits:
               cpu: "1.0"
