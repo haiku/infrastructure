@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.183
+        image: ghcr.io/haiku/haikudepotserver:1.0.184
         env:
         - name: HDS_JOBSERVICE_TYPE
           value: "db2"
@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.183
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.184
           resources:
             limits:
               cpu: "1.0"
