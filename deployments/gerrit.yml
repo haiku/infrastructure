@@ -315,7 +315,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd,default-repo-url-patch@kubernetescrd
 spec:
   tls:
   - hosts:
@@ -354,6 +354,16 @@ spec:
             name: review
             port:
               name: www
+---
+# Correct for old-style cgit paths (without .git)
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: repo-url-patch
+spec:
+  redirectRegex:
+    regex: ^https?:\/\/c?git\.haiku\-os\.org\/([a-z\-]*[^\.])\/(.*)
+    replacement: https://git.haiku-os.org/${1}.git/${2}
 ---
 apiVersion: batch/v1
 kind: CronJob
