@@ -728,9 +728,6 @@ sub send_notices_for_ref($$)
 
 parse_options();
 
-# append repository path to URL
-$cgit_url .= "/$repos_name" if $cgit_url;
-
 my @refInfos;
 
 if (@ARGV)
