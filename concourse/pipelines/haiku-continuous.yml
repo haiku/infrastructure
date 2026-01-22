@@ -89,6 +89,7 @@ task-build-image: &task-build-image
         esac
         ../haiku-git/configure $TOOLCHAIN_PRIMARY $TOOLCHAIN_SECONDARY
         jam -j4 -c -q @((profile))-((media))
+        jam -j4 -q unittests
         # Generate compile_commands.json and normalize it to be functonal in an IDE
         cp compile_commands.json ../compile_commands.((arch))/compile_commands_((arch)).json
         sed -i 's/..\/haiku-git\///g' ../compile_commands.((arch))/compile_commands_((arch)).json
