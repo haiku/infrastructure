@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: haiku-format-bot
-        image: ghcr.io/haiku/haiku-format-bot:0.2.0
+        image: ghcr.io/haiku/haiku-format-bot:0.3.0
         command: ["python3"]
         args: ["-m", "formatchecker.runner", "--daemon", "--submit"]
         resources:
