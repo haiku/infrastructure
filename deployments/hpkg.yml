@@ -78,47 +78,33 @@ data:
       server {
         listen 80;
         server_name _;
-        location /master/build-packages {
-          #return 302 https://haiku-buildpackages.cdn.haiku-os.org/master$request_uri;
-          alias /usr/share/nginx/html/build-packages/master;
-          autoindex off;
+        location / {
+          rewrite "^/master/build-packages/[a-f0-9]{64}/packages/(.*)$" https://haiku-buildpackages.cdn.haiku-os.org/packages/$1 redirect;
+          rewrite "^/master/build-packages/([a-f0-9]{64}/.*)$" https://haiku-buildpackages.cdn.haiku-os.org/$1 redirect;
         }
         location /healthz {
           return 200 "healthy boi!\n";
         }
-        location / {
-          return 302 https://download.haiku-os.org;
-        }
+        #return 302 https://download.haiku-os.org;
       }
     }
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hpkg-haikuports
+  name: hpkg-haikuports-buildpackages
   labels:
-    app: hpkg-haikuports
+    app: hpkg-haikuports-buildpackages
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: hpkg-haikuports
+      app: hpkg-haikuports-buildpackages
   template:
     metadata:
       labels:
-        app: hpkg-haikuports
+        app: hpkg-haikuports-buildpackages
     spec:
-      # Run on the buildmaster node for shared access to packages pvc
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - buildmaster
-            topologyKey: kubernetes.io/hostname
       containers:
       - name: nginx
         image: docker.io/nginx:stable-alpine
@@ -139,9 +125,6 @@ spec:
         - name: nginx-config
           mountPath: /etc/nginx
           readOnly: true
-        - name: buildmaster-packages
-          mountPath: "/usr/share/nginx/html"
-          readOnly: true
       volumes:
         - name: nginx-config
           configMap:
@@ -149,17 +132,14 @@ spec:
             items:
               - key: nginx.conf
                 path: nginx.conf
-        - name: buildmaster-packages
-          persistentVolumeClaim:
-            claimName: buildmaster-packages-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hpkg-haikuports
+  name: hpkg-haikuports-buildpackages
 spec:
   selector:
-    app: hpkg-haikuports
+    app: hpkg-haikuports-buildpackages
   ports:
   - name: www
     port: 80
@@ -169,18 +149,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hpkg-haikuports-bouncer
+  name: hpkg-haikuports
   labels:
-    app: hpkg-haikuports-bouncer
+    app: hpkg-haikuports
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: hpkg-haikuports-bouncer
+      app: hpkg-haikuports
   template:
     metadata:
       labels:
-        app: hpkg-haikuports-bouncer
+        app: hpkg-haikuports
     spec:
       containers:
       - name: hpkgbouncer
@@ -221,10 +201,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hpkg-haikuports-bouncer
+  name: hpkg-haikuports
 spec:
   selector:
-    app: hpkg-haikuports-bouncer
+    app: hpkg-haikuports
   ports:
   - name: hpkg-bouncer-www
     port: 80
@@ -237,8 +217,8 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /haiku/
       - /haikuports/
+      - /haiku/
 ---
 # web frontends for package repos
 apiVersion: networking.k8s.io/v1
@@ -269,17 +249,10 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: hpkg-haikuports
+            name: hpkg-haikuports-buildpackages
             port:
               number: 80
       - path: /haikuports/
-        pathType: Prefix
-        backend:
-          service:
-            name: hpkg-haikuports-bouncer
-            port:
-              number: 80
-      - path: /
         pathType: Prefix
         backend:
           service:
