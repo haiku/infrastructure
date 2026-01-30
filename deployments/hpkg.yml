@@ -80,6 +80,7 @@ data:
         server_name _;
         location / {
           rewrite "^/master/build-packages/[a-f0-9]{64}/packages/(.*)$" https://haiku-buildpackages.cdn.haiku-os.org/packages/$1 redirect;
+          rewrite "^/master/build-packages/packages/(.*)$" https://haiku-buildpackages.cdn.haiku-os.org/packages/$1 redirect;
           rewrite "^/master/build-packages/([a-f0-9]{64}/.*)$" https://haiku-buildpackages.cdn.haiku-os.org/$1 redirect;
         }
         location /healthz {
