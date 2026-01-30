@@ -59,8 +59,43 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 5
           failureThreshold: 5
+      - name: anubis-gitore
+        image: ghcr.io/techarohq/anubis:latest
+        imagePullPolicy: Always
+        env:
+          - name: "BIND"
+            value: ":6969"
+          - name: "DIFFICULTY"
+            value: "5"
+          - name: "METRICS_BIND"
+            value: ":9090"
+          - name: "SERVE_ROBOTS_TXT"
+            value: "true"
+          - name: "TARGET"
+            value: "http://localhost:3333"
+          - name: "OG_PASSTHROUGH"
+            value: "false"
+          - name: "OG_EXPIRY_TIME"
+            value: "24h"
+        resources:
+          limits:
+            cpu: 750m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
       - name: gitore
-        image: codeberg.org/kallisti5/gitore:v0.2.3
+        image: codeberg.org/kallisti5/gitore:v0.2.4
         env:
         - name: BIND_ADDRESS
           value: "0.0.0.0:3333"
@@ -247,6 +282,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: anubis-gitore
+spec:
+  selector:
+    app: git
+  ports:
+  - name: www
+    port: 6969
+    targetPort: 6969
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: gitore
 spec:
   selector:
@@ -331,7 +378,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gitore
+            name: anubis-gitore
             port:
               name: www
   - host: cgit.haiku-os.org
@@ -341,7 +388,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gitore
+            name: anubis-gitore
             port:
               name: www
   - host: review.haiku-os.org
