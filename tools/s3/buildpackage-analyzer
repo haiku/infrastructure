@@ -1,0 +1,58 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "usage: $0 <directory>"
+	exit 1
+fi
+
+# SETTINGS
+# Scan everything (latest hash, old hash)
+EVERYTHING=1
+# Attempt to solve by seaching haikuports (slow.. especially with EVERYTHING)
+SOLVE=0
+
+ARCHITECTURES="x86_64 x86_gcc2 x86 riscv64 arm arm64 m68k sparc ppc"
+BASE_PATH=$1
+WORK_PATH=$(mktemp -d)
+TARGETS=""
+
+echo "Checking latest checksums..."
+for arch in $ARCHITECTURES; do
+	wget -q "https://raw.githubusercontent.com/haiku/haiku/refs/heads/master/build/jam/repositories/HaikuPorts/$arch" -O $WORK_PATH/$arch
+	sha256sum $WORK_PATH/$arch | awk '{ print $1 }' > $WORK_PATH/$arch.sha256
+	CHECKSUM=$(cat $WORK_PATH/$arch.sha256)
+	if [ ! -d "$BASE_PATH/$CHECKSUM" ]; then
+		echo "ERROR: Latest build-packages hash ($CHECKSUM) missing for $arch!!"
+	fi
+	TARGETS="$TARGETS $BASE_PATH/$CHECKSUM"
+done
+
+echo "Analyzing repositories..."
+if [ $EVERYTHING -eq 1 ]; then
+	TARGETS=$(find $BASE_PATH -maxdepth 1 -name '????????????????????????????????????????????????????????????????')
+fi
+
+for i in $TARGETS; do
+	if [ ! -d $i ]; then
+		continue
+	fi
+	ARCH=$(cat $i/repo.info | grep architecture | awk '{print $2}')
+	CHECKSUM=$(basename $i)
+	if [ $CHECKSUM == $(cat $WORK_PATH/$ARCH.sha256) ]; then
+		echo "+++ latest $CHECKSUM ($ARCH)..."
+	else
+		echo "---    old $CHECKSUM ($ARCH)..."
+	fi
+	for r in $(cat $i/package.list); do
+		BASENAME=$(basename $BASE_PATH/$r)
+		if [ ! -f $BASE_PATH/$r ]; then
+			echo "           Error: $CHECKSUM ($ARCH) is missing $r"
+			if [ $SOLVE -eq 1 ]; then
+				echo "           Searching for solutions..."
+				find /s3/haikuports-repository/master/ -name $BASENAME
+			fi
+		fi
+	done
+done
+
+rm -rf $WORK_PATH
