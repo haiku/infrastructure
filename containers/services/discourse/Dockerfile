@@ -1,14 +1,14 @@
 #
 # A sane discourse container without the "meta-build" and "launcher"
 #
-FROM docker.io/ruby:3.3-bookworm
+FROM docker.io/ruby:3.4-bookworm
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=3.5.1
+ARG VERSION=2026.1.0
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
@@ -50,7 +50,7 @@ RUN mkdir -p /apps \
 	&& rm -rf /apps/discourse/plugins/discourse-ai \
 	&& gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' /apps/discourse/Gemfile.lock)
 
-RUN npm install -g ember-cli terser uglify-js pnpm@9
+RUN npm install -g ember-cli pnpm@10
 # See: https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L164-L170
 RUN cd /apps/discourse \
 	&& bundle config --local deployment true \
