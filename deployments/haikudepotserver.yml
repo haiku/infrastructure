@@ -22,6 +22,8 @@ spec:
       - name: haikudepotserver
         image: ghcr.io/haiku/haikudepotserver:1.0.184
         env:
+        - name: HDS_JOBSERVICE_TYPE
+          value: "db2"
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
