@@ -114,6 +114,7 @@ jobs:
       - get: haiku-git
         tags: ["((worker_tag))"]
         trigger: true
+        params: {depth: 8}
       - task: build-((branch))-((profile))-((media))
         tags: ["((worker_tag))"]
         config:
