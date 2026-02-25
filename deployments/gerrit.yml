@@ -95,7 +95,7 @@ spec:
           seccompProfile:
             type: RuntimeDefault
       - name: gitore
-        image: codeberg.org/kallisti5/gitore:v0.2.4
+        image: codeberg.org/kallisti5/gitore:v0.2.6
         env:
         - name: BIND_ADDRESS
           value: "0.0.0.0:3333"
