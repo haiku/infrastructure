@@ -23,10 +23,10 @@ spec:
         resources:
           limits:
             cpu: 2048m
-            memory: 2.5Gi
+            memory: 2800Mi
           requests:
             cpu: 250m
-            memory: 1.5Gi
+            memory: 2200Mi
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/gerrit/review_site
@@ -83,7 +83,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: 250m
-            memory: 256Mi
+            memory: 64Mi
         securityContext:
           runAsUser: 1000
           runAsGroup: 1000
@@ -108,10 +108,10 @@ spec:
         resources:
           limits:
             cpu: 2048m
-            memory: 2.5Gi
+            memory: 2600Mi
           requests:
             cpu: 250m
-            memory: 1Gi
+            memory: 2000Mi
         volumeMounts:
         - name: gerrit-data
           mountPath: /gerrit

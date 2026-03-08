@@ -30,7 +30,7 @@ spec:
               memory: "2Gi"
             requests:
               cpu: "0.15"
-              memory: "512Mi"
+              memory: "800Mi"
           volumeMounts:
             - name: trac-data
               mountPath: /var/trac
@@ -57,7 +57,7 @@ spec:
             - name: "TARGET"
               value: "http://localhost:80"
             - name: "OG_PASSTHROUGH"
-              value: "false"
+              value: "true"
             - name: "OG_EXPIRY_TIME"
               value: "24h"
           resources:
@@ -66,7 +66,7 @@ spec:
               memory: 256Mi
             requests:
               cpu: 250m
-              memory: 256Mi
+              memory: 64Mi
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
