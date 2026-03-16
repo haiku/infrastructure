@@ -72,6 +72,19 @@ spec:
             secretKeyRef:
               name: discourse-pg
               key: password
+        livenessProbe:
+          httpGet:
+            path: /srv/status
+            port: 80
+          initialDelaySeconds: 90
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /srv/status
+            port: 80
+          failureThreshold: 60
+          initialDelaySeconds: 60
+          periodSeconds: 5
         volumeMounts:
         - name: discourse-data
           mountPath: /shared
