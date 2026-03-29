@@ -22,8 +22,6 @@ spec:
       - name: haikudepotserver
         image: ghcr.io/haiku/haikudepotserver:1.0.186
         env:
-        - name: HDS_JOBSERVICE_TYPE
-          value: "db2"
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
         - name: SPRING_MAIL_HOST
@@ -242,7 +240,7 @@ spec:
         spec:
           containers:
             - name: haikudepotserver-maintenance-hourly
-              image: curlimages/curl:8.13.0
+              image: curlimages/curl:8.18.0
               args:
                 - curl
                 - -X
@@ -272,7 +270,7 @@ spec:
         spec:
           containers:
             - name: haikudepotserver-maintenance-daily
-              image: curlimages/curl:8.13.0
+              image: curlimages/curl:8.18.0
               args:
                 - curl
                 - -X
@@ -281,5 +279,35 @@ spec:
                 - Content-Type:application/json
                 - --data
                 - '{"type":"DAILY"}'
+                - http://haikudepotserver:81/actuator/hdsmaintenance
+          restartPolicy: Never
+---
+# This CronJob runs every day hitting one of the HDS application server instances
+# to run some logic.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-maintenance-daily
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: haikudepotserver-maintenance-5min
+              image: curlimages/curl:8.18.0
+              args:
+                - curl
+                - -X
+                - POST
+                - -H
+                - Content-Type:application/json
+                - --data
+                - '{"type":"FIVE_MINUTELY"}'
                 - http://haikudepotserver:81/actuator/hdsmaintenance
           restartPolicy: Never
