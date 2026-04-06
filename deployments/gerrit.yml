@@ -59,20 +59,50 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 5
           failureThreshold: 5
-      - name: anubis-gitore
-        image: ghcr.io/techarohq/anubis:latest
+      - name: cgit
+        image: ghcr.io/haiku/cgit:1.2.3-9
+        env:
+        - name: CGIT_TITLE
+          value: "Haiku's repositories"
+        - name: CGIT_DESC
+          value: "Presented by cgit on kubernetes"
+        - name: CGIT_VROOT
+          value: "/"
+        - name: CGIT_SECTION_FROM_STARTPATH
+          value: "1"
+        resources:
+          limits:
+            cpu: 750m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - name: gerrit-data
+          mountPath: /var/git
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /haiku/
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 10
+      - name: anubis-cgit
+        image: ghcr.io/techarohq/anubis:main
         imagePullPolicy: Always
         env:
           - name: "BIND"
-            value: ":6969"
+            value: ":6868"
           - name: "DIFFICULTY"
-            value: "5"
+            value: "10"
           - name: "METRICS_BIND"
-            value: ":9090"
+            value: ":9091"
           - name: "SERVE_ROBOTS_TXT"
             value: "true"
           - name: "TARGET"
-            value: "http://localhost:3333"
+            value: "http://localhost:80"
           - name: "OG_PASSTHROUGH"
             value: "false"
           - name: "OG_EXPIRY_TIME"
@@ -94,45 +124,10 @@ spec:
               - ALL
           seccompProfile:
             type: RuntimeDefault
-      - name: gitore
-        image: codeberg.org/kallisti5/gitore:v0.2.6
-        env:
-        - name: BIND_ADDRESS
-          value: "0.0.0.0:3333"
-        - name: SCAN_PATH
-          value: "/gerrit/git"
-        - name: DB_STORE
-          value: "/tmp/gitore.db"
-        - name: REPOSITORY_LIST
-          value: "/gerrit/repos.gitore"
-        resources:
-          limits:
-            cpu: 2048m
-            memory: 2600Mi
-          requests:
-            cpu: 250m
-            memory: 2000Mi
-        volumeMounts:
-        - name: gerrit-data
-          mountPath: /gerrit
-          readOnly: true
-        - name: gitore-cache
-          mountPath: /tmp/gitore.db
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3333
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 3
-          timeoutSeconds: 10
       volumes:
       - name: gerrit-data
         persistentVolumeClaim:
           claimName: gerrit-data-pvc
-      - name: gitore-cache
-        persistentVolumeClaim:
-          claimName: gitore-cache-pvc
       - name: irccat-password
         secret:
           secretName: irccat-password
@@ -237,9 +232,6 @@ spec:
           - name: gerrit-data
             persistentVolumeClaim:
               claimName: gerrit-data-pvc
-          - name: gitore-cache
-            persistentVolumeClaim:
-              claimName: gitore-cache-pvc
           - name: codeberg-bot-secret
             secret:
               secretName: codeberg-bot
@@ -269,39 +261,28 @@ spec:
       storage: 10Gi
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: gitore-cache-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-gitore
+  name: anubis-cgit
 spec:
   selector:
     app: git
   ports:
   - name: www
-    port: 6969
-    targetPort: 6969
+    port: 6868
+    targetPort: 6868
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gitore
+  name: cgit
 spec:
   selector:
     app: git
   ports:
   - name: www
-    port: 3333
-    targetPort: 3333
+    port: 80
+    targetPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -354,7 +335,7 @@ spec:
     middlewares:
     - name: git-ingressmiddle
 ---
-# web frontends for gitore and gerrit
+# web frontends for gerrit
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -362,7 +343,8 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd,default-repo-url-patch@kubernetescrd
+    #traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd,default-repo-url-patch@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd
 spec:
   tls:
   - hosts:
@@ -378,7 +360,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: anubis-gitore
+            name: anubis-cgit
             port:
               name: www
   - host: cgit.haiku-os.org
@@ -388,7 +370,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: anubis-gitore
+            name: anubis-cgit
             port:
               name: www
   - host: review.haiku-os.org
