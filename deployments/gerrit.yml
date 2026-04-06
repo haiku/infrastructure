@@ -86,9 +86,9 @@ spec:
             path: /haiku/
             port: 80
           initialDelaySeconds: 10
-          periodSeconds: 10
+          periodSeconds: 600
           failureThreshold: 3
-          timeoutSeconds: 10
+          timeoutSeconds: 15
       - name: anubis-cgit
         image: ghcr.io/techarohq/anubis:main
         imagePullPolicy: Always
