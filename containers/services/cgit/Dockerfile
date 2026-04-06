@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.21
+FROM docker.io/alpine:3.23
 
 LABEL org.opencontainers.image.source="https://github.com/haiku/infrastructure"
 LABEL org.opencontainers.image.url="https://github.com/haiku/infrastructure/tree/main/containers/services/cgit"
