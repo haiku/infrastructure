@@ -92,4 +92,4 @@ virtual-root=$CGIT_VROOT
 
 section-from-path=$CGIT_SECTION_FROM_STARTPATH
 
-include=/var/git/repos
+include=/var/git/repos.cgit
