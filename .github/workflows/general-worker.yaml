@@ -40,7 +40,9 @@ jobs:
         platforms: linux/amd64,linux/arm64
     - uses: int128/docker-manifest-create-action@v2
       with:
-        tags: ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}
+        tags: |
+          ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}
+          ${{env.REPOSITORY}}/${{env.NAME}}:latest
         sources: |
           ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-amd64
           ${{env.REPOSITORY}}/${{env.NAME}}:${{ steps.detect-version.outputs.RELEASE_VERSION }}-arm64
