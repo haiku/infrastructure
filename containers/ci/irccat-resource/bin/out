@@ -1,0 +1,53 @@
+#!/usr/bin/ruby
+require 'json'
+require 'net/http'
+require 'uri'
+
+input = JSON.parse(STDIN.read)
+
+if ! input.has_key? "source"
+  puts "Concourse input valiation failed, missing source"
+  exit 132
+end
+source = input['source']
+
+if ! input.has_key? "params"
+  puts "Concourse input validation failed, missing params"
+  exit 132
+end
+params = input['params']
+
+if ! source.has_key? "uri"
+  puts "No uri provided in resource source!"
+  exit 132
+end
+if ! params.has_key? "message"
+  puts "No message provided in resource source!"
+  exit 132
+end
+
+message = params["message"]
+# First we substitute any environment variables in the message
+ENV.each do |key,value|
+  message.gsub!("${#{key}}", value)
+end
+
+# Then we create our own convenience variables
+message.gsub!("${BUILD_URL}", "#{ENV['ATC_EXTERNAL_URL']}/teams/#{ENV['BUILD_TEAM_NAME']}/pipelines/#{ENV['BUILD_PIPELINE_NAME']}/jobs/#{ENV['BUILD_JOB_NAME']}/builds/#{ENV['BUILD_NAME']}")
+
+uri = URI.parse(source["uri"])
+request = Net::HTTP::Post.new(uri)
+request.body = message
+req_options = {
+  use_ssl: uri.scheme == "https",
+}
+
+if source.has_key? "secret"
+  request.add_field 'Authorization', "Bearer #{source["secret"]}"
+end
+
+response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+  http.request(request)
+end
+
+puts '{"version": {"id":"3"},"metadata":[]}'
