@@ -14,7 +14,7 @@ ENV CGIT_SECTION_FROM_STARTPATH=0
 RUN apk add --update \
     tini gettext curl fcgiwrap spawn-fcgi git cgit highlight perl nginx discount groff py-pip \
 	&& pip install --break-system-packages markdown docutils \
-	&& rm -rf /var/git && mkdir -p /var/git /run/nginx
+	&& rm -rf /var/git && mkdir -p /var/git /var/cache/cgit /run/nginx
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
