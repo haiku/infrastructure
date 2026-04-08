@@ -39,3 +39,8 @@ fly -t haiku set-team -n $BRANCH_CURRENT --github-team=haiku:infrastructure --no
 ## bootstrap team. Runs through the bootstrap process.
 fly -t haiku set-team -n bootstrap --github-team=haiku:infrastructure --non-interactive
 ./apply-pipeline.sh bootstrap master $1
+
+## testing team. Builds test images with automatic unit tests.
+fly -t haiku set-team -n testing --github-team=haiku:infrastructure --non-interactive
+./apply-pipeline.sh testing master $1
+#./apply-pipeline.sh testing $BRANCH_CURRENT $1 # (not yet)

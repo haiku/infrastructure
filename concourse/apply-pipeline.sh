@@ -61,7 +61,7 @@ if [ "$TEAM" == "continuous" ]; then
 	$FLY_CLI -t haiku expose-pipeline -p gerrit-$BRANCH
 fi
 
-if [ "$TEAM" != "continuous" ] && [ "$TEAM" != "bootstrap" ]; then
+if [ "$TEAM" != "continuous" ] && [ "$TEAM" != "bootstrap" ] && [ "$TEAM" != "testing" ]; then
 	echo "Deploy toolchain builder..."
 	$FLY_CLI -t haiku set-pipeline -n -p toolchain-$BRANCH $COMMON_FLAGS -c pipelines/toolchain-builder.yml
 	$FLY_CLI -t haiku expose-pipeline -p toolchain-$BRANCH
@@ -92,10 +92,9 @@ for ARCH in $ARCHES; do
 
 	echo "Applying $BRANCH - $ARCH target: @$PROFILE-$MEDIA"
 
-	if [ "$TEAM" == "continuous" ]; then
-		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-continuous.yml
-	elif [ "$TEAM" == "bootstrap" ]; then
-		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -c pipelines/haiku-bootstrap.yml
+	if [ "$TEAM" == "continuous" ] || [ "$TEAM" == "bootstrap" ] || [ "$TEAM" == "testing" ]; then
+		# If this is a known singleton team, apply it as it stands
+		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -v bucket_image_prefix=$BUCKET_IMAGE_PREFIX -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-$TEAM.yml
 	else
 		$FLY_CLI -t haiku set-pipeline -p $BRANCH-$ARCH $COMMON_FLAGS -v arch=$ARCH -v profile=$PROFILE -v media=$MEDIA -v bucket_image_prefix=$BUCKET_IMAGE_PREFIX -v bucket_repo=$BUCKET_REPO -y days=\[$DAYS\] -c pipelines/haiku-release.yml
 	fi
