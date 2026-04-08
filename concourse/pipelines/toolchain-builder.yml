@@ -38,16 +38,7 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
-  - name: toolchain-container-((branch))-sha
-    tags: ["((worker_tag))"]
-    type: docker-image
-    icon: docker
-    source:
-      email: contact@haiku-inc.org
-      username: ((container-registry-user))
-      password: ((container-registry-password))
-      repository: ((container-registry))/toolchain-worker-((branch))
-  - name: toolchain-container-((branch))-latest
+  - name: toolchain-container-((branch))
     tags: ["((worker_tag))"]
     type: docker-image
     icon: docker
@@ -221,7 +212,6 @@ jobs:
                 echo "  \"haiku\": \"$HAIKU_SHA\"" >> container-context/labels.json
                 echo "}" >> container-context/labels.json
                 echo "$BUILDTOOLS_SHA" > container-context/tag
-                echo "latest" > container-context/latesttag
                 mkdir container-context/jam
                 cp jam/jam container-context/jam
                 mkdir container-context/toolchains
@@ -235,15 +225,10 @@ jobs:
                 echo "RUN ln -s /toolchains/cross-tools-x86_gcc2 $GCC2PATH/cross-tools-x86_gcc2" >> container-context/Dockerfile
                 # Dump the context of the container for reference
                 find container-context
-      - put: toolchain-container-((branch))-sha
+      - put: toolchain-container-((branch))
         tags: ["((worker_tag))"]
         params:
           tag_file: container-context/tag
           labels_file: container-context/labels.json
           build: container-context
-      - put: toolchain-container-((branch))-latest
-        tags: ["((worker_tag))"]
-        params:
-          tag_file: container-context/latesttag
-          labels_file: container-context/labels.json
-          build: container-context
+          tag_as_latest: true
