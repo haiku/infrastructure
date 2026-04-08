@@ -3,7 +3,7 @@ resource_types:
 - name: gerrit
   type: registry-image
   source:
-    repository: docker.io/haiku/gerrit-resource
+    repository: ((container-registry))/gerrit-resource
     tag: 0.0.4
 resources:
 - name: haiku-git
@@ -17,7 +17,7 @@ task-build-image: &task-build-image
   platform: linux
   image_resource:
     type: registry-image
-    source: { repository: haiku/toolchain-worker-((branch)) }
+    source: { repository: ((container-registry))/toolchain-worker-((branch)) }
   inputs:
     - name: haiku-git
   run:
