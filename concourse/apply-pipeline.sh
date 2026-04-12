@@ -44,8 +44,7 @@ if [ $BRANCH == "master" ]; then
 	BUCKET_IMAGE_PREFIX="haiku-nightly"
 	BUCKET_REPO="haiku-repository"
 	BRANCH_PROFILE="nightly"
-	#ARCHES="x86_64 x86_gcc2h arm sparc riscv64 ppc m68k"
-	ARCHES="x86_64 x86_gcc2h arm sparc riscv64 m68k"
+	ARCHES="x86_64 x86_gcc2h arm arm64 sparc riscv64"
 	DAYS="Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
 else
 	BUCKET_IMAGE_PREFIX="haiku-release/testing/$BRANCH"
@@ -74,7 +73,7 @@ for ARCH in $ARCHES; do
 	MEDIA="anyboot"
 
 	# Some architectures are special
-	if [ "$ARCH" == "arm" ]; then
+	if [ "$ARCH" == "arm" ] || [ "$ARCH" == "arm64" ]; then
 		PROFILE="minimum"
 		MEDIA="mmc"
 	elif [ "$ARCH" == "sparc" ]; then
