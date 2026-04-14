@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: gerrit
-        image: ghcr.io/haiku/gerrit:3.12.3-1
+        image: ghcr.io/haiku/gerrit:3.13.5-1
         resources:
           limits:
             cpu: 2048m
