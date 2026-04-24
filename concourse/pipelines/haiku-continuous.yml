@@ -1,7 +1,7 @@
 ---
 resource_types:
   - name: irccat-resource
-    type: docker-image
+    type: registry-image
     tags: ["((worker_tag))"]
     source:
       repository: ((container-registry))/irccat-resource

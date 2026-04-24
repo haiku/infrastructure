@@ -9,7 +9,7 @@ roles:
       users: ["admin"]
 #resource_types:
 #  - name: irc-notification
-#    type: docker-image
+#    type: registry-image
 #    source:
 #      repository: flavorjones/irc-notification-resource
 resources:
@@ -40,7 +40,7 @@ resources:
       branch: ((branch))
   - name: toolchain-container-((branch))
     tags: ["((worker_tag))"]
-    type: docker-image
+    type: registry-image
     icon: docker
     source:
       email: contact@haiku-inc.org
