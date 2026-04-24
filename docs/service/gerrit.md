@@ -28,6 +28,11 @@ and modifiable using the REST API: https://review.haiku-os.org/accounts/nobody@e
 If a user experiences random forbidden errors logging in, their account is likely
 in a state of limbo due to a [gerrit bug](https://bugs.chromium.org/p/gerrit/issues/detail?id=12125)
 
+Get the user's account id.
+```
+curl --user bigshotadmin:password -XGET "https://review.haiku-os.org/a/accounts/?q=email:user@domain.com"
+```
+
 Review the logs for the specific error.
 
 * Replace **ACCOUNTID** below with the user's account ID.
@@ -35,7 +40,7 @@ Review the logs for the specific error.
 
 Review the user's identities:
 ```
-curl --user bigshotadmin:password -XGET https://review.haiku-os.org/a/accounts/ACCOUNTID/external.ids
+curl --user bigshotadmin:password -XGET "https://review.haiku-os.org/a/accounts/ACCOUNTID/external.ids"
 ```
 
 Delete the identitiy for the user Gerrit is complaining about being a conflict:
