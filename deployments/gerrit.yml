@@ -89,41 +89,21 @@ spec:
           periodSeconds: 600
           failureThreshold: 3
           timeoutSeconds: 15
-      - name: anubis-cgit
-        image: ghcr.io/techarohq/anubis:main
-        imagePullPolicy: Always
-        env:
-          - name: "BIND"
-            value: ":6868"
-          - name: "DIFFICULTY"
-            value: "10"
-          - name: "METRICS_BIND"
-            value: ":9091"
-          - name: "SERVE_ROBOTS_TXT"
-            value: "true"
-          - name: "TARGET"
-            value: "http://localhost:80"
-          - name: "OG_PASSTHROUGH"
-            value: "false"
-          - name: "OG_EXPIRY_TIME"
-            value: "24h"
-        resources:
-          limits:
-            cpu: 750m
-            memory: 256Mi
-          requests:
-            cpu: 250m
-            memory: 64Mi
-        securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          seccompProfile:
-            type: RuntimeDefault
+      - name: oauth2-proxy-cgit
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
+        args: ["--config", "/etc/oauth2proxy.cfg"]
+        volumeMounts:
+        - name: oauth2proxy-cgit-cfg
+          mountPath: /etc/oauth2proxy.cfg
+          subPath: oauth2proxy.cfg
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 4180
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3
+          timeoutSeconds: 15
       volumes:
       - name: gerrit-data
         persistentVolumeClaim:
@@ -131,6 +111,9 @@ spec:
       - name: irccat-password
         secret:
           secretName: irccat-password
+      - name: oauth2proxy-cgit-cfg
+        secret:
+          secretName: oauth2proxy-cgit-cfg
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -263,14 +246,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-cgit
+  name: oauth2-cgit
 spec:
   selector:
     app: git
   ports:
   - name: www
-    port: 6868
-    targetPort: 6868
+    port: 4180
+    targetPort: 4180
 ---
 apiVersion: v1
 kind: Service
@@ -360,19 +343,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: anubis-cgit
+            name: oauth2-cgit
             port:
-              name: www
-  - host: cgit.haiku-os.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: anubis-cgit
-            port:
-              name: www
+              number: 4180
   - host: review.haiku-os.org
     http:
       paths:
