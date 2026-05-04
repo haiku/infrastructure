@@ -6,6 +6,7 @@ metadata:
 data:
   haiku-os.org: https://www.haiku-os.org;true
   api.haiku-os.org: https://www.haiku-os.org/docs/api;true
+  cgit.haiku-os.org: https://git.haiku-os.org;true
   lofi.haiku-os.org: https://www.haiku-os.org;false
 ---
 apiVersion: traefik.io/v1alpha1
@@ -74,6 +75,16 @@ spec:
             port:
               number: 80
   - host: api.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: redirector
+            port:
+              number: 80
+  - host: cgit.haiku-os.org
     http:
       paths:
       - path: /
