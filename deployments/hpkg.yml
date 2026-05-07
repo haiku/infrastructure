@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: hpkgbouncer
-        image: ghcr.io/haiku/hpkgbouncer:0.5.0
+        image: ghcr.io/haiku/hpkgbouncer:0.5.1
         env:
         - name: ROCKET_LOG_LEVEL
           value: "normal"
