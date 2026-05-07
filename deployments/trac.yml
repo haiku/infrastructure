@@ -49,7 +49,7 @@ spec:
             - name: "BIND"
               value: ":6969"
             - name: "DIFFICULTY"
-              value: "4"
+              value: "6"
             - name: "METRICS_BIND"
               value: ":9090"
             - name: "SERVE_ROBOTS_TXT"
@@ -57,12 +57,12 @@ spec:
             - name: "TARGET"
               value: "http://localhost:80"
             - name: "OG_PASSTHROUGH"
-              value: "true"
+              value: "false"
             - name: "OG_EXPIRY_TIME"
               value: "24h"
           resources:
             limits:
-              cpu: 750m
+              cpu: 1024m
               memory: 256Mi
             requests:
               cpu: 250m
@@ -139,7 +139,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-errorku@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-trac-scanblock@kubernetescrd,default-errorku@kubernetescrd,default-badasn-denyip@kubernetescrd
 spec:
   tls:
     - hosts:
