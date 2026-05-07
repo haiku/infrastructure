@@ -7,6 +7,7 @@ spec:
   plugin:
     denyip:
       ipDenyList:
+        - 43.160.0.0/12    # Tencent hammering gerrit
         - 45.161.128.0/22  # Brazilian Telco hammering cgit
         - 45.179.20.0/22   # Brazilian Telco hammering cgit
         - 47.74.0.0/15     # alibaba hammering trac
