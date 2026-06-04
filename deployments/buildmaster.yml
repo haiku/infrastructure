@@ -16,6 +16,9 @@ spec:
   selector:
     matchLabels:
       app: buildmaster
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage :-(
+    type: Recreate
   template:
     metadata:
       labels:
