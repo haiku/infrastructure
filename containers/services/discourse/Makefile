@@ -1,4 +1,4 @@
-VERSION = 2026.1.0
+VERSION = 2026.5.0
 REGISTRY = ghcr.io/haiku
 
 default:

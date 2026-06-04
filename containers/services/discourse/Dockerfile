@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=2026.1.0
+ARG VERSION=2026.5.0
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
@@ -47,8 +47,7 @@ RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
 # See: https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L157-L159
 RUN mkdir -p /apps \
 	&& git clone --branch v$VERSION --filter=tree:0 https://github.com/discourse/discourse.git /apps/discourse \
-	&& rm -rf /apps/discourse/plugins/discourse-ai \
-	&& gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' /apps/discourse/Gemfile.lock)
+	&& rm -rf /apps/discourse/plugins/discourse-ai
 
 RUN npm install -g ember-cli pnpm@10
 # See: https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L164-L170
