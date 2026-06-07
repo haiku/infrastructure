@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: ghcr.io/haiku/discourse:2026.1.0
+        image: ghcr.io/haiku/discourse:2026.5.0
         resources:
           limits:
             cpu: "2.0"
@@ -52,8 +52,6 @@ spec:
           value: "25"
         - name: DISCOURSE_SMTP_ADDRESS
           value: "smtp"
-        - name: DISCOURSE_SMTP_ENABLE_START_TLS
-          value: "false"
         - name: DISCOURSE_SMTP_AUTHENTICATION
           value: "none"
         - name: DISCOURSE_REDIS_HOST
