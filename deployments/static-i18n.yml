@@ -21,10 +21,10 @@ spec:
         resources:
           limits:
             cpu: "0.50"
-            memory: "256Mi"
+            memory: "64Mi"
           requests:
             cpu: "0.15"
-            memory: "128Mi"
+            memory: "8Mi"
         startupProbe:
           httpGet:
             path: /
