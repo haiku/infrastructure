@@ -26,6 +26,13 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "128Mi"
+          requests:
+            cpu: "0.15"
+            memory: "25Mi"
         image: ghcr.io/haikuports/haikuporter/frontend:1.4.0-1-g1b13
         volumeMounts:
         - name: buildmaster-data-x86-64
@@ -38,6 +45,13 @@ spec:
         image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "512Mi"
+          requests:
+            cpu: "0.15"
+            memory: "135Mi"
         volumeMounts:
         - name: buildmaster-sources
           mountPath: /var/sources
@@ -61,6 +75,13 @@ spec:
         image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
         #command: ["bootstrap", "x86_gcc2"]
         command: ["loop"]
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "512Mi"
+          requests:
+            cpu: "0.15"
+            memory: "135Mi"
         volumeMounts:
         - name: buildmaster-sources
           mountPath: /var/sources
@@ -84,6 +105,13 @@ spec:
         image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
         #command: ["bootstrap", "riscv64"]
         command: ["loop"]
+        resources:
+          limits:
+            cpu: "1.0"
+            memory: "512Mi"
+          requests:
+            cpu: "0.15"
+            memory: "135Mi"
         volumeMounts:
         - name: buildmaster-sources
           mountPath: /var/sources
