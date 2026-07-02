@@ -233,6 +233,13 @@ spec:
       containers:
       - name: static-build
         image: ghcr.io/haiku/static-build:20250707
+        resources:
+          limits:
+            cpu: "0.50"
+            memory: "64Mi"
+          requests:
+            cpu: "0.15"
+            memory: "8Mi"
 ---
 apiVersion: v1
 kind: Service
