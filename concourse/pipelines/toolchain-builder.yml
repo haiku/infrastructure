@@ -40,7 +40,7 @@ resources:
       branch: ((branch))
   - name: toolchain-container-((branch))
     tags: ["((worker_tag))"]
-    type: registry-image
+    type: docker-image
     icon: docker
     source:
       username: ((container-registry-user))
