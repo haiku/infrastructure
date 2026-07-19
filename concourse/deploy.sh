@@ -27,9 +27,9 @@ fly -t haiku set-team -n nightly --github-team=haiku:infrastructure --non-intera
 ./apply-pipeline.sh nightly master $1
 
 ## release branches. Builds released weekly. Artifacts pushed to release buckets
-# HINT: fly -t haiku set-team -n r1beta4 --github-team=haiku:infrastructure
-BRANCH_LAST=r1beta4
-BRANCH_CURRENT=r1beta5
+# HINT: fly -t haiku set-team -n r1beta5 --github-team=haiku:infrastructure
+BRANCH_LAST=r1beta5
+BRANCH_CURRENT=r1beta6
 
 fly -t haiku set-team -n $BRANCH_LAST --github-team=haiku:infrastructure --non-interactive
 ./apply-pipeline.sh $BRANCH_LAST $BRANCH_LAST $1

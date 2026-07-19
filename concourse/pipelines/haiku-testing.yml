@@ -106,19 +106,17 @@ jobs:
                 echo "#define DEFAULT_GEOCODING_SERVICE_KEY \"$DEFAULT_GEOCODING_SERVICE_KEY\"" >> ../haiku-git/src/kits/network/libnetservices/DefaultGeolocationServiceKey.h
                 # EFI Signing Key
                 # TODO: risc-v is efi, but sbsign needs code added to support signing
-                if [[ "((branch))" != "r1beta3" ]]; then
-                    case "((arch))" in
-                        "x86_64")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                        "arm")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                        "arm64")
-                            echo "((efi-db-key))" | base64 -d > efi.key
-                            ;;
-                    esac
-                fi
+                case "((arch))" in
+                    "x86_64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                    "arm64")
+                        echo "((efi-db-key))" | base64 -d > efi.key
+                        ;;
+                esac
                 if [[ "((branch))" != "master" ]]; then
                     export SOURCES="--include-sources"
                 fi
