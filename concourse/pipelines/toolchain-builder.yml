@@ -43,7 +43,6 @@ resources:
     type: registry-image
     icon: docker
     source:
-      email: contact@haiku-inc.org
       username: ((container-registry-user))
       password: ((container-registry-password))
       repository: ((container-registry))/toolchain-worker-((branch))
