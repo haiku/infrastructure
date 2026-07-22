@@ -40,12 +40,13 @@ resources:
       branch: ((branch))
   - name: toolchain-container-((branch))
     tags: ["((worker_tag))"]
-    type: docker-image
+    type: registry-image
     icon: docker
     source:
+      tag: latest
+      repository: ((container-registry))/toolchain-worker-((branch))
       username: ((container-registry-user))
       password: ((container-registry-password))
-      repository: ((container-registry))/toolchain-worker-((branch))
 # Common Tasks
 task-build-jam: &task-build-jam
   platform: linux
@@ -205,11 +206,9 @@ jobs:
               - |
                 BUILDTOOLS_SHA=$(git -C buildtools-git rev-parse HEAD)
                 HAIKU_SHA=$(git -C haiku-git rev-parse HEAD)
-                echo "{" > container-context/labels.json
-                echo "  \"build_date\": \"$(date)\"," >> container-context/labels.json
-                echo "  \"buildtools\": \"$BUILDTOOLS_SHA\"," >> container-context/labels.json
-                echo "  \"haiku\": \"$HAIKU_SHA\"" >> container-context/labels.json
-                echo "}" >> container-context/labels.json
+                echo "build_date=\"$(date)\"" > container-context/labels
+                echo "buildtools=$BUILDTOOLS_SHA" >> container-context/labels
+                echo "haiku=$HAIKU_SHA" >> container-context/labels
                 echo "$BUILDTOOLS_SHA" > container-context/tag
                 mkdir container-context/jam
                 cp jam/jam container-context/jam
@@ -224,10 +223,26 @@ jobs:
                 echo "RUN ln -s /toolchains/cross-tools-x86_gcc2 $GCC2PATH/cross-tools-x86_gcc2" >> container-context/Dockerfile
                 # Dump the context of the container for reference
                 find container-context
+      - task: build-container
+        tags: ["((worker_tag))"]
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: concourse/oci-build-task
+          inputs:
+          - name: container-context
+          outputs:
+          - name: image
+          params:
+            CONTEXT: container-context
+            LABELS_FILE: container-context/labels
+          run:
+            path: build
       - put: toolchain-container-((branch))
         tags: ["((worker_tag))"]
         params:
-          tag_file: container-context/tag
-          labels_file: container-context/labels.json
-          build: container-context
-          tag_as_latest: true
+          image: image/image.tar
+          additional_tags: container-context/tag
