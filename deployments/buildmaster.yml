@@ -52,7 +52,7 @@ spec:
           - name: STORAGE_BACKEND_CONFIG
             value: "/run/secrets/storage_config/storage-config-x86-64.json"
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta6_5"
+            value: "r1beta6_53"
           - name: BUILD_TARGET_ARCH
             value: "x86_64"
           - name: REPOSITORY_TRIGGER_URL
@@ -75,7 +75,7 @@ spec:
           - name: STORAGE_BACKEND_CONFIG
             value: "/run/secrets/storage_config/storage-config-x86-gcc2.json"
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta6_5"
+            value: "r1beta6_53"
           - name: BUILD_TARGET_ARCH
             value: "x86_gcc2"
           - name: REPOSITORY_TRIGGER_URL
@@ -98,7 +98,7 @@ spec:
           - name: STORAGE_BACKEND_CONFIG
             value: "/run/secrets/storage_config/storage-config-riscv64.json"
           - name: SYSTEM_PACKAGE_BRANCH
-            value: "r1beta6_5"
+            value: "r1beta6_53"
           - name: BUILD_TARGET_ARCH
             value: "riscv64"
           - name: REPOSITORY_TRIGGER_URL
