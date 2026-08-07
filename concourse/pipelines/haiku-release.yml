@@ -31,6 +31,7 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+      fetch_tags: true
   - name: garage
     tags: ["((worker_tag))"]
     type: rclone
@@ -57,7 +58,7 @@ jobs:
       - get: haiku-git
         tags: ["((worker_tag))"]
         trigger: false
-        params: {depth: 1}
+        params: {depth: 256}
       - task: build-((branch))-((media))
         tags: ["((worker_tag))"]
         config:

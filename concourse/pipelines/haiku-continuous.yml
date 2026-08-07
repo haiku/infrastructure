@@ -28,6 +28,7 @@ resources:
     source:
       uri: https://review.haiku-os.org/haiku.git
       branch: ((branch))
+      fetch_tags: true
   - name: garage
     tags: ["((worker_tag))"]
     type: rclone
