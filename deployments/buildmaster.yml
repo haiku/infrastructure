@@ -2,7 +2,7 @@
 # Haiku buildmaster
 #
 # Runs buildmasters which connect to various builders
-# at various remote locations over ssh with verifie
+# at various remote locations over ssh with verified
 # host keys.
 #
 apiVersion: apps/v1
@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: buildmaster-frontend
-        image: ghcr.io/haikuports/haikuporter/frontend:1.4.0-1-g1b13
+        image: ghcr.io/haikuports/haikuporter/frontend:1.5.1
         volumeMounts:
         - name: buildmaster-data-x86-64
           mountPath: /var/instances/master/x86_64
@@ -35,7 +35,7 @@ spec:
         - name: buildmaster-data-riscv64
           mountPath: /var/instances/master/riscv64
       - name: buildmaster-x86-64
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.5.1
         #command: ["bootstrap", "x86_64"]
         command: ["loop"]
         volumeMounts:
@@ -58,7 +58,7 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"
       - name: buildmaster-x86-gcc2
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.5.1
         #command: ["bootstrap", "x86_gcc2"]
         command: ["loop"]
         volumeMounts:
@@ -81,7 +81,7 @@ spec:
           - name: REPOSITORY_TRIGGER_URL
             value: "https://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_gcc2/import"
       - name: buildmaster-riscv64
-        image: ghcr.io/haikuports/haikuporter/buildmaster:1.4.0-1-g1b13
+        image: ghcr.io/haikuports/haikuporter/buildmaster:1.5.1
         #command: ["bootstrap", "riscv64"]
         command: ["loop"]
         volumeMounts:
