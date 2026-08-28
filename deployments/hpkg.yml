@@ -199,7 +199,7 @@ spec:
         - name: S3_PUBLIC
           value: "https://haikuports-repository.cdn.haiku-os.org/"
         - name: BRANCH_ALIASES
-          value: "master:r1beta6"
+          value: "master:r1beta6,r1beta5"
         volumeMounts:
         - name: secrets
           mountPath: "/var/run/secrets"
