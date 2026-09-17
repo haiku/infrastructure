@@ -48,17 +48,19 @@ spec:
           - name: SMTP_CONNECT_TIMEOUT
             value: "30"
         startupProbe:
-          tcpSocket:
-            port: 29418
+          httpGet:
+            path: /config/server/healthcheck~status
+            port: 8080
           initialDelaySeconds: 30
-          periodSeconds: 10
+          periodSeconds: 5
           failureThreshold: 60
         livenessProbe:
-          tcpSocket:
-            port: 29418
+          httpGet:
+            path: /config/server/healthcheck~status
+            port: 8080
           initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 5
+          periodSeconds: 30
+          failureThreshold: 4
       - name: cgit
         image: ghcr.io/haiku/cgit:1.2.3-11
         env:
@@ -73,10 +75,10 @@ spec:
         resources:
           limits:
             cpu: 750m
-            memory: 256Mi
+            memory: 768Mi
           requests:
             cpu: 250m
-            memory: 256Mi
+            memory: 512Mi
         volumeMounts:
         - name: gerrit-data
           mountPath: /var/git
