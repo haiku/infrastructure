@@ -2,12 +2,16 @@
 
 from datetime import datetime
 import glob
+import hashlib
 import json
 import os
 import re
+import ssl
 import sys
 import time
-from subprocess import call, check_call, check_output
+import urllib.error
+import urllib.request
+from subprocess import check_call, check_output
 
 def log(level, message, **fields):
 	record = {
@@ -207,6 +211,52 @@ def isHttpHtmlResponse(path):
 	return (low.startswith(b'<!doctype html') or low.startswith(b'<html')
 		or b'<!doctype html' in low or b'<html>' in low or b'<title>' in low)
 
+def downloadFile(url, targetPath, rateLimitBytes):
+	# Downloads url to targetPath using the standard library, following
+	# redirects and tolerating self-signed TLS certificates (mirroring the
+	# previous "curl -kL" behaviour).  The sha256 of the content is computed
+	# while streaming and returned along with the HTTP status and Content-Type
+	# so callers can reject HTML error pages.
+	sslContext = ssl._create_unverified_context()
+	request = urllib.request.Request(url, headers={ 'User-Agent': 'haiku-ports-mirror/1.0' })
+	try:
+		response = urllib.request.urlopen(request, context=sslContext, timeout=120)
+	except urllib.error.HTTPError as e:
+		return {
+			'success': False,
+			'error': str(e),
+			'status': e.code,
+			'content_type': e.headers.get('Content-Type', ''),
+			'sha256': None,
+		}
+	except Exception as e:
+		return {
+			'success': False,
+			'error': str(e),
+			'status': None,
+			'content_type': '',
+			'sha256': None,
+		}
+
+	status = getattr(response, 'status', getattr(response, 'code', 200))
+	contentType = response.headers.get('Content-Type', '') or ''
+	hasher = hashlib.sha256()
+	with open(targetPath, 'wb') as f:
+		while True:
+			chunk = response.read(64 * 1024)
+			if not chunk:
+				break
+			hasher.update(chunk)
+			f.write(chunk)
+			time.sleep(len(chunk) / float(rateLimitBytes))
+	response.close()
+	return {
+		'success': True,
+		'status': status,
+		'content_type': contentType,
+		'sha256': hasher.hexdigest(),
+	}
+
 def updateRecipe(recipeFile):
 	with open(recipeFile, 'r') as f:
 		recipe = f.read()
@@ -257,38 +307,21 @@ def updateRecipe(recipeFile):
 				return
 			if os.path.exists(downloadpath):
 				os.remove(downloadpath)
-			httpInfoFile = downloadpath + '.http'
-			args = [ 'curl', '-fkL', '--limit-rate', '5M', '--silent', '--output', downloadpath,
-				'--write-out', '%{http_code} %{content_type}', srcUri ]
-			with open(httpInfoFile, 'w') as httpOutput:
-				curlResult = call(args, stdout=httpOutput, cwd=downloadDir)
-			httpInfo = ''
-			try:
-				with open(httpInfoFile, 'r') as f:
-					httpInfo = f.read().strip()
-			except Exception:
-				pass
-			if os.path.exists(httpInfoFile):
-				os.remove(httpInfoFile)
-			if curlResult != 0:
-				log('error', 'unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult),
-					filename=filename, curl_resultcode=curlResult)
+			downloadResult = downloadFile(srcUri, downloadpath, rateLimitBytes=5 * 1024 * 1024)
+			if not downloadResult['success']:
+				if os.path.exists(downloadpath):
+					os.remove(downloadpath)
+				log('error', 'unable to download ' + filename + ': ' + downloadResult['error'],
+					filename=filename, uri=srcUri, http_code=downloadResult['status'])
 				return
 
-			httpCode = httpInfo.split(' ', 1)[0] if httpInfo else ''
-			contentType = httpInfo.split(' ', 1)[1] if ' ' in httpInfo else ''
-			if srcUri.startswith('http') and not httpCode.startswith('2'):
-				log('error', 'unexpected HTTP status ' + httpCode + ' downloading ' + filename,
-					filename=filename, http_code=httpCode, uri=srcUri)
+			if 'html' in downloadResult['content_type'].lower() or isHttpHtmlResponse(downloadpath):
 				os.remove(downloadpath)
-				return
-			if 'html' in contentType.lower() or isHttpHtmlResponse(downloadpath):
 				log('error', 'downloaded an HTTP response instead of the source file for ' + filename,
-					filename=filename, content_type=contentType, uri=srcUri)
-				os.remove(downloadpath)
+					filename=filename, content_type=downloadResult['content_type'], uri=srcUri)
 				return
 
-			checksum = check_output(['sha256sum', '-b', downloadpath], universal_newlines=True).split()[0]
+			checksum = downloadResult['sha256']
 			if checksum != checksumMatch.group(1):
 				log('error', 'SHA256-checksum mismatch for ' + filename,
 					filename=filename, expected=checksumMatch.group(1), got=checksum)
