@@ -1,11 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from datetime import datetime
 import glob
 import os
 import re
+import sys
 import time
-from subprocess import call, check_call, check_output;
+from subprocess import call, check_call, check_output
 
 # constants
 gitRepos = [
@@ -15,6 +16,31 @@ gitRepos = [
 
 portsMirrorDir = '/ports-mirror/srv-www'
 downloadDir = '/ports-mirror/ports-mirror.in'
+
+# Optional S3 bucket mirroring.  When S3_BUCKET is set, source packages are
+# archived to the bucket in the same <recipeName>/<filename> layout as the
+# local mirror directory instead of being stored in portsMirrorDir.
+s3Bucket = os.environ.get('S3_BUCKET')
+s3Endpoint = os.environ.get('S3_ENDPOINT')
+s3AccessKey = os.environ.get('S3_ACCESS_KEY')
+s3SecretKey = os.environ.get('S3_SECRET_KEY')
+useS3 = bool(s3Bucket)
+s3Client = None
+
+if useS3:
+	import boto3
+	from botocore.client import Config
+	from botocore.exceptions import ClientError
+	if not (s3Endpoint and s3AccessKey and s3SecretKey):
+		print('*** S3_BUCKET is set, but S3_ENDPOINT, S3_ACCESS_KEY, or S3_SECRET_KEY is missing!')
+		sys.exit(1)
+	s3Client = boto3.client(
+		's3',
+		endpoint_url=s3Endpoint,
+		aws_access_key_id=s3AccessKey,
+		aws_secret_access_key=s3SecretKey,
+		config=Config(signature_version='s3v4'),
+	)
 
 if not os.path.exists(portsMirrorDir):
 	os.mkdir(portsMirrorDir)
@@ -39,8 +65,17 @@ class Replacer(object):
 
 def expandVariables(string, recipe):
 	replacer = Replacer(recipe)
-	string = re.sub('\$(\w+)', replacer, string)
-	return re.sub('\$\{(\w+)\}', replacer, string)
+	string = re.sub(r'\$(\w+)', replacer, string)
+	return re.sub(r'\$\{(\w+)\}', replacer, string)
+
+def s3FileExists(s3target):
+	try:
+		s3Client.head_object(Bucket=s3Bucket, Key=s3target)
+		return True
+	except ClientError as e:
+		if e.response['Error']['Code'] == '404':
+			return False
+		raise
 
 def updateRecipe(recipeFile):
 	with open(recipeFile, 'r') as f:
@@ -57,7 +92,7 @@ def updateRecipe(recipeFile):
 	shellVars['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
 	shellVars['portVersionedName'] = shellVars['portName'] + '-' + shellVars['portVersion']
 
-	for srcUriMatch in re.finditer('^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
+	for srcUriMatch in re.finditer(r'^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
 		srcUriKey = srcUriMatch.group(1)
 		srcFilenameKey = srcUriKey.replace('SOURCE_URI', 'SOURCE_FILENAME')
 		checksumSha256Key = srcUriKey.replace('SOURCE_URI', 'CHECKSUM_SHA256')
@@ -78,19 +113,23 @@ def updateRecipe(recipeFile):
 			borkedMarkerPath = downloadDir + '/' + filename + '.is_borked'
 			if os.path.exists(borkedMarkerPath):
 				return
-			targetpath = portsMirrorDir + '/' + recipeName + '/' + filename
+			s3target = recipeName + '/' + filename
+			targetpath = portsMirrorDir + '/' + s3target
 			downloadpath = downloadDir + '/' + filename
-			if os.path.exists(targetpath):
+			if useS3:
+				if s3FileExists(s3target):
+					return
+			elif os.path.exists(targetpath):
 				return
 			targetdir = os.path.dirname(targetpath)
-			if not os.path.exists(targetdir):
+			if not useS3 and not os.path.exists(targetdir):
 				os.mkdir(targetdir)
-			print datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-			print '\t' + os.path.basename(recipeFile) + ' => ' + filename + " (" + srcUri + ")"
+			print(datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+			print('\t' + os.path.basename(recipeFile) + ' => ' + filename + " (" + srcUri + ")")
 			checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe,
 				flags=re.DOTALL | re.MULTILINE)
 			if not checksumMatch:
-				print '*** recipe ' + recipeFile + ' does not contain a usable checksum!'
+				print('*** recipe ' + recipeFile + ' does not contain a usable checksum!')
 				return
 			if os.path.exists(downloadpath):
 				os.remove(downloadpath)
@@ -98,17 +137,26 @@ def updateRecipe(recipeFile):
 			#args = [ 'curl', '-fkL', '--limit-rate', '5M', '--output', downloadpath, srcUri ]
 			curlResult = call(args, cwd=portsMirrorDir)
 			if curlResult != 0:
-				print '* unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult)
+				print('* unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult))
 				return
 
-			checksum = check_output(['sha256sum', '-b', downloadpath]).split()[0]
+			checksum = check_output(['sha256sum', '-b', downloadpath], universal_newlines=True).split()[0]
 			if checksum != checksumMatch.group(1):
-				print '*** SHA256-checksum mismatch for ' + filename
-				print '***	expected :' + checksumMatch.group(1)
-				print '***	got	  :' + checksum
+				print('*** SHA256-checksum mismatch for ' + filename)
+				print('***\texpected :' + checksumMatch.group(1))
+				print('***\tgot\t  :' + checksum)
 				return
 
-			os.rename(downloadpath, targetpath)
+			if useS3:
+				try:
+					s3Client.upload_file(downloadpath, s3Bucket, s3target)
+				except Exception as e:
+					os.remove(downloadpath)
+					print('* unable to archive ' + filename + ' to s3://' + s3Bucket + '/' + s3target + ': ' + str(e))
+					return
+				os.remove(downloadpath)
+			else:
+				os.rename(downloadpath, targetpath)
 
 
 def updateFromCheckout(gitRepoDir):
@@ -116,7 +164,7 @@ def updateFromCheckout(gitRepoDir):
 		try:
 			updateRecipe(recipeFile)
 		except OSError as e:
-			print "*** exception while processing " + recipeFile + ": " + str(e)
+			print("*** exception while processing " + recipeFile + ": " + str(e))
 			continue
 
 while True:
@@ -126,11 +174,11 @@ while True:
 		repoName = gitRepoDir.split('/')[-1]
 
 		if not os.path.exists(gitRepoDir):
-			print 'cloning %s from %s' % (repoName, gitRepoUrl)
+			print('cloning %s from %s' % (repoName, gitRepoUrl))
 			check_call([ 'git', 'clone', gitRepoUrl, gitRepoDir ])
 		check_call([ 'git', 'fetch', '--all' ], cwd=gitRepoDir)
 
-		branchesString = check_output([ 'git', 'branch', '-a' ], cwd=gitRepoDir)
+		branchesString = check_output([ 'git', 'branch', '-a' ], cwd=gitRepoDir, universal_newlines=True)
 		branches = branchesString.splitlines()
 
 		for branch in branches:
@@ -139,7 +187,7 @@ while True:
 				continue
 			if ' ' in branch:
 				branch = branch[0:branch.find(' ')]
-			print 'updating %s/%s' % (repoName, branch)
+			print('updating %s/%s' % (repoName, branch))
 			check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
 
 			updateFromCheckout(gitRepoDir)
