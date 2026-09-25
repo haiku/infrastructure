@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from datetime import datetime
+import concurrent.futures
 import glob
 import hashlib
 import json
@@ -8,6 +9,7 @@ import os
 import re
 import ssl
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -29,7 +31,9 @@ gitRepos = [
 ]
 
 downloadDir = '/tmp/ports-mirror.in'
-maxSourceSizeBytes = 250 * 1024 * 1024 # skip archiving source packages larger than maxSourceSizeBytes
+maxSourceSizeBytes = 200 * 1024 * 1024 # skip archiving source packages larger than this
+maxDownloadSpeedBytes = 250 * 1024 # Maximum speed per download thread
+parallelDownloads = max(1, int(os.environ.get('PARALLEL_DOWNLOADS', '4')))
 
 # Source packages are archived to an S3 bucket in a <recipeName>/<filename>
 # layout, keyed by the recipe name and the source filename.
@@ -59,7 +63,15 @@ s3Client = boto3.client(
 if not os.path.exists(downloadDir):
 	os.mkdir(downloadDir)
 
-shellVars = dict()
+_shellVarsLocal = threading.local()
+
+def shellVars():
+	# Each worker thread keeps its own variable table so recipes processed in
+	# parallel never corrupt each other's variable expansion.
+	if not hasattr(_shellVarsLocal, 'vars'):
+		_shellVarsLocal.vars = dict()
+	return _shellVarsLocal.vars
+
 recipe = ''
 
 def globToRegex(glob, greedy):
@@ -84,8 +96,9 @@ def globToRegex(glob, greedy):
 	return ''.join(out)
 
 def resolveVar(name, recipe, depth=0):
-	if name in shellVars:
-		return shellVars[name]
+	table = shellVars()
+	if name in table:
+		return table[name]
 	if depth > 20:
 		return None
 	lineMatch = re.search('^' + name + r'=(.*)$', recipe, flags=re.MULTILINE)
@@ -102,7 +115,7 @@ def resolveVar(name, recipe, depth=0):
 		else:
 			value = value[1:]
 	value = expandVariables(value, recipe, depth + 1)
-	shellVars[name] = value
+	table[name] = value
 	return value
 
 def expandParameter(expr, recipe, depth):
@@ -426,12 +439,17 @@ def getRemoteFileSize(url):
 	except ValueError:
 		return None
 
-def downloadFile(url, targetPath, rateLimitBytes):
+class DownloadTooLarge(Exception):
+	def __init__(self, totalBytes):
+		self.totalBytes = totalBytes
+
+def downloadFile(url, targetPath, rateLimitBytes, maxBytes):
 	# Downloads url to targetPath using the standard library, following
 	# redirects and tolerating self-signed TLS certificates (mirroring the
 	# previous "curl -kL" behaviour).  The sha256 of the content is computed
 	# while streaming and returned along with the HTTP status and Content-Type
-	# so callers can reject HTML error pages.
+	# so callers can reject HTML error pages.  The download is aborted as soon
+	# as maxBytes is exceeded rather than fetching the whole (oversized) file.
 	sslContext = ssl._create_unverified_context()
 	request = urllib.request.Request(url, headers={ 'User-Agent': 'haiku-ports-mirror/1.0' })
 	try:
@@ -456,6 +474,7 @@ def downloadFile(url, targetPath, rateLimitBytes):
 	status = getattr(response, 'status', getattr(response, 'code', 200))
 	contentType = response.headers.get('Content-Type', '') or ''
 	hasher = hashlib.sha256()
+	totalBytes = 0
 	try:
 		with open(targetPath, 'wb') as f:
 			while True:
@@ -464,7 +483,28 @@ def downloadFile(url, targetPath, rateLimitBytes):
 					break
 				hasher.update(chunk)
 				f.write(chunk)
+				totalBytes += len(chunk)
+				if totalBytes > maxBytes:
+					raise DownloadTooLarge(totalBytes)
 				time.sleep(len(chunk) / float(rateLimitBytes))
+	except DownloadTooLarge as e:
+		try:
+			response.close()
+		except Exception:
+			pass
+		try:
+			os.remove(targetPath)
+		except Exception:
+			pass
+		return {
+			'success': False,
+			'too_large': True,
+			'bytes': e.totalBytes,
+			'error': 'source package exceeds maximum size of ' + str(maxBytes) + ' bytes',
+			'status': status,
+			'content_type': contentType,
+			'sha256': None,
+		}
 	except Exception as e:
 		# e.g. http.client.IncompleteRead when the connection drops mid-file;
 		# discard the partial download and let the caller continue.
@@ -501,11 +541,12 @@ def updateRecipe(recipeFile):
 	recipeFileName = os.path.basename(recipeFile)
 	recipeName = recipeFileName.partition('-')[0]
 
-	shellVars.clear()
-	shellVars['portName'] = os.path.basename(recipeFile).partition('-')[0]
-	shellVars['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
-	shellVars['portVersionedName'] = shellVars['portName'] + '-' + shellVars['portVersion']
-	shellVars['portBaseName'] = shellVars['portName'].replace('_', '-')
+	table = shellVars()
+	table.clear()
+	table['portName'] = os.path.basename(recipeFile).partition('-')[0]
+	table['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
+	table['portVersionedName'] = table['portName'] + '-' + table['portVersion']
+	table['portBaseName'] = table['portName'].replace('_', '-')
 
 	for srcUriMatch in re.finditer(r'^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
 		srcUriKey = srcUriMatch.group(1)
@@ -529,7 +570,7 @@ def updateRecipe(recipeFile):
 			if os.path.exists(borkedMarkerPath):
 				return
 			s3target = recipeName + '/' + filename
-			downloadpath = downloadDir + '/' + filename
+			downloadpath = downloadDir + '/' + str(threading.get_ident()) + '-' + filename
 			checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe,
 				flags=re.DOTALL | re.MULTILINE)
 			if checksumMatch and s3ObjectValid(s3target, checksumMatch.group(1)):
@@ -546,11 +587,16 @@ def updateRecipe(recipeFile):
 			if srcUri.startswith('http'):
 				remoteSize = getRemoteFileSize(srcUri)
 				if remoteSize is not None and remoteSize > maxSourceSizeBytes:
-					log('info', 'skipping archival of ' + filename + ' - remote source package is larger than maxSourceSizeBytes',
+					log('info', 'skipping archival of ' + filename + ' - remote source package is larger than 250 MiB',
 						filename=filename, bytes=remoteSize, size_mib=remoteSize / (1024 * 1024.0), uri=srcUri)
 					return
-			downloadResult = downloadFile(srcUri, downloadpath, rateLimitBytes=5 * 1024 * 1024)
+			downloadResult = downloadFile(srcUri, downloadpath, rateLimitBytes=maxDownloadSpeedBytes, maxBytes=maxSourceSizeBytes)
 			if not downloadResult['success']:
+				if downloadResult.get('too_large'):
+					log('info', 'skipping archival of ' + filename + ' - source package is larger than 250 MiB',
+						filename=filename, bytes=downloadResult['bytes'],
+						size_mib=downloadResult['bytes'] / (1024 * 1024.0), uri=srcUri)
+					return
 				if os.path.exists(downloadpath):
 					os.remove(downloadpath)
 				log('error', 'unable to download ' + filename + ': ' + downloadResult['error'],
@@ -569,13 +615,6 @@ def updateRecipe(recipeFile):
 					filename=filename, expected=checksumMatch.group(1), got=checksum)
 				return
 
-			fileSize = os.path.getsize(downloadpath)
-			if fileSize > maxSourceSizeBytes:
-				os.remove(downloadpath)
-				log('info', 'skipping archival of ' + filename + ' - source package is larger than maxSourceSizeBytes',
-					filename=filename, bytes=fileSize, size_mib=fileSize / (1024 * 1024.0))
-				return
-
 			try:
 				s3Client.upload_file(downloadpath, s3Bucket, s3target,
 					ExtraArgs={'Metadata': {'sha256': checksum}})
@@ -589,14 +628,19 @@ def updateRecipe(recipeFile):
 				filename=filename, bucket=s3Bucket, key=s3target, sha256=checksum)
 
 
+def processRecipe(recipeFile):
+	try:
+		updateRecipe(recipeFile)
+	except Exception as e:
+		log('error', 'exception while processing ' + recipeFile + ': ' + str(e),
+			recipe_file=recipeFile, error=str(e))
+
 def updateFromCheckout(gitRepoDir):
-	for recipeFile in glob.glob(gitRepoDir + '/*/*/*.recipe'):
-		try:
-			updateRecipe(recipeFile)
-		except Exception as e:
-			log('error', 'exception while processing ' + recipeFile + ': ' + str(e),
-				recipe_file=recipeFile, error=str(e))
-			continue
+	recipeFiles = glob.glob(gitRepoDir + '/*/*/*.recipe')
+	with concurrent.futures.ThreadPoolExecutor(max_workers=parallelDownloads) as executor:
+		futures = [ executor.submit(processRecipe, recipeFile) for recipeFile in recipeFiles ]
+		for future in concurrent.futures.as_completed(futures):
+			future.result()
 
 while True:
 	for gitRepo in gitRepos:

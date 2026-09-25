@@ -11,6 +11,11 @@ layout. The following environment variables are required:
 * `S3_ACCESS_KEY` - S3 access key
 * `S3_SECRET_KEY` - S3 secret key
 
+Optional:
+
+* `PARALLEL_DOWNLOADS` - number of recipes to fetch and archive concurrently
+  (default `4`)
+
 The script records the recipe's sha256 checksum on each archived object and
 verifies it via the S3 API (`head_object`). Objects whose recorded checksum
 does not match the recipe -- or that were archived before the checksum was
