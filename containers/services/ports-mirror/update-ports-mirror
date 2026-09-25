@@ -531,6 +531,8 @@ def updateRecipe(recipeFile):
 					filename=filename, bucket=s3Bucket, key=s3target, error=str(e))
 				return
 			os.remove(downloadpath)
+			log('info', 'archived ' + filename + ' to s3://' + s3Bucket + '/' + s3target,
+				filename=filename, bucket=s3Bucket, key=s3target, sha256=checksum)
 
 
 def updateFromCheckout(gitRepoDir):
