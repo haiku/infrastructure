@@ -29,6 +29,7 @@ gitRepos = [
 ]
 
 downloadDir = '/tmp/ports-mirror.in'
+maxSourceSizeBytes = 250 * 1024 * 1024 # skip archiving source packages larger than maxSourceSizeBytes
 
 # Source packages are archived to an S3 bucket in a <recipeName>/<filename>
 # layout, keyed by the recipe name and the source filename.
@@ -406,6 +407,25 @@ def isHttpHtmlResponse(path):
 	return (low.startswith(b'<!doctype html') or low.startswith(b'<html')
 		or b'<!doctype html' in low or b'<html>' in low or b'<title>' in low)
 
+def getRemoteFileSize(url):
+	# Returns the Content-Length reported by the server via a HEAD request, or
+	# None when the size cannot be determined up front (e.g. servers that do
+	# not support HEAD).
+	sslContext = ssl._create_unverified_context()
+	request = urllib.request.Request(url, method='HEAD', headers={ 'User-Agent': 'haiku-ports-mirror/1.0' })
+	try:
+		response = urllib.request.urlopen(request, context=sslContext, timeout=60)
+	except Exception:
+		return None
+	size = response.headers.get('Content-Length')
+	response.close()
+	if size is None:
+		return None
+	try:
+		return int(size)
+	except ValueError:
+		return None
+
 def downloadFile(url, targetPath, rateLimitBytes):
 	# Downloads url to targetPath using the standard library, following
 	# redirects and tolerating self-signed TLS certificates (mirroring the
@@ -504,6 +524,12 @@ def updateRecipe(recipeFile):
 				return
 			if os.path.exists(downloadpath):
 				os.remove(downloadpath)
+			if srcUri.startswith('http'):
+				remoteSize = getRemoteFileSize(srcUri)
+				if remoteSize is not None and remoteSize > maxSourceSizeBytes:
+					log('info', 'skipping archival of ' + filename + ' - remote source package is larger than maxSourceSizeBytes',
+						filename=filename, bytes=remoteSize, size_mib=remoteSize / (1024 * 1024.0), uri=srcUri)
+					return
 			downloadResult = downloadFile(srcUri, downloadpath, rateLimitBytes=5 * 1024 * 1024)
 			if not downloadResult['success']:
 				if os.path.exists(downloadpath):
@@ -522,6 +548,13 @@ def updateRecipe(recipeFile):
 			if checksum != checksumMatch.group(1):
 				log('error', 'SHA256-checksum mismatch for ' + filename,
 					filename=filename, expected=checksumMatch.group(1), got=checksum)
+				return
+
+			fileSize = os.path.getsize(downloadpath)
+			if fileSize > maxSourceSizeBytes:
+				os.remove(downloadpath)
+				log('info', 'skipping archival of ' + filename + ' - source package is larger than maxSourceSizeBytes',
+					filename=filename, bytes=fileSize, size_mib=fileSize / (1024 * 1024.0))
 				return
 
 			try:
