@@ -1,4 +1,7 @@
+REGISTRY = ghcr.io/haiku
 default:
-	docker build --no-cache --tag docker.io/haiku/ports-mirror:latest .
+	podman build --no-cache --tag ${REGISTRY}/ports-mirror:latest .
+test:
+	podman run -d --env-file test_s3_secrets ${REGISTRY}/ports-mirror:latest
 push:
-	docker push docker.io/haiku/ports-mirror:latest
+	podman push ${REGISTRY}/ports-mirror:latest

@@ -57,23 +57,130 @@ if not os.path.exists(downloadDir):
 shellVars = dict()
 recipe = ''
 
+def globToRegex(glob, greedy):
+	# Translate a bash glob pattern into a regular expression.  Bash escapes
+	# like "\~" are turned into the literal escaped character, while "*" and
+	# "?" become the equivalent regex quantifiers.
+	out = []
+	i = 0
+	while i < len(glob):
+		c = glob[i]
+		if c == '\\' and i + 1 < len(glob):
+			out.append(re.escape(glob[i + 1]))
+			i += 2
+			continue
+		if c == '*':
+			out.append('.*' if greedy else '.*?')
+		elif c == '?':
+			out.append('.')
+		else:
+			out.append(re.escape(c))
+		i += 1
+	return ''.join(out)
+
+def resolveVar(name, recipe, depth=0):
+	if name in shellVars:
+		return shellVars[name]
+	if depth > 20:
+		return None
+	value = None
+	quotedMatch = re.search('^' + name + r'="(.*?)"', recipe, flags=re.DOTALL | re.MULTILINE)
+	if quotedMatch:
+		value = quotedMatch.group(1)
+	else:
+		lineMatch = re.search('^' + name + r'=(.*)$', recipe, flags=re.MULTILINE)
+		if lineMatch:
+			value = lineMatch.group(1)
+			value = value.split(' #', 1)[0].strip()
+			if value.startswith('"'):
+				value = value[1:]
+				if value.endswith('"'):
+					value = value[:-1]
+	if value is None:
+		return None
+	value = expandVariables(value, recipe, depth + 1)
+	shellVars[name] = value
+	return value
+
+def expandParameter(expr, recipe, depth):
+	# Expands a bash-style ${...} parameter expansion, supporting the forms
+	# used by haikuports recipes: ${var}, ${var:offset:length}, ${var#pat} /
+	# ${var##pat}, ${var%pat} / ${var%%pat}, and ${var/pat[/repl]} /
+	# ${var//pat[/repl]}.
+	m = re.match(r'^(\w+)(.*)$', expr)
+	if not m:
+		return '${' + expr + '}'
+	name = m.group(1)
+	op = m.group(2)
+	value = resolveVar(name, recipe, depth)
+	if value is None:
+		return '${' + expr + '}'
+	if op == '':
+		return value
+	if op.startswith(':?'):
+		# ${var:?} expands to the value, erroring only if unset
+		return value
+	substringMatch = re.match(r'^:(-?\d+)(?::(-?\d+))?$', op)
+	if substringMatch:
+		offset = int(substringMatch.group(1))
+		length = int(substringMatch.group(2)) if substringMatch.group(2) is not None else None
+		return value[offset:] if length is None else value[offset:offset + length]
+	prefixMatch = re.match(r'^(##?)(.+)$', op)
+	if prefixMatch:
+		glob = prefixMatch.group(2)
+		greedy = prefixMatch.group(1) == '##'
+		prefixRemoved = re.match('^(' + globToRegex(glob, greedy) + ')(.*)$', value)
+		if prefixRemoved:
+			return prefixRemoved.group(2)
+		return value
+	suffixMatch = re.match(r'^(%%?)(.+)$', op)
+	if suffixMatch:
+		glob = suffixMatch.group(2)
+		if suffixMatch.group(1) == '%%':
+			# remove the longest suffix, keep the shortest prefix
+			suffixRemoved = re.match('^(.*?)' + globToRegex(glob, True) + '$', value)
+		else:
+			# remove the shortest suffix, keep the longest prefix
+			suffixRemoved = re.match('^(.*)' + globToRegex(glob, True) + '$', value)
+		if suffixRemoved:
+			return suffixRemoved.group(1)
+		return value
+	replaceMatch = re.match(r'^(//?)(.*)$', op, flags=re.DOTALL)
+	if replaceMatch:
+		allOccurrences = replaceMatch.group(1) == '//'
+		rest = replaceMatch.group(2)
+		if '/' in rest:
+			pattern, replacement = rest.split('/', 1)
+		else:
+			pattern, replacement = rest, ''
+		count = 0 if allOccurrences else 1
+		return re.sub(globToRegex(pattern, True), lambda match: replacement, value, count=count)
+	return '${' + expr + '}'
+
 class Replacer(object):
-	def __init__(self, recipe):
+	def __init__(self, recipe, depth):
 		self.recipe = recipe
+		self.depth = depth
 
 	def __call__(self, match):
-		shellVar = match.group(1)
-		if shellVar not in shellVars:
-			shellVarSpecMatch = re.search('^' + shellVar + '="(.+?)"', self.recipe, flags=re.DOTALL | re.MULTILINE)
-			if not shellVarSpecMatch:
-				return match.group(0)
-			shellVars[shellVar] = shellVarSpecMatch.group(1)
-		return shellVars[shellVar]
+		if match.group(2) is not None:
+			value = resolveVar(match.group(2), self.recipe, self.depth)
+			return value if value is not None else match.group(0)
+		return expandParameter(match.group(1), self.recipe, self.depth)
 
-def expandVariables(string, recipe):
-	replacer = Replacer(recipe)
-	string = re.sub(r'\$(\w+)', replacer, string)
-	return re.sub(r'\$\{(\w+)\}', replacer, string)
+def stripFragment(spec):
+	# haikuports appends URL fragments like "#noarchive" to SOURCE_URI.  Only
+	# strip a "#" that ends the URL; a "#" inside a bash parameter expansion
+	# (e.g. ${portVersion##*.}) is always followed by "}" and must be kept so
+	# it is not confused with a URL fragment.
+	hashIndex = spec.rfind('#')
+	if hashIndex != -1 and '}' not in spec[hashIndex:]:
+		return spec[:hashIndex]
+	return spec
+
+def expandVariables(string, recipe, depth=0):
+	replacer = Replacer(recipe, depth)
+	return re.sub(r'\$\{([^}]*)\}|\$(\w+)', replacer, string)
 
 def s3ObjectValid(s3target, expectedSha256):
 	# Returns True when the object exists in the bucket and the sha256 checksum
@@ -87,6 +194,18 @@ def s3ObjectValid(s3target, expectedSha256):
 			return False
 		raise
 	return head.get('Metadata', {}).get('sha256') == expectedSha256
+
+def isHttpHtmlResponse(path):
+	# Returns True when the downloaded content looks like an HTML response
+	# (e.g. a 200-OK error page) rather than the expected binary source file.
+	try:
+		with open(path, 'rb') as f:
+			head = f.read(2048)
+	except Exception:
+		return False
+	low = head.lstrip().lower()
+	return (low.startswith(b'<!doctype html') or low.startswith(b'<html')
+		or b'<!doctype html' in low or b'<html>' in low or b'<title>' in low)
 
 def updateRecipe(recipeFile):
 	with open(recipeFile, 'r') as f:
@@ -102,6 +221,7 @@ def updateRecipe(recipeFile):
 	shellVars['portName'] = os.path.basename(recipeFile).partition('-')[0]
 	shellVars['portVersion'] = os.path.basename(recipeFile).partition('-')[2][:-7]
 	shellVars['portVersionedName'] = shellVars['portName'] + '-' + shellVars['portVersion']
+	shellVars['portBaseName'] = shellVars['portName'].replace('_', '-')
 
 	for srcUriMatch in re.finditer(r'^(SOURCE_URI(?:_\d+)*)="(.+?)"', recipe, flags=re.DOTALL | re.MULTILINE):
 		srcUriKey = srcUriMatch.group(1)
@@ -110,7 +230,7 @@ def updateRecipe(recipeFile):
 		for srcUriSpec in srcUriMatch.group(2).split():
 			if not (srcUriSpec.startswith('http') or srcUriSpec.startswith('ftp')):
 				return
-			srcUri = srcUriSpec.partition('#')[0]
+			srcUri = stripFragment(srcUriSpec)
 			srcUri = expandVariables(srcUri, recipe)
 			srcFilenameMatch = re.search('^' + srcFilenameKey + '="(.+?)"', recipe,
 				flags=re.DOTALL | re.MULTILINE)
@@ -137,12 +257,35 @@ def updateRecipe(recipeFile):
 				return
 			if os.path.exists(downloadpath):
 				os.remove(downloadpath)
-			args = [ 'curl', '-fkL', '--limit-rate', '5M', '--silent', '--output', downloadpath, srcUri ]
-			#args = [ 'curl', '-fkL', '--limit-rate', '5M', '--output', downloadpath, srcUri ]
-			curlResult = call(args, cwd=downloadDir)
+			httpInfoFile = downloadpath + '.http'
+			args = [ 'curl', '-fkL', '--limit-rate', '5M', '--silent', '--output', downloadpath,
+				'--write-out', '%{http_code} %{content_type}', srcUri ]
+			with open(httpInfoFile, 'w') as httpOutput:
+				curlResult = call(args, stdout=httpOutput, cwd=downloadDir)
+			httpInfo = ''
+			try:
+				with open(httpInfoFile, 'r') as f:
+					httpInfo = f.read().strip()
+			except Exception:
+				pass
+			if os.path.exists(httpInfoFile):
+				os.remove(httpInfoFile)
 			if curlResult != 0:
 				log('error', 'unable to download ' + filename + ' - curl gave resultcode ' + str(curlResult),
 					filename=filename, curl_resultcode=curlResult)
+				return
+
+			httpCode = httpInfo.split(' ', 1)[0] if httpInfo else ''
+			contentType = httpInfo.split(' ', 1)[1] if ' ' in httpInfo else ''
+			if srcUri.startswith('http') and not httpCode.startswith('2'):
+				log('error', 'unexpected HTTP status ' + httpCode + ' downloading ' + filename,
+					filename=filename, http_code=httpCode, uri=srcUri)
+				os.remove(downloadpath)
+				return
+			if 'html' in contentType.lower() or isHttpHtmlResponse(downloadpath):
+				log('error', 'downloaded an HTTP response instead of the source file for ' + filename,
+					filename=filename, content_type=contentType, uri=srcUri)
+				os.remove(downloadpath)
 				return
 
 			checksum = check_output(['sha256sum', '-b', downloadpath], universal_newlines=True).split()[0]
