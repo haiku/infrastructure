@@ -427,7 +427,7 @@ def getRemoteFileSize(url):
 	sslContext = ssl._create_unverified_context()
 	request = urllib.request.Request(url, method='HEAD', headers={ 'User-Agent': 'haiku-ports-mirror/1.0' })
 	try:
-		response = urllib.request.urlopen(request, context=sslContext, timeout=60)
+		response = urllib.request.urlopen(request, context=sslContext, timeout=30)
 	except Exception:
 		return None
 	size = response.headers.get('Content-Length')
@@ -453,7 +453,7 @@ def downloadFile(url, targetPath, rateLimitBytes, maxBytes):
 	sslContext = ssl._create_unverified_context()
 	request = urllib.request.Request(url, headers={ 'User-Agent': 'haiku-ports-mirror/1.0' })
 	try:
-		response = urllib.request.urlopen(request, context=sslContext, timeout=120)
+		response = urllib.request.urlopen(request, context=sslContext, timeout=30)
 	except urllib.error.HTTPError as e:
 		return {
 			'success': False,
