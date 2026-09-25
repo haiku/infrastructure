@@ -456,14 +456,33 @@ def downloadFile(url, targetPath, rateLimitBytes):
 	status = getattr(response, 'status', getattr(response, 'code', 200))
 	contentType = response.headers.get('Content-Type', '') or ''
 	hasher = hashlib.sha256()
-	with open(targetPath, 'wb') as f:
-		while True:
-			chunk = response.read(64 * 1024)
-			if not chunk:
-				break
-			hasher.update(chunk)
-			f.write(chunk)
-			time.sleep(len(chunk) / float(rateLimitBytes))
+	try:
+		with open(targetPath, 'wb') as f:
+			while True:
+				chunk = response.read(64 * 1024)
+				if not chunk:
+					break
+				hasher.update(chunk)
+				f.write(chunk)
+				time.sleep(len(chunk) / float(rateLimitBytes))
+	except Exception as e:
+		# e.g. http.client.IncompleteRead when the connection drops mid-file;
+		# discard the partial download and let the caller continue.
+		try:
+			response.close()
+		except Exception:
+			pass
+		try:
+			os.remove(targetPath)
+		except Exception:
+			pass
+		return {
+			'success': False,
+			'error': 'incomplete or failed download: ' + str(e),
+			'status': status,
+			'content_type': contentType,
+			'sha256': None,
+		}
 	response.close()
 	return {
 		'success': True,
@@ -574,7 +593,7 @@ def updateFromCheckout(gitRepoDir):
 	for recipeFile in glob.glob(gitRepoDir + '/*/*/*.recipe'):
 		try:
 			updateRecipe(recipeFile)
-		except OSError as e:
+		except Exception as e:
 			log('error', 'exception while processing ' + recipeFile + ': ' + str(e),
 				recipe_file=recipeFile, error=str(e))
 			continue
