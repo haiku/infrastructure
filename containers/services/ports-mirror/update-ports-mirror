@@ -87,21 +87,19 @@ def resolveVar(name, recipe, depth=0):
 		return shellVars[name]
 	if depth > 20:
 		return None
-	value = None
-	quotedMatch = re.search('^' + name + r'="(.*?)"', recipe, flags=re.DOTALL | re.MULTILINE)
-	if quotedMatch:
-		value = quotedMatch.group(1)
-	else:
-		lineMatch = re.search('^' + name + r'=(.*)$', recipe, flags=re.MULTILINE)
-		if lineMatch:
-			value = lineMatch.group(1)
-			value = value.split(' #', 1)[0].strip()
-			if value.startswith('"'):
-				value = value[1:]
-				if value.endswith('"'):
-					value = value[:-1]
-	if value is None:
+	lineMatch = re.search('^' + name + r'=(.*)$', recipe, flags=re.MULTILINE)
+	if not lineMatch:
 		return None
+	value = lineMatch.group(1)
+	value = value.split(' #', 1)[0].strip()
+	if value.startswith('"'):
+		# strip the enclosing quotes; the value may itself contain quotes
+		# (e.g. inside a `...` command substitution), so use the last quote
+		endQuote = value.rfind('"')
+		if endQuote > 0:
+			value = value[1:endQuote]
+		else:
+			value = value[1:]
 	value = expandVariables(value, recipe, depth + 1)
 	shellVars[name] = value
 	return value
@@ -161,16 +159,217 @@ def expandParameter(expr, recipe, depth):
 		return re.sub(globToRegex(pattern, True), lambda match: replacement, value, count=count)
 	return '${' + expr + '}'
 
-class Replacer(object):
-	def __init__(self, recipe, depth):
-		self.recipe = recipe
-		self.depth = depth
+def findCommandClose(string, start, openChar, closeChar):
+	# Returns the index of the closeChar matching the openChar opened at
+	# 'start', skipping backslash-escaped characters (e.g. the "\)" in a sed
+	# expression), or -1 when unbalanced.
+	depth = 1
+	i = start
+	while i < len(string):
+		if string[i] == '\\' and i + 1 < len(string):
+			i += 2
+			continue
+		if string[i] == openChar:
+			depth += 1
+		elif string[i] == closeChar:
+			depth -= 1
+			if depth == 0:
+				return i
+		i += 1
+	return -1
 
-	def __call__(self, match):
-		if match.group(2) is not None:
-			value = resolveVar(match.group(2), self.recipe, self.depth)
-			return value if value is not None else match.group(0)
-		return expandParameter(match.group(1), self.recipe, self.depth)
+def expandVariables(string, recipe, depth=0):
+	out = []
+	i = 0
+	n = len(string)
+	while i < n:
+		c = string[i]
+		if c == '$' and i + 1 < n:
+			nextChar = string[i + 1]
+			if nextChar == '{':
+				close = string.find('}', i + 2)
+				if close != -1:
+					out.append(expandParameter(string[i + 2:close], recipe, depth))
+					i = close + 1
+					continue
+			elif nextChar == '(':
+				close = findCommandClose(string, i + 2, '(', ')')
+				if close != -1:
+					result = evaluateCommand(string[i + 2:close], recipe, depth)
+					out.append(result if result is not None else string[i:close + 1])
+					i = close + 1
+					continue
+			else:
+				nameMatch = re.match(r'\w+', string[i + 1:])
+				if nameMatch:
+					name = nameMatch.group(0)
+					value = resolveVar(name, recipe, depth)
+					out.append(value if value is not None else '$' + name)
+					i += 1 + len(name)
+					continue
+			out.append(c)
+			i += 1
+			continue
+		elif c == '`':
+			close = string.find('`', i + 1)
+			if close != -1:
+				result = evaluateCommand(string[i + 1:close], recipe, depth)
+				out.append(result if result is not None else string[i:close + 1])
+				i = close + 1
+				continue
+			out.append(c)
+			i += 1
+			continue
+		out.append(c)
+		i += 1
+	return ''.join(out)
+
+def sedPatternToRegex(pattern):
+	# Translates a sed basic regular expression into a python regular
+	# expression, handling the constructs used by haikuports recipes (e.g.
+	# "\." for a literal dot, "\(...\)" groups, and "\>" for end-of-word).
+	out = []
+	i = 0
+	while i < len(pattern):
+		c = pattern[i]
+		if c == '\\' and i + 1 < len(pattern):
+			nxt = pattern[i + 1]
+			if nxt == '>':
+				out.append(r'(?=\W|$)')
+			elif nxt == '<':
+				out.append(r'(?<=\W)')
+			elif nxt == '(':
+				out.append('(')
+			elif nxt == ')':
+				out.append(')')
+			elif nxt in '0123456789':
+				out.append('\\' + nxt)
+			elif nxt == '.':
+				out.append(r'\.')
+			else:
+				out.append(re.escape(nxt))
+			i += 2
+		elif c == '[':
+			j = i
+			while j < len(pattern) and pattern[j] != ']':
+				j += 1
+			out.append(pattern[i:j + 1])
+			i = j + 1
+		else:
+			out.append(re.escape(c))
+			i += 1
+	return ''.join(out)
+
+def applySedExpr(value, expr):
+	if not expr.startswith('s'):
+		return value
+	delim = expr[1] if len(expr) > 1 else '/'
+	parts = expr[2:].split(delim)
+	if len(parts) < 2:
+		return value
+	pattern = parts[0]
+	replacement = parts[1]
+	flags = parts[2] if len(parts) > 2 else ''
+	count = 0 if 'g' in flags else 1
+	return re.sub(sedPatternToRegex(pattern), replacement, value, count=count)
+
+def applySed(value, sedArgs):
+	result = value
+	exprs = []
+	i = 0
+	while i < len(sedArgs):
+		arg = sedArgs[i].strip().strip("'").strip('"')
+		if arg == '-e' and i + 1 < len(sedArgs):
+			exprs.append(sedArgs[i + 1].strip().strip("'").strip('"'))
+			i += 2
+		elif arg.startswith('-e'):
+			exprs.append(arg[2:].strip())
+			i += 1
+		elif arg.startswith('s'):
+			exprs.append(arg)
+			i += 1
+		else:
+			i += 1
+	for expr in exprs:
+		result = applySedExpr(result, expr)
+	return result
+
+def applyCut(value, cutArgs):
+	delim = None
+	fieldSpec = None
+	rangeSpec = None
+	i = 0
+	while i < len(cutArgs):
+		arg = cutArgs[i]
+		if arg in ('-d', '--delimiter') and i + 1 < len(cutArgs):
+			delim = cutArgs[i + 1]
+			i += 2
+		elif arg.startswith('-d') and len(arg) > 2:
+			delim = arg[2:]
+			i += 1
+		elif arg == '-f' and i + 1 < len(cutArgs):
+			fieldSpec = cutArgs[i + 1]
+			i += 2
+		elif arg.startswith('-f') and len(arg) > 2:
+			fieldSpec = arg[2:]
+			i += 1
+		elif arg.startswith('-b') or arg.startswith('-c'):
+			if len(arg) > 2:
+				rangeSpec = arg[2:]
+				i += 1
+			elif i + 1 < len(cutArgs):
+				rangeSpec = cutArgs[i + 1]
+				i += 2
+			else:
+				i += 1
+		else:
+			i += 1
+	if rangeSpec is not None:
+		low, _, high = rangeSpec.partition('-')
+		low = int(low) if low else 0
+		high = int(high) if high else None
+		return value[low - 1:high]
+	if delim is None or fieldSpec is None:
+		return value
+	pieces = value.split(delim)
+	out = []
+	for spec in fieldSpec.split(','):
+		if '-' in spec:
+			low, high = spec.split('-', 1)
+			low = int(low) if low else 1
+			high = int(high) if high else len(pieces)
+			out.extend(pieces[low - 1:high])
+		else:
+			index = int(spec)
+			if 1 <= index <= len(pieces):
+				out.append(pieces[index - 1])
+	return delim.join(out)
+
+def evaluateCommand(command, recipe, depth):
+	# Evaluates the simple shell pipelines used by haikuports recipes to
+	# transform versions, e.g. `echo $portVersion | sed 's/\_/-/g'` or
+	# $(echo $portVersion | cut -d. -f1).  Returns None when the command
+	# cannot be evaluated so the original substitution is preserved.
+	command = expandVariables(command, recipe, depth + 1)
+	stages = [stage.strip() for stage in command.split('|')]
+	if not stages or not stages[0].startswith('echo'):
+		return None
+	value = None
+	for stage in stages:
+		parts = stage.split()
+		if not parts:
+			continue
+		if parts[0] == 'echo':
+			value = ' '.join(parts[1:]).strip().strip('"').strip("'")
+		elif parts[0] == 'sed' and value is not None:
+			value = applySed(value, parts[1:])
+		elif parts[0] == 'cut' and value is not None:
+			value = applyCut(value, parts[1:])
+		elif parts[0] == 'basename' and value is None:
+			value = os.path.basename(' '.join(parts[1:]).strip().strip('"').strip("'"))
+		elif parts[0] == 'dirname' and value is None:
+			value = os.path.dirname(' '.join(parts[1:]).strip().strip('"').strip("'"))
+	return value
 
 def stripFragment(spec):
 	# haikuports appends URL fragments like "#noarchive" to SOURCE_URI.  Only
@@ -181,10 +380,6 @@ def stripFragment(spec):
 	if hashIndex != -1 and '}' not in spec[hashIndex:]:
 		return spec[:hashIndex]
 	return spec
-
-def expandVariables(string, recipe, depth=0):
-	replacer = Replacer(recipe, depth)
-	return re.sub(r'\$\{([^}]*)\}|\$(\w+)', replacer, string)
 
 def s3ObjectValid(s3target, expectedSha256):
 	# Returns True when the object exists in the bucket and the sha256 checksum
