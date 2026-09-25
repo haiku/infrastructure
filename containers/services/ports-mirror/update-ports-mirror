@@ -494,6 +494,8 @@ def updateRecipe(recipeFile):
 			checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe,
 				flags=re.DOTALL | re.MULTILINE)
 			if checksumMatch and s3ObjectValid(s3target, checksumMatch.group(1)):
+				log('info', 'no update needed for ' + filename + ' - checksum matches s3://' + s3Bucket + '/' + s3target,
+					filename=filename, bucket=s3Bucket, key=s3target, sha256=checksumMatch.group(1))
 				return
 			log('info', os.path.basename(recipeFile) + ' => ' + filename + " (" + srcUri + ")",
 				recipe=recipeFileName, filename=filename, uri=srcUri)
