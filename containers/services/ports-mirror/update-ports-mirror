@@ -68,14 +68,18 @@ def expandVariables(string, recipe):
 	string = re.sub(r'\$(\w+)', replacer, string)
 	return re.sub(r'\$\{(\w+)\}', replacer, string)
 
-def s3FileExists(s3target):
+def s3ObjectValid(s3target, expectedSha256):
+	# Returns True when the object exists in the bucket and the sha256 checksum
+	# recorded on it matches the one described in the recipe.  Objects that are
+	# missing, that predate checksum recording, or whose checksum does not match
+	# are considered invalid so they get re-downloaded and re-archived.
 	try:
-		s3Client.head_object(Bucket=s3Bucket, Key=s3target)
-		return True
+		head = s3Client.head_object(Bucket=s3Bucket, Key=s3target)
 	except ClientError as e:
 		if e.response['Error']['Code'] == '404':
 			return False
 		raise
+	return head.get('Metadata', {}).get('sha256') == expectedSha256
 
 def updateRecipe(recipeFile):
 	with open(recipeFile, 'r') as f:
@@ -116,8 +120,10 @@ def updateRecipe(recipeFile):
 			s3target = recipeName + '/' + filename
 			targetpath = portsMirrorDir + '/' + s3target
 			downloadpath = downloadDir + '/' + filename
+			checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe,
+				flags=re.DOTALL | re.MULTILINE)
 			if useS3:
-				if s3FileExists(s3target):
+				if checksumMatch and s3ObjectValid(s3target, checksumMatch.group(1)):
 					return
 			elif os.path.exists(targetpath):
 				return
@@ -126,8 +132,6 @@ def updateRecipe(recipeFile):
 				os.mkdir(targetdir)
 			print(datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 			print('\t' + os.path.basename(recipeFile) + ' => ' + filename + " (" + srcUri + ")")
-			checksumMatch = re.search('^' + checksumSha256Key + '="(.+?)"', recipe,
-				flags=re.DOTALL | re.MULTILINE)
 			if not checksumMatch:
 				print('*** recipe ' + recipeFile + ' does not contain a usable checksum!')
 				return
@@ -149,7 +153,8 @@ def updateRecipe(recipeFile):
 
 			if useS3:
 				try:
-					s3Client.upload_file(downloadpath, s3Bucket, s3target)
+					s3Client.upload_file(downloadpath, s3Bucket, s3target,
+						ExtraArgs={'Metadata': {'sha256': checksum}})
 				except Exception as e:
 					os.remove(downloadpath)
 					print('* unable to archive ' + filename + ' to s3://' + s3Bucket + '/' + s3target + ': ' + str(e))

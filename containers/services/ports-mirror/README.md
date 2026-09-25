@@ -14,5 +14,7 @@ variables:
 * `S3_ACCESS_KEY` - S3 access key
 * `S3_SECRET_KEY` - S3 secret key
 
-When `S3_BUCKET` is set, the script checks whether each package already
-exists in the bucket and only downloads and archives it when it is missing.
+When `S3_BUCKET` is set, the script records the recipe's sha256 checksum on
+each archived object and verifies it via the S3 API (`head_object`). Objects
+whose recorded checksum does not match the recipe -- or that were archived
+before the checksum was recorded -- are re-downloaded and re-archived.
