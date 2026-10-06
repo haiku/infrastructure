@@ -15,6 +15,9 @@ Optional:
 
 * `PARALLEL_DOWNLOADS` - number of recipes to fetch and archive concurrently
   (default `4`)
+* `SCAN_BRANCHES` - comma- or whitespace-separated list of branches to scan.
+  Remote-tracking refs (`remotes/origin/<branch>`) match by their branch name.
+  Defaults to `master main`.
 
 The script records the recipe's sha256 checksum on each archived object and
 verifies it via the S3 API (`head_object`). Objects whose recorded checksum

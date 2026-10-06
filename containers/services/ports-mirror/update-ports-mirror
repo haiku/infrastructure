@@ -35,6 +35,13 @@ maxSourceSizeBytes = 200 * 1024 * 1024 # skip archiving source packages larger t
 maxDownloadSpeedBytes = 250 * 1024 # Maximum speed per download thread
 parallelDownloads = max(1, int(os.environ.get('PARALLEL_DOWNLOADS', '4')))
 
+# SCAN_BRANCHES optionally restricts which branches are scanned.  It accepts a
+# comma- or whitespace-separated list of branch names and defaults to the
+# primary "master" / "main" branches so a fresh checkout is not scanned in its
+# entirety.
+scanBranchesEnv = os.environ.get('SCAN_BRANCHES', '').strip()
+scanBranches = [ b for b in re.split(r'[,\s]+', scanBranchesEnv) if b ] or [ 'master', 'main' ]
+
 # Source packages are archived to an S3 bucket in a <recipeName>/<filename>
 # layout, keyed by the recipe name and the source filename.
 s3Bucket = os.environ.get('S3_BUCKET')
@@ -628,6 +635,14 @@ def updateRecipe(recipeFile):
 				filename=filename, bucket=s3Bucket, key=s3target, sha256=checksum)
 
 
+def branchShortName(ref):
+	# Maps a `git branch -a` entry to its branch name, dropping the
+	# "remotes/<remote>/" prefix from remote-tracking refs so it can be
+	# compared against the configured SCAN_BRANCHES list.
+	if ref.startswith('remotes/'):
+		return ref[len('remotes/'):].partition('/')[2]
+	return ref
+
 def processRecipe(recipeFile):
 	try:
 		updateRecipe(recipeFile)
@@ -663,8 +678,11 @@ while True:
 				continue
 			if ' ' in branch:
 				branch = branch[0:branch.find(' ')]
-			log('info', 'updating %s/%s' % (repoName, branch),
-				repo=repoName, branch=branch)
+			branchName = branchShortName(branch)
+			if branchName not in scanBranches:
+				continue
+			log('info', 'updating %s/%s' % (repoName, branchName),
+				repo=repoName, branch=branchName)
 			check_call([ 'git', 'checkout', '-q', branch ], cwd=gitRepoDir)
 
 			updateFromCheckout(gitRepoDir)
