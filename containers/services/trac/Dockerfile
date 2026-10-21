@@ -13,7 +13,7 @@ RUN ls
 ADD requirements.txt /app
 
 # Install the requirements
-RUN apk add build-base libjpeg graphviz freetype libpq postgresql18-dev postgresql18-client curl git zlib
+RUN apk add build-base libjpeg graphviz freetype libpq postgresql18-dev postgresql18-client curl git zlib subversion
 
 RUN python3 -m ensurepip && \
     python3 -mpip install -r requirements.txt

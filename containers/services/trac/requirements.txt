@@ -28,5 +28,5 @@ TracAccountManager
 TracRobotsTxt
 TracSpamFilter
 TracVote
-git+https://github.com/nielx/trac-mastertickets
+svn+https://trac-hacks.org/svn/masterticketsplugin/trunk/
 git+https://github.com/nielx/trac-subcomponents
