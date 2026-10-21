@@ -1,4 +1,4 @@
-VERSION = 1.6.1.1-python
+VERSION = 1.6.1.2-python
 REGISTRY = ghcr.io/haiku
 ENGINE = podman
 default:

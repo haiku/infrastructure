@@ -25,8 +25,8 @@ git+https://github.com/haiku/trac.git@1.6.1-haiku
 
 # Our Plugins
 TracAccountManager
-TracMasterTickets
 TracRobotsTxt
 TracSpamFilter
 TracVote
+git+https://github.com/nielx/trac-mastertickets
 git+https://github.com/nielx/trac-subcomponents
