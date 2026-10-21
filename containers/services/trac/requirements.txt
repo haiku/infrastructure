@@ -1,19 +1,32 @@
+# Things we used to include... no longer needed?
+#html5lib==1.1
+#webencodings==0.6.1
+
 # This list is generated from a fresh virtualenv when Trac is installed
-Babel==2.14.0
-cffi==1.16.0
-docutils==0.20.1
-html5lib==1.1
-Jinja2==3.1.5
-MarkupSafe==2.1.5
-pillow==10.3.0
-Pygments==2.17.2
-pytz==2024.1
-six==1.16.0
-textile==4.0.2
-webencodings==0.5.1
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+multipart==2.0.1
+setuptools==80.10.2
+
+# Things the README mention
+Babel==2.18.0 # localization
+pytz==2026.5 # timezone support
+docutils==0.20.1 # wiki structured text
+Pygments==2.17.2 # syntax highlighting
+textile==4.0.4 # textile markup
+MarkupSafe==3.0.4 # not documented, but required for markup safety
 
 # Optional module for PostgreSQL
-psycopg2cffi==2.9.0
+psycopg2 # for non-pypy
+#psycopg2cffi==2.9.0 # pypy hack
 
 # Customized Trac 1.6
-git+https://github.com/haiku/trac.git@1.6.0-haiku
+git+https://github.com/haiku/trac.git@1.6.1-haiku
+
+# Our Plugins
+TracAccountManager
+TracMasterTickets
+TracRobotsTxt
+TracSpamFilter
+TracVote
+git+https://github.com/nielx/trac-subcomponents

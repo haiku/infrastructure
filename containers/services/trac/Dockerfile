@@ -1,4 +1,4 @@
-FROM docker.io/pypy:3.11-slim
+FROM docker.io/python:3.15-alpine
 
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/trac/pypy
@@ -13,13 +13,12 @@ RUN ls
 ADD requirements.txt /app
 
 # Install the requirements
-RUN apt update && \
-    apt install -y build-essential gcc graphviz libjpeg-dev libfreetype-dev libpq-dev curl git zlib1g-dev
+RUN apk add build-base libjpeg graphviz freetype libpq postgresql18-dev postgresql18-client curl git zlib
 
-RUN pypy -m ensurepip && \
-    pypy -mpip install -r requirements.txt
+RUN python3 -m ensurepip && \
+    python3 -mpip install -r requirements.txt
 
-CMD /opt/pypy/bin/tracd -b 0.0.0.0 -p 80 -s /var/trac/dev.haiku-os.org
+CMD /usr/local/bin/tracd -b 0.0.0.0 -p 80 -s /var/trac/dev.haiku-os.org
 
 # Make port 80 available to the outside world
 EXPOSE 80
