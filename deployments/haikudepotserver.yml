@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.200
+        image: ghcr.io/haiku/haikudepotserver:1.0.201
         env:
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
@@ -94,7 +94,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.200
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.201
           resources:
             limits:
               cpu: "1.0"
@@ -240,7 +240,7 @@ spec:
         spec:
           containers:
             - name: haikudepotserver-maintenance-hourly
-              image: curlimages/curl:8.18.0
+              image: curlimages/curl:8.23.0
               args:
                 - curl
                 - -X
@@ -270,7 +270,7 @@ spec:
         spec:
           containers:
             - name: haikudepotserver-maintenance-daily
-              image: curlimages/curl:8.18.0
+              image: curlimages/curl:8.23.0
               args:
                 - curl
                 - -X
@@ -287,7 +287,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: haikudepotserver-maintenance-daily
+  name: haikudepotserver-maintenance-5min
 spec:
   schedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
@@ -300,7 +300,7 @@ spec:
         spec:
           containers:
             - name: haikudepotserver-maintenance-5min
-              image: curlimages/curl:8.18.0
+              image: curlimages/curl:8.23.0
               args:
                 - curl
                 - -X
