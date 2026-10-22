@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: userguide
-        image: ghcr.io/haiku/userguide:1.0-1
+        image: ghcr.io/haiku/userguide:1.1-2
         env:
         - name: REF_DIR
           value: data/source_docs
