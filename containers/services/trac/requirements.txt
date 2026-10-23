@@ -24,9 +24,10 @@ psycopg2 # for non-pypy
 git+https://github.com/haiku/trac.git@1.6.1-haiku
 
 # Our Plugins
-TracAccountManager
+#TracAccountManager
 TracRobotsTxt
 TracSpamFilter
 TracVote
+git+https://github.com/haiku/trac-oidc@0.2.1.dev0
 svn+https://trac-hacks.org/svn/masterticketsplugin/trunk/
 git+https://github.com/nielx/trac-subcomponents
