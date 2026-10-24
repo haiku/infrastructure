@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: haikudepotserver
-        image: ghcr.io/haiku/haikudepotserver:1.0.202
+        image: ghcr.io/haiku/haikudepotserver:1.0.204
         env:
         - name: HDS_BASE_URL
           value: "https://depot.haiku-os.org"
@@ -54,6 +54,17 @@ spec:
             secretKeyRef:
               name: haikudepotserver-jws
               key: shared-key
+        - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HAIKU_ISSUERURI
+          value: "https://sso.haiku-os.org/realms/haiku"
+        - name: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HAIKU_PROVIDER
+          value: "haiku"
+        - name: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HAIKU_CLIENTID
+          value: "haikudepotserver-app"
+        - name: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HAIKU_CLIENTSECRET
+          valueFrom:
+            secretKeyRef:
+              name: haikudepotserver-sso
+              key: secret
         resources:
           limits:
             cpu: "1.0"
@@ -94,7 +105,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-server-graphics
-          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.202
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.204
           resources:
             limits:
               cpu: "1.0"
