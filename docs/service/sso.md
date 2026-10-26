@@ -47,6 +47,7 @@ See [Gerrit Documentation](gerrit.md) for details
 4) Erase the username for the user in gerrit "username:OLDUSERNAME"
 5) Create a new username for the user in gerrit username:NEWUSERNAME"
 6) Add the user's email back to their identity in Gerrit
+7) Use ```tools/sso/gerrit_identity_fixer.rb``` to tie the new identity to the user (see the comments in the script on how to use it)
 
 ### Validation
 
