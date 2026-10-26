@@ -19,3 +19,35 @@ We prefer OAuth2 because it's awesome
 9) Add the Client ID, Client Secret, and configure [the endpoint](https://sso.haiku-os.org/realms/haiku/.well-known/openid-configuration)
 10) The user roles are available under "roles", email is available under "email"
 11) You can simulate what is available to clients via Client scopes -> Evaluate
+
+## Renaming users
+
+> Renaming Keycloak users is not recommended except in extreme cases. We
+> have a wide range of legacy systems keying off of the username field which
+> don't take username changes well.
+>
+> DO NOT ENABLE USERS EDITING THEIR OWN USERNAMES in User Profile permissions!
+
+1) Login as a Keycloak admin
+2) Switch to the haiku realm
+4) Users -> find the user -> rename the user
+
+### Fix Trac
+
+1) Login to Trac.  Admin -> Rename Trac User
+2) Rename the trac user, ensuring the new username matches the update
+
+### Fix Gerrit
+
+See [Gerrit Documentation](gerrit.md) for details
+
+1) Login to Gerrit, find your HTTP username / password
+2) Find the account ID using the Gerrit APIs
+3) Erase the external id "keycloak-oauth:OLDUSERNAME"
+4) Erase the username for the user in gerrit "username:OLDUSERNAME"
+5) Create a new username for the user in gerrit username:NEWUSERNAME"
+6) Add the user's email back to their identity in Gerrit
+
+### Validation
+
+Ask the user to login to all systems they use and ensure access.
