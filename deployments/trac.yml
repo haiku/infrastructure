@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: trac
-          image: ghcr.io/haiku/trac:1.6.1.10-python
+          image: ghcr.io/haiku/trac:1.6.1.11-python
           resources:
             limits:
               cpu: "2.0"
