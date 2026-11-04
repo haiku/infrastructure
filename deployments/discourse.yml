@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: discourse
-        image: ghcr.io/haiku/discourse:2026.5.0
+        image: ghcr.io/haiku/discourse:2026.7.0
         resources:
           limits:
             cpu: "2.0"
@@ -121,6 +121,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-ua-ratelimit-loose@kubernetescrd,default-scraper-denyip@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd
 spec:
   tls:
   - hosts:

@@ -189,7 +189,7 @@ metadata:
 spec:
   rateLimit:
     average: 1
-    burst: 50
+    burst: 80
     period: 2s
     sourceCriterion:
       requestHeaderName: User-Agent
@@ -203,7 +203,7 @@ metadata:
 spec:
   rateLimit:
     average: 2
-    burst: 100
+    burst: 200
     period: 1s
     sourceCriterion:
       requestHeaderName: User-Agent
