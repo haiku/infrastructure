@@ -8,6 +8,7 @@ spec:
     denyip:
       ipDenyList:
         - 43.160.0.0/12    # Tencent hammering gerrit
+        - 45.144.115.0/24  # Clouvider SQLi attacks
         - 45.161.128.0/22  # Brazilian Telco hammering cgit
         - 45.179.20.0/22   # Brazilian Telco hammering cgit
         - 47.74.0.0/15     # alibaba hammering trac
@@ -176,3 +177,53 @@ spec:
         - 221.132.32.0/21  # Vietnam Telco hitting cgit
         - 221.132.52.0/22  # Vietnam Telco hitting cgit
         - 222.252.0.0/14   # Vietnam Telco hitting cgit
+---
+# Rate limit by User-Agent instead of by IP. Distributed scrapers rotate
+# tens of thousands of source IPs but commonly reuse one UA string per run.
+# average/period is per Traefik instance; with 4 ingress pods this is
+# ~2 req/s per UA per host. Burst covers normal page + asset loads.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ua-ratelimit
+spec:
+  rateLimit:
+    average: 1
+    burst: 50
+    period: 2s
+    sourceCriterion:
+      requestHeaderName: User-Agent
+---
+# Looser UA limit for API-ish hosts where legitimate clients can burst
+# (HaikuDepot clients, SSO login asset loads, analytics beacons).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ua-ratelimit-loose
+spec:
+  rateLimit:
+    average: 2
+    burst: 100
+    period: 1s
+    sourceCriterion:
+      requestHeaderName: User-Agent
+---
+# Hosting/proxy ranges and confirmed attack ranges from the Nov 2026
+# distributed scrape. Deliberately excludes residential ISPs.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: scraper-denyip
+spec:
+  plugin:
+    denyip:
+      ipDenyList:
+        - 23.230.0.0/16    # EGIHosting (GTT)
+        - 31.76.0.0/16     # SERV.HOST GROUP / Ace Data Centers
+        - 45.144.115.0/24  # Clouvider SQLi / credential stuffing
+        - 142.147.128.0/17 # Web2Objects
+        - 142.252.0.0/16   # EGIHosting
+        - 172.120.0.0/15   # EGIHosting
+        - 172.252.0.0/16   # Subnet Digital / EGIHosting
+        - 189.81.0.0/16    # Datacamp
+        - 192.177.0.0/16   # EGIHosting
