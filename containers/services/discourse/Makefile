@@ -1,31 +1,32 @@
-VERSION = 2026.5.0
+VERSION = 2026.7.0
 REGISTRY = ghcr.io/haiku
+ENGINE = podman
 
 default:
-	docker build --layers --no-cache --build-arg VERSION=${VERSION} -t ${REGISTRY}/discourse:${VERSION} .
+	${ENGINE} build --layers --no-cache --build-arg VERSION=${VERSION} -t ${REGISTRY}/discourse:${VERSION} .
 shell:
-	docker run -it ${REGISTRY}/discourse:${VERSION} /bin/bash -l
+	${ENGINE} run -it ${REGISTRY}/discourse:${VERSION} /bin/bash -l
 test:
-	docker kill redis || true
-	docker kill discourse || true
-	docker kill postgres || true
+	${ENGINE} kill redis || true
+	${ENGINE} kill discourse || true
+	${ENGINE} kill postgres || true
 	sleep 5
-	docker rm postgres || true
-	docker network create discourse || true
-	docker run -d --name postgres --network discourse -e POSTGRES_PASSWORD=mysecretpassword docker.io/postgres:latest
-	docker rm redis || true
-	docker run -d --name redis --network discourse docker.io/redis:latest
+	${ENGINE} rm postgres || true
+	${ENGINE} network create discourse || true
+	${ENGINE} run -d --name postgres --network discourse -e POSTGRES_PASSWORD=mysecretpassword docker.io/postgres:latest
+	${ENGINE} rm redis || true
+	${ENGINE} run -d --name redis --network discourse docker.io/redis:latest
 	sleep 20
-	docker rm discourse || true
-	docker run --rm --network discourse --env-file test.env ${REGISTRY}/discourse:${VERSION} bundle exec rake db:create
-	docker run -d --name discourse --network discourse -p 8080:80 --env-file test.env ${REGISTRY}/discourse:${VERSION}
+	${ENGINE} rm discourse || true
+	${ENGINE} run --rm --network discourse --env-file test.env ${REGISTRY}/discourse:${VERSION} bundle exec rake db:create
+	${ENGINE} run -d --name discourse --network discourse -p 8080:80 --env-file test.env ${REGISTRY}/discourse:${VERSION}
 clean:
-	docker kill redis || true
-	docker kill discourse || true
-	docker kill postgres || true
+	${ENGINE} kill redis || true
+	${ENGINE} kill discourse || true
+	${ENGINE} kill postgres || true
 	sleep 5
-	docker rm postgres || true
-	docker rm redis || true
-	docker rm discourse || true
+	${ENGINE} rm postgres || true
+	${ENGINE} rm redis || true
+	${ENGINE} rm discourse || true
 push:
-	docker push ${REGISTRY}/discourse:${VERSION}
+	${ENGINE} push ${REGISTRY}/discourse:${VERSION}

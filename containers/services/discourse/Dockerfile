@@ -1,21 +1,22 @@
 #
 # A sane discourse container without the "meta-build" and "launcher"
 #
-FROM docker.io/ruby:3.4-bookworm
+FROM docker.io/ruby:3.4-trixie
 
 MAINTAINER Haiku, Inc. <contact@haiku-os.org>
 LABEL org.opencontainers.image.source https://github.com/haiku/infrastructure
 LABEL org.opencontainers.image.url https://github.com/haiku/infrastructure/tree/master/containers/services/discourse
 LABEL org.opencontainers.image.vendor Haiku, Inc.
 
-ARG VERSION=2026.5.0
+ARG VERSION=2026.7.0
 ENV DISCOURSE_VERSION $VERSION
 
 # Add the postgresql software repository (not available in main Debian yet)
 # See: https://www.postgresql.org/download/linux/debian/
 
-RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN mkdir -p /etc/apt/keyrings && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg
+RUN sh -c 'echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+
 
 # Add the Node software repositories
 # See https://github.com/discourse/discourse_docker/blob/200094a0d07b8c1d5a765d1c6cac8bdbf3c84601/image/base/Dockerfile#L85-L86
@@ -39,7 +40,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal \
 
 # Imagemagick: the discourse/lib/letter_avatar.rb expects there to be a `magick` command
 # Link the installed imagemagick convert
-RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
+#RUN ln -s /usr/bin/convert-im6.q16 /usr/bin/magick
 
 # Install Discourse
 # Starting with Discourse 3.5, a lot of plugins are bundled, including the discourse-ai plugin. This plugin requires the vector
