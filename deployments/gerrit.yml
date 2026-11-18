@@ -33,6 +33,10 @@ spec:
         - name: irccat-password
           mountPath: /run/secrets/irccat
         env:
+          # This will remove the use of native base64 decode which is prone to
+          # Remove once the issue is patched in Gerrit.
+          - name: JAVA_OPTIONS
+            value: "-XX:-UseBASE64Intrinsics"
           - name: AUTH_TYPE
             value: "OAUTH"
           - name: GITWEB_TYPE

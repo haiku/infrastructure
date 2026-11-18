@@ -21,6 +21,10 @@ spec:
         image: ghcr.io/haiku/keycloak:26.4.7-1
         args: ["start", "--optimized"]
         env:
+        # This will remove the use of native base64 decode which is prone to
+        # Remove once the issue is patched in KeyCloak.
+        - name: JAVA_OPTS_APPEND
+          value: "-XX:-UseBASE64Intrinsics"
         - name: KC_HOSTNAME
           value: https://sso.haiku-os.org/
         - name: KC_HOSTNAME_ADMIN
