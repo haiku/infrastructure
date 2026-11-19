@@ -2,6 +2,8 @@
 
 ALLOW_URI="https://raw.githubusercontent.com/haiku/infrastructure/refs/heads/main/data/rsync-allow"
 
+echo "Rebuilding rsync allow list from ${ALLOW_URI}..."
+
 ALLOW=""
 for i in $(curl -s -o- $ALLOW_URI | sed -e '/^#/d'); do
         ALLOW="${ALLOW} $i"
