@@ -1,0 +1,91 @@
+### Haiku Pootle
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  labels:
+    app: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin
+  strategy:
+    # RollingUpgrade can't be used because of RWO storage
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+      - name: portal
+        image: ghcr.io/kallisti5/importantadminportal:0.1.1
+        resources:
+          limits:
+            cpu: "2.0"
+            memory: "1Gi"
+          requests:
+            cpu: "0.25"
+            memory: "48Mi"
+        volumeMounts:
+        - name: admin-data
+          mountPath: /data
+      volumes:
+      - name: admin-data
+        persistentVolumeClaim:
+          claimName: admin-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: admin-data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin
+spec:
+  selector:
+    app: admin
+  ports:
+  - name: web
+    port: 8080
+    targetPort: 8080
+---
+# web frontends for our "admin portal"
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: admin
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: web,webs
+spec:
+  tls:
+  - hosts:
+    - admin.haiku-os.org
+    secretName: tls-cert-admin
+  rules:
+  - host: admin.haiku-os.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: admin
+            port:
+              name: web

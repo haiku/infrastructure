@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: threatdb
+spec:
+  plugin:
+    threatdb:
+      refreshInterval: 15m
+      requestTimeout: 15s
+      providers:
+        honeypot:
+          name: haiku-honeypot
+          url: https://admin.haiku-os.org/report.txt
+        threatlive:
+          name: threat.live
+          url: https://list.threat.live
+        tweetfeed:
+          name: tweetfeed.live
+          url: https://api.tweetfeed.live/v1/blocklist/ips.txt
