@@ -5,15 +5,20 @@ metadata:
 spec:
   plugin:
     threatdb:
-      refreshInterval: 15m
-      requestTimeout: 15s
       providers:
         honeypot:
           name: haiku-honeypot
           url: https://admin.haiku-os.org/report.txt
+          refreshInterval: 5m
         threatlive:
           name: threat.live
           url: https://list.threat.live
+          refreshInterval: 15m
         tweetfeed:
           name: tweetfeed.live
           url: https://api.tweetfeed.live/v1/blocklist/ips.txt
+          refreshInterval: 15m
+        ipsum:
+          name: ipsum
+          url: https://raw.githubusercontent.com/stamparm/ipsum/master/levels/3.txt
+          refreshInterval: 12h
