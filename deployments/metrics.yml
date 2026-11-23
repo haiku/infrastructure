@@ -53,60 +53,11 @@ spec:
     port: 3000
     targetPort: 3000
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: fathom
-  labels:
-    app: fathom
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: fathom
-  template:
-    metadata:
-      labels:
-        app: fathom
-    spec:
-      containers:
-      - name: fathom
-        #image: docker.io/usefathom/fathom:latest
-        image: docker.io/haiku/fathom:c9d08a
-        command: ["/app/fathom"]
-        args: ["--config", "/secrets/.env", "server"]
-        resources:
-          limits:
-            cpu: "1.0"
-            memory: "1Gi"
-          requests:
-            cpu: "0.15"
-            memory: "256Mi"
-        volumeMounts:
-        - name: dot-env
-          mountPath: /secrets
-      volumes:
-      - name: dot-env
-        secret:
-          secretName: fathom-secrets
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: fathom
-spec:
-  selector:
-    app: fathom
-  ports:
-  - name: www
-    port: 8080
-    targetPort: 8080
----
 # web frontends for umami
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: fathom
+  name: metrics
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
@@ -126,57 +77,50 @@ spec:
             name: umami
             port:
               name: www
-      - path: /old
-        pathType: Prefix
-        backend:
-          service:
-            name: fathom
-            port:
-              name: www
 ---
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: fathom-pgbackup
-spec:
-  schedule: "0 0 * * 1,4"
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          restartPolicy: Never
-          containers:
-            - name: pgbackup
-              image: ghcr.io/haiku/pgbackup:3.0.4
-              args: ["backup", "fathom"]
-              env:
-              - name: REMOTE_PREFIX
-                value: haiku-backups
-              - name: REMOTE_MAX_AGE
-                value: 15d
-              - name: PG_HOSTNAME
-                value: postgres
-              - name: PG_USERNAME
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-admin
-                    key: username
-              - name: PG_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: postgres-admin
-                    key: password
-              volumeMounts:
-              - name: rclone-config
-                mountPath: /root/.config
-          volumes:
-          - name: rclone-config
-            secret:
-              secretName: s3-backup
-              items:
-              - key: rclone.conf
-                path: rclone/rclone.conf
-              - key: twosecret
-                path: twosecret
+#apiVersion: batch/v1
+#kind: CronJob
+#metadata:
+#  name: umami-pgbackup
+#spec:
+#  schedule: "0 0 * * 1,4"
+#  successfulJobsHistoryLimit: 1
+#  failedJobsHistoryLimit: 1
+#  jobTemplate:
+#    spec:
+#      template:
+#        spec:
+#          restartPolicy: Never
+#          containers:
+#            - name: pgbackup
+#              image: ghcr.io/haiku/pgbackup:3.0.4
+#              args: ["backup", "umami"]
+#              env:
+#              - name: REMOTE_PREFIX
+#                value: haiku-backups
+#              - name: REMOTE_MAX_AGE
+#                value: 15d
+#              - name: PG_HOSTNAME
+#                value: postgres
+#              - name: PG_USERNAME
+#                valueFrom:
+#                  secretKeyRef:
+#                    name: postgres-admin
+#                    key: username
+#              - name: PG_PASSWORD
+#                valueFrom:
+#                  secretKeyRef:
+#                    name: postgres-admin
+#                    key: password
+#              volumeMounts:
+#              - name: rclone-config
+#                mountPath: /root/.config
+#          volumes:
+#          - name: rclone-config
+#            secret:
+#              secretName: s3-backup
+#              items:
+#              - key: rclone.conf
+#                path: rclone/rclone.conf
+#              - key: twosecret
+#                path: twosecret
