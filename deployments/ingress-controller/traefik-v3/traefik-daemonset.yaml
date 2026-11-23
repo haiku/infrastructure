@@ -27,7 +27,7 @@ spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
       containers:
-      - image: docker.io/traefik:3.5
+      - image: docker.io/traefik:3.6
         name: traefik-ingress-lb
         resources:
           limits:
@@ -83,6 +83,8 @@ spec:
         - --experimental.plugins.scanblock.version=v1.0.0
         - --experimental.plugins.denyip.modulename=github.com/kvncrw/denyip
         - --experimental.plugins.denyip.version=v1.1.0
+        - --experimental.plugins.threatdb.modulename=github.com/kallisti5/threatdb
+        - --experimental.plugins.threatdb.version=v0.1.0
         - --entrypoints.web.address=:80
         - --entrypoints.web.http.redirections.entryPoint.to=webs
         - --entrypoints.web.http.redirections.entryPoint.permanent=false

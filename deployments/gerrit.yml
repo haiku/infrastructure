@@ -329,7 +329,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
     #traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd,default-repo-url-patch@kubernetescrd
-    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd
+    #traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd,default-cloud-denyip@kubernetescrd,default-badasn-denyip@kubernetescrd
 spec:
   tls:
   - hosts:
