@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: docker.io/postgres:14.23-alpine
+        image: docker.io/postgres:14.25-alpine
         env:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdb
