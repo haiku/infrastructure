@@ -1,4 +1,10 @@
-### Haiku Pootle
+### Haiku Admin Portal
+###
+### Mission critical, really important.  Sensitive data.
+### Admin, Root, Privileged, Top Secret
+###
+### <3 Winnie-the-pooh
+###
 apiVersion: apps/v1
 kind: Deployment
 metadata:
