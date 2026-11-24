@@ -81,10 +81,8 @@ spec:
         - --providers.kubernetesingress.ingressclass=default
         - --experimental.plugins.scanblock.modulename=github.com/safing/scanblock
         - --experimental.plugins.scanblock.version=v1.0.0
-        - --experimental.plugins.denyip.modulename=github.com/kvncrw/denyip
-        - --experimental.plugins.denyip.version=v1.1.0
         - --experimental.plugins.threatdb.modulename=github.com/kallisti5/threatdb
-        - --experimental.plugins.threatdb.version=v0.1.0
+        - --experimental.plugins.threatdb.version=v0.1.1
         - --entrypoints.web.address=:80
         - --entrypoints.web.http.redirections.entryPoint.to=webs
         - --entrypoints.web.http.redirections.entryPoint.permanent=false

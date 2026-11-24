@@ -5,6 +5,7 @@ metadata:
 spec:
   plugin:
     threatdb:
+      statusPath: /_threatdb/status
       providers:
         honeypot:
           name: haiku-honeypot

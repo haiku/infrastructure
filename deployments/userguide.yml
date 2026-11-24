@@ -93,7 +93,9 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
-    traefik.ingress.kubernetes.io/router.middlewares: default-errorku@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: >-
+      default-threatdb@kubernetescrd,
+      default-errorku@kubernetescrd
 spec:
   tls:
   - hosts:
