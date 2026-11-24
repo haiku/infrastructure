@@ -368,7 +368,7 @@ metadata:
   name: repo-url-patch
 spec:
   redirectRegex:
-    regex: ^https?:\/\/c?git\.haiku\-os\.org\/([a-z\-]*[^\.])\/(.*)
+    regex: ^https?:\/\/git\.haiku\-os\.org\/([a-z\-]*[^\.])\/(.*)
     replacement: https://git.haiku-os.org/${1}.git/${2}
 ---
 apiVersion: batch/v1
