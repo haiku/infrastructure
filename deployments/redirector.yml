@@ -62,6 +62,7 @@ spec:
   - hosts:
     - lofi.haiku-os.org
     - api.haiku-os.org
+    - cgit.haiku-os.org
     secretName: tls-cert-redirector
   rules:
   - host: lofi.haiku-os.org

@@ -330,13 +330,11 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,webs
     traefik.ingress.kubernetes.io/router.middlewares: >-
       default-threatdb@kubernetescrd,
-      default-repo-url-patch@kubernetescrd,
       default-errorku@kubernetescrd
 spec:
   tls:
   - hosts:
     - git.haiku-os.org
-    - cgit.haiku-os.org
     - review.haiku-os.org
     secretName: tls-cert-gerrit
   rules:
