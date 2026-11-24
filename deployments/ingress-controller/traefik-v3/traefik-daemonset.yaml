@@ -1,5 +1,4 @@
-# A simple Traefik v3.5 ingress controller
-# CRD's are for the birds
+# A simple Traefik v3.7 ingress controller
 ---
 apiVersion: v1
 kind: ServiceAccount
