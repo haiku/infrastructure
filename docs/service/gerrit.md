@@ -53,9 +53,75 @@ This supplants the prior method of accessing the SQL database, which is now depr
 You can refer to the user by its user ID or by an existing email or its login.
 
 ## Force flush of caches
+
 Make sure you are in the administrators group and run:
 ```
 ssh USERNAME@review.haiku-os.org gerrit flush-caches
+```
+
+## Disk full
+
+Gerrit runs off a volume attached to the K8S Pod. The disk can fill and there are various means to clear off material to resolve the problem.
+
+### Caches
+
+These are stored as [H2](https://h2database.com/html/main.html) databases. H2 is an embedded Java database engine. It's important not to delete the databases while Gerrit is transacting with the database because it won't be expecting you to do this. Instead, take down Gerrit and then delete the files.
+
+Scale down the git deployment;
+
+```
+haiku-kubectl scale deployment/git --replicas 0
+```
+
+Create a file `/tmp/rescue.yaml`;
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-debugger
+spec:
+  containers:
+  - name: debugger
+    image: alpine:latest
+    command: ["sleep", "infinity"]
+    volumeMounts:
+    - name: gerrit-data
+      mountPath: /var/gerrit/review_site
+  volumes:
+  - name: gerrit-data
+    persistentVolumeClaim:
+      claimName: gerrit-data-pvc
+```
+
+Apply the pod manifest;
+
+```
+haiku-kubectl apply -f /tmp/rescue.yaml
+```
+
+Wait for it to reach running state and then shell into it.
+
+```
+haiku-kubectl exec -it volume-debugger -- /bin/sh
+```
+
+You can delete the cache at;
+
+```
+rm /var/gerrit/review_site/cache/*
+```
+
+Logout of the shell and delete the rescue pod;
+
+```
+haiku-kubectl delete pod/volume-debugger
+```
+
+Scale git back up again;
+
+```
+haiku-kubectl scale deployment/git --replicas 1
 ```
 
 ## Installing missing core plugins
